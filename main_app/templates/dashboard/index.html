@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Favico -->
+	<link rel="shortcut icon" href="../../static/assets/img/favicon.png" type="image/x-icon">
+	<link rel="icon" href="../../static/assets/img/favicon.png" type="image/x-icon">
+	<title>TrainingTracker ADMIN - Laporan Online</title>
+	<!-- vendor css -->
+	<link href="../../static/lib/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+	<link href="../../static/lib/ionicons/css/ionicons.min.css" rel="stylesheet">
+	<link href="../../static/lib/datatables.net-dt/css/jquery.dataTables.min.css" rel="stylesheet">
+	<link href="../../static/lib/fullcalendar/fullcalendar.min.css" rel="stylesheet">
+	<!-- DashForge CSS -->
+	<link rel="stylesheet" href="../../static/assets/css/dashforge.css">
+	<link rel="stylesheet" href="../../static/css/custom.css">	
+	<style>	 
+		#calendar {
+			max-width: 600px;
+			margin: 40px auto;
+			padding: 0 10px;
+		}
+
+  	</style>
+
+
+	
+</head>
+
+<body class="body">
+	<aside class="aside aside-fixed">
+		<div class="aside-header">
+			<a href="#" class="aside-logo img-logo"><img src="../../static/assets/img/trainingtracker-logo-white.png" class="w-75"></a>
+			<a href="" class="aside-menu-link">
+				<i data-feather="menu"></i>
+				<i data-feather="x"></i>
+			</a>
+		</div>
+		<div class="aside-body">
+			<ul class="nav nav-aside">
+				<!-- <li class="nav-label mg-t-25">Home</li> -->
+				{% for menu_item in menu_list_html %}
+                    {%if menu_item.value == 'DASHBOARD' %}
+                        <li class="nav-item nav-item-active ">
+                            <a href="{{menu_item.url}}" class="nav-link nav-link-active"><i data-feather="{{ menu_item.icon_class }}"></i>
+                                <span>{{menu_item.menu_name.title()}}</span></a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a href="{{menu_item.url}}" class="nav-link"><i data-feather="{{ menu_item.icon_class }}"></i>
+                                <span>{{menu_item.menu_name.title()}}</span></a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+			</ul>
+		</div>
+	</aside>
+
+	<div class="content pd-0">
+		<!-- Navbar Top -->
+		<div class="content-header">
+		<div></div>
+		<div class="d-flex align-items-center justify-content-between">
+			<div class="d-flex align-items-center">			
+				<div class="text-success font-weight-bold mr-3" id="balance"></div>
+			</div>
+			<div class="dropdown">
+			<span class="font-weight-bold text-dark">{{ username | safe }}</span>
+			<a class="dropdown-toggle ml-2" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				<i class="fas fa-user-circle fa-lg"></i>
+			</a>
+			<div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
+				{% if user_rec.role == 'TRAINEE' %}
+				<div class="dropdown-item text-info">
+				<i class="fas fa-user-graduate"></i> You're in Trainee Portal
+				</div>
+				{% elif user_rec.role == 'TRAINER' %}
+				<div class="dropdown-item text-info">
+				<i class="fas fa-chalkboard"></i> You're in Trainer Portal
+				</div>
+				{% elif user_rec.role == 'ADMIN' %}
+				<div class="dropdown-item text-info">
+				<i class="fas fa-chalkboard"></i> WELCOME BOSS
+				</div>				
+				{% endif %}
+				<div class="dropdown-divider"></div>
+				<a class="dropdown-item" href="/profile"><i class="fas fa-user"></i> Profile</a>
+				{% if user_rec.register_teacher == 'FALSE' %}
+				<a class="dropdown-item" href="/profile"><i class="fas fa-chalkboard-teacher"></i> Become a Trainer</a>
+				{% endif %}
+				{% if user_rec.role == 'TRAINEE' and user_rec.register_teacher == 'TRUE' %}
+				<a class="dropdown-item" href="/profile/change_portal/trainer"><i class="fas fa-chalkboard"></i> Trainer Portal</a>
+				{% endif %}
+				{% if user_rec.role == 'TRAINER' %}
+				<a class="dropdown-item" href="/profile/change_portal/trainee"><i class="fas fa-user-graduate"></i> Trainee Portal</a>
+				{% endif %}
+				<a class="dropdown-item" href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Sign out</a>
+			</div>
+			</div>
+		</div>
+		</div>
+
+		<!-- BODY -->	
+		<!-- The Modal -->
+		<div class="modal fade" id="numberModal">
+			<div class="modal-dialog">
+				<div class="modal-content">
+	
+					<!-- Modal Header -->
+					<div class="modal-header">
+						<h4 class="modal-title">Please enter a 4-digit number verification code we sent to {{user_rec["email"]}}. </h4>
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+					</div>
+	
+					<!-- Modal Body -->
+					<div class="modal-body">
+						<form id="numberForm" action="/auth/check_verification_email" method="POST">
+							<div class="form-group">
+								<label for="fourDigitNumber">4 Digit Number:</label>
+								<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+								<input type="text" name="unique_4_number" class="form-control" id="fourDigitNumber" maxlength="4" pattern="\d{4}" required>
+								<div class="invalid-feedback">
+									Please enter a 4-digit number.
+								</div>
+							</div>
+							<button type="submit" class="btn btn-primary">Submit</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- Flash messages section -->
+		{% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flashes">
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+		{% endif %}
+		{% endwith %}
+		
+		  <!-- email verification messages section -->
+		{% if user_rec["ver_email"] == "FALSE" %}		
+		<div class="card bg-danger text-white">
+			<div class="flex-wrap">
+				<div class="card-body">please verification your email first!! verification email already sent to <b>{{user_rec["email"]}}</b> or 
+				<form action="/auth/send_verification_email" method="POST" enctype="multipart/form-data" class="mx-2">
+					<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+					<input type="hidden" name="redirect" value="/user/dashboard">
+					<button type="submit" class="btn btn-primary position-relative">
+						<i class="fas fa-envelope"></i> Send Verification Email
+					</button>
+				</form>
+			</div>
+			<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#numberModal">
+				input verify number here
+			</button>
+		  </div>
+		{% endif %}
+		<div class="container-fluid">
+			<div class="row">
+				<!-- Information Section -->
+				<div class="col-md-4">
+					<h2>Event Information</h2>
+					<div class="info-container">
+						<!-- Cards will be dynamically generated here -->
+						
+						{% if event %}
+						{% for event in schedule_list %}
+						<div class="card">
+							<div class="card-body">
+								<p class="card-text"><strong>Section Name:</strong> {{ event.title }}
+									<a href="{{ event.detail_activation_class }}" class="btn btn-link" target="_blank">
+										<i class="fas fa-eye"></i>
+									</a>
+								</p>
+								
+								<p class="card-text"><strong>Class Name:</strong> {{ event.extendedProps.class_name }}</p>																								
+							</div>
+						</div>
+						{% endfor %}
+						{% endif %}
+					</div>
+				</div>
+				<!-- Calendar Section -->
+				<div class="col-md-8">
+					<div id="calendar"></div>
+				</div>
+			</div>
+		</div>
+		
+	
+
+	<!-- END MAIN BODY -->
+
+	</div>
+	<!-- Atomic Watch this is just to reload the page if you make any changes to the html -->
+	<!-- <script src="//localhost:35729/livereload.js"></script> -->
+
+
+	<script src="../../static/lib/jquery/jquery.min.js"></script>
+	<script src="../../static/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+	<script src="../../static/lib/feather-icons/feather.min.js"></script>
+	<script src="../../static/lib/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+	<script src="../../static/lib/datatables.net/js/jquery.dataTables.min.js"></script>
+	<script src="../../static/lib/moment/moment.js"></script>
+	<script src="../../static/lib/fullcalendar/fullcalendar.min.js"></script>
+	<script src="../../static/assets/js/dashforge.js"></script>
+	<script src="../../static/assets/js/dashforge.aside.js"></script>
+	<script src="../../static/js/sytem_param/port_distance_config.js"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script>
+
+		// Function to format number as Rupiah
+		function formatRupiah(value) {
+			const formatter = new Intl.NumberFormat('id-ID', {
+				style: 'currency',
+				currency: 'IDR',
+				minimumFractionDigits: 2
+			});
+			return formatter.format(value);
+		}
+
+		// Assuming user_rec.balance is passed from server to client-side as a JavaScript variable
+		const userBalance = {{ user_rec.balance }};
+		
+		// Update the balance element with formatted value
+		document.getElementById('balance').textContent = formatRupiah(userBalance);
+		
+
+		// calender section
+		// calender section
+		$(document).ready(function() {
+			$('#calendar').fullCalendar({
+				header: {
+					left: 'prev,next today',
+					center: 'title',
+					right: 'month,basicWeek,basicDay'
+				},
+				editable: true,
+				eventLimit: true, // allow "more" link when too many events
+				events: {{ schedule_list|tojson }}
+			});
+    	});
+		// $(document).ready(function() {
+
+		// 	$('#calendar').fullCalendar({
+		// 	//locale: 'zh-cn',
+		// 	header: {
+		// 		left: 'prev,next today',
+		// 		center: 'title',
+		// 		right: 'month,basicWeek,basicDay'
+		// 	},
+		// 	defaultDate: '2018-03-12',
+		// 	navLinks: true, // can click day/week names to navigate views
+		// 	editable: true,
+		// 	eventLimit: true, // allow "more" link when too many events
+		// 	events: [
+		// 		{
+		// 		title: 'All Day Event',
+		// 		start: '2018-03-01'
+		// 		},
+		// 		{
+		// 		title: 'Long Event',
+		// 		start: '2018-03-07',
+		// 		end: '2018-03-10'
+		// 		},
+		// 		{
+		// 		id: 999,
+		// 		title: 'Repeating Event',
+		// 		start: '2018-03-09T16:00:00'
+		// 		},
+		// 		{
+		// 		id: 999,
+		// 		title: 'Repeating Event',
+		// 		start: '2018-03-16T16:00:00'
+		// 		},
+		// 		{
+		// 		title: 'Conference',
+		// 		start: '2018-03-11',
+		// 		end: '2018-03-13'
+		// 		},
+		// 		{
+		// 		title: 'Meeting',
+		// 		start: '2018-03-12T10:30:00',
+		// 		end: '2018-03-12T12:30:00'
+		// 		},
+		// 		{
+		// 		title: 'Lunch',
+		// 		start: '2018-03-12T12:00:00'
+		// 		},
+		// 		{
+		// 		title: 'Meeting',
+		// 		start: '2018-03-12T14:30:00'
+		// 		},
+		// 		{
+		// 		title: 'Happy Hour',
+		// 		start: '2018-03-12T17:30:00'
+		// 		},
+		// 		{
+		// 		title: 'Dinner',
+		// 		start: '2018-03-12T20:00:00'
+		// 		},
+		// 		{
+		// 		title: 'Birthday Party',
+		// 		start: '2018-03-13T07:00:00'
+		// 		},
+		// 		{
+		// 		title: 'Click for Google',
+		// 		url: 'http://google.com/',
+		// 		start: '2018-03-28'
+		// 		}
+		// 	]
+		// 	});
+		// });
+		
+	</script> 	
+
+
+
+
+</body>
+
+</html>

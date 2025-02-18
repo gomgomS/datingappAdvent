@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Favico -->
+    <link rel="shortcut icon" href="../../static/assets/img/favicon.png" type="image/x-icon">
+    <link rel="icon" href="../../static/assets/img/favicon.png" type="image/x-icon">
+    <title>TrainingTracker ADMIN - USERS</title>
+    <!-- vendor css -->
+    <link href="../../static/lib/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="../../static/lib/ionicons/css/ionicons.min.css" rel="stylesheet">
+    <link href="../../static/lib/select2/css/select2.min.css" rel="stylesheet">
+    <link href="../../static/lib/flatpicker/flatpickr.min.css" rel="stylesheet">
+    <!-- DashForge CSS -->
+    <link rel="stylesheet" href="../../static/assets/css/dashforge.css">
+    <link rel="stylesheet" href="../../static/css/custom.css">
+    <!-- some additional css here -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&display=swap');
+        
+        html, body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #2b2c41, #404066);
+        }
+
+        .frame {
+          position: relative;
+          width: 56vh;
+          height: 84vh;
+          max-width: 400px;
+          max-height: 600px;
+          z-index: 1;
+        }
+
+        .icons {
+          margin-top: 3vh;
+          user-select: none;
+          z-index: 1;
+        }
+
+        .icons > svg {
+          width: 10vh;
+          height: 10vh;
+          max-width: 60px;
+          max-height: 60px;
+          border-radius: 50%;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+          cursor: pointer;
+        }
+
+        .icons > svg:nth-child(1) { fill: #fb4f68; margin-right: 2vh; }
+        .icons > svg:nth-child(2) { fill: #4dca93; }
+        .icons > svg > path:nth-child(1) { fill: #fff; }
+
+        .card_swipe {
+          position: absolute;
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          width: 100%;
+          height: 100%;
+          color: #f1f1f1;
+          border-radius: 10px;
+          user-select: none;
+          cursor: pointer;
+          overflow: hidden;
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-position: center;
+          touch-action: none;
+        }
+
+        .card_swipe .is-like {
+          width: 100%;
+          height: 100%;
+          position: absolute;
+          opacity: 0;
+        }
+        .card_swipe .is-like::after {
+          position: absolute;
+          left: 50%;
+          bottom: 30%;
+          transform: translateX(-50%) rotate(-10deg);
+          width:70%;
+          height: 13%;
+          font-size: 3em;
+          letter-spacing: 0.2em;
+          font-weight: 600;
+          border-radius: 0.15em;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .card_swipe .like::after {
+          content: "YUMM";
+          color: #4dca93;
+          border: 0.1em solid #4dca93;
+        }
+
+        .card_swipe .nope::after {
+          content: "YUCK";
+          color: #fb4f68;
+          border: 0.1em solid #fb4f68;
+        }
+
+        .card_swipe .bottom {
+          width: 100%;
+          height: 25%;
+          background: linear-gradient(to top, #00000080, #00000000);
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: center;
+          padding-left: 7%;
+          font-weight: 400;
+        }
+
+        .card_swipe .bottom .title > span:nth-child(1) {
+          font-size: 2em;
+          font-weight: 700;
+          margin-right: 0.2em;
+        }
+
+        .card_swipe .bottom .title > span:nth-child(2) {
+          font-size: clamp(13px, 1.5em, 25px);
+        }
+
+        .card_swipe .bottom .title > span:nth-child(2) > b {
+          font-size: 0.6em;
+          margin-right: 0.2em;
+        }
+
+        .card_swipe .bottom .info {
+          margin: 3% 0 0 2%;
+          font-size: clamp(10px, 1.1em, 20px);
+        }
+
+        @media screen and (max-height: 540px) {
+          .frame {
+            width: 54vh;
+            height: 81vh;
+            font-size: 13px;
+          }
+        }
+
+        @media screen and (max-height: 440px) {
+          .frame {
+            font-size: 8px;
+          }
+        }
+        .card {
+          width: 100%;
+          max-width: 400px; /* Keep it responsive */
+          border-radius: 10px;
+          overflow: hidden;
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-position: center;
+        }
+
+        .icons > svg {
+          width: 50px;
+          height: 50px;
+          cursor: pointer;
+          transition: transform 0.2s ease-in-out;
+        }
+
+        .icons > svg:hover {
+          transform: scale(1.1);
+        }
+
+        /* Middle Image Placeholder */
+        .frame {
+            width: 56vh;
+            height: 70vh; /* Adjusted to prevent overlapping */
+            max-width: 400px;
+            max-height: 550px;
+            border-radius: 20px;
+            background: white;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+            margin: 80px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: url('your-image.jpg') no-repeat center center;
+            background-size: cover;
+        }
+
+        /* Menu Box Styling */
+        .menu-top, .menu-bottom {
+            width: 90%;
+            max-width: 420px;
+            display: flex;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+            padding: 14px 24px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            position: absolute;
+        }
+
+        /* Top Menu */
+        .menu-top {
+            top: 20px;
+        }
+
+        /* Bottom Menu */
+        .menu-bottom {
+            bottom: 20px;
+            justify-content: space-around;
+        }
+
+        /* Menu Items */
+        .menu-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: transform 0.2s ease, color 0.3s ease;
+        }
+
+        /* Icon Styling */
+        .menu-icon {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        /* Updated Colors */
+        .menu-top, .menu-bottom {
+            background: #404066;
+            border: 2px solid #edcc6f;
+            color: #d2ebff;
+        }
+
+        .menu-item {
+            color: #d2ebff;
+        }
+
+        .menu-item:hover {
+            transform: scale(1.1);
+            color: #88cafc;
+        }
+
+        /* Active Match Button */
+        .menu-item.active {
+            color: #edcc6f;
+            pointer-events: none;
+            font-weight: bold;
+            transform: scale(1.1);
+        }
+
+        /* Responsive Fixes */
+        @media screen and (max-width: 768px) {
+            .frame {
+                width: 90vw;
+                height: 65vh;
+                max-height: 500px;
+            }
+
+            .menu-top {
+                top: 10px;
+            }
+
+            .menu-bottom {                
+                bottom: 10px;
+            }
+        }
+
+        @media screen and (max-height: 600px) {
+            .frame {
+                height: 60vh;
+                max-height: 450px;
+            }
+        }
+    </style>
+</head>
+
+{% autoescape false %}
+<body>
+    <!-- Top Menu -->
+    <!-- Top Menu -->
+    <div class="menu-top">
+      <div class="menu-icon">🔍</div>  <!-- Top Left -->
+      <div class="menu-icon">💎</div>  <!-- Top Right -->
+    </div>
+
+    <!-- Middle Image -->
+    <div class="frame"></div>
+
+    <!-- Bottom Menu -->
+    <div class="menu-bottom">
+      <!-- Match (Active, Not Clickable) -->
+      <div class="menu-item active">
+          <div class="menu-icon">🔥</div>
+          <span>Swipe</span>
+      </div>
+
+      <!-- Swipe (Directs to /match) -->
+      <a href="/match" class="menu-item">
+          <div class="menu-icon">❤️</div>
+          <span>Match</span>
+      </a>
+
+      <!-- Chat (Directs to /chat) -->
+      <a href="/chat" class="menu-item">
+          <div class="menu-icon">💬</div>
+          <span>Chat</span>
+      </a>
+
+      <!-- Profile (Directs to /profile) -->
+      <a href="/profile" class="menu-item">
+          <div class="menu-icon">👤</div>
+          <span>Profile</span>
+      </a>
+    </div>
+
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/41e808b0fd.js" crossorigin="anonymous"></script>
+
+    <script src="../../static/lib/jquery/jquery.min.js"></script>
+    <script src="../../static/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../../static/lib/feather-icons/feather.min.js"></script>
+    <script src="../../static/lib/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="../../static/lib/flatpicker/flatpickr.js"></script>
+    <script src="../../static/assets/js/dashforge.js"></script>
+    <script src="../../static/assets/js/dashforge.aside.js"></script>
+    <script src="../../static/lib/select2/js/select2.min.js"></script>
+   <script>
+      let imgCount = 0
+      // const cloudUrl = 'https://djjjk9bjm164h.cloudfront.net/'
+      // const data = [
+      //   {img: `${cloudUrl}tender01.jpg`, name: 'Korean Fried', price: '20', distance: '2'},
+      //   {img: `${cloudUrl}tender02.jpg`, name: 'Grilled', price: '23', distance: '5'},
+      //   {img: `${cloudUrl}tender03.jpg`, name: 'Fried', price: '25', distance: '11'},
+      //   {img: `${cloudUrl}tender04.jpg`, name: 'Deep Fried', price: '23', distance: '6'}
+      // ]    
+
+      const frame = document.body.querySelector('.frame');
+      let current = null; // ✅ Declare `current` globally
+      let likeText = null;
+      let startX = 0, startY = 0, moveX = 0, moveY = 0;
+
+      var apiUrl = "http://0.0.0.0:5008/api/find/match";
+
+      $.get(apiUrl, function(resp, status) {
+        console.log(resp);
+
+        if (status !== "success") {
+          console.error("Network response was not ok");
+          return;
+        }
+
+        const cloudUrl = "your_cloud_url_here/";
+        const data = resp.map(item => ({
+          img: item.img,
+          name: item.name,
+          price: item.price,
+          distance: item.distance,
+          future_wife_id: item.user_id // ✅ Add user ID
+        }));
+
+        console.log("Updated data:", data);
+
+        // Append new cards
+        data.forEach(item => appendcard_swipe(item));
+
+        // ✅ Set `current` to the last added card
+        current = frame.querySelector('.card_swipe:last-child');
+        if (current) {
+          likeText = current.children[0];
+          initcard_swipe(current);
+        }
+
+      }).fail(function(error) {
+        console.error("Error fetching data:", error);
+      });
+
+      document.querySelector('#like').onclick = () => {
+        if (!current) return;
+        moveX = 1;
+        moveY = 0;
+        sendDecision(current.dataset.futureWifeId, "acc"); // ✅ Send Accept
+        complete();
+      };
+
+      document.querySelector('#hate').onclick = () => {
+        if (!current) return;
+        moveX = -1;
+        moveY = 0;
+        sendDecision(current.dataset.futureWifeId, "reject"); // ✅ Send Reject
+        complete();
+      };
+
+      function appendcard_swipe(data) {
+        const firstcard_swipe = frame.children[0];
+        const newcard_swipe = document.createElement('div');
+        newcard_swipe.className = 'card_swipe';
+        newcard_swipe.style.backgroundImage = `url(${data.img})`;
+        newcard_swipe.dataset.futureWifeId = data.future_wife_id; // ✅ Store user ID
+        newcard_swipe.innerHTML = `
+                <div class="is-like">LIKE</div>
+                <div class="bottom">
+                  <div class="title">
+                    <span>${data.name}</span>
+                    <span><b>$</b>${data.price}</span>
+                  </div>
+                  <div class="info">
+                    ${data.distance} miles away
+                  </div>
+                </div>
+              `;
+        if (firstcard_swipe) frame.insertBefore(newcard_swipe, firstcard_swipe);
+        else frame.appendChild(newcard_swipe);
+
+        // ✅ Update `current` when a new card is added
+        current = newcard_swipe;
+      }
+
+      function initcard_swipe(card_swipe) {
+        card_swipe.addEventListener('pointerdown', onPointerDown);
+      }
+
+      function setTransform(x, y, deg, duration) {
+        if (!current) return;
+        current.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${deg}deg)`;
+        likeText.style.opacity = Math.abs((x / innerWidth * 2.1));
+        likeText.className = `is-like ${x > 0 ? 'like' : 'nope'}`;
+        if (duration) current.style.transition = `transform ${duration}ms`;
+      }
+
+      function onPointerDown({ clientX, clientY }) {
+        if (!current) return;
+        startX = clientX;
+        startY = clientY;
+        current.addEventListener('pointermove', onPointerMove);
+        current.addEventListener('pointerup', onPointerUp);
+        current.addEventListener('pointerleave', onPointerUp);
+      }
+
+      function onPointerMove({ clientX, clientY }) {
+        moveX = clientX - startX;
+        moveY = clientY - startY;
+        setTransform(moveX, moveY, moveX / innerWidth * 50);
+      }
+
+      function onPointerUp() {
+        if (!current) return;
+        current.removeEventListener('pointermove', onPointerMove);
+        current.removeEventListener('pointerup', onPointerUp);
+        current.removeEventListener('pointerleave', onPointerUp);
+        if (Math.abs(moveX) > frame.clientWidth / 2) {
+          current.removeEventListener('pointerdown', onPointerDown);
+          sendDecision(current.dataset.futureWifeId, moveX > 0 ? "acc" : "reject"); // ✅ Send decision
+          complete();
+        } else cancel();
+      }
+
+      function complete() {
+        if (!current) return;
+        const flyX = (Math.abs(moveX) / moveX) * innerWidth * 1.3;
+        const flyY = (moveY / moveX) * flyX;
+        setTransform(flyX, flyY, flyX / innerWidth * 50, innerWidth);
+
+        const prev = current;
+        const next = current.previousElementSibling;
+        if (next) {
+          current = next;
+          likeText = current.children[0];
+          initcard_swipe(current);
+        } else {
+          current = null; // No more cards left
+        }
+
+        setTimeout(() => {
+          if (prev) frame.removeChild(prev);
+        }, innerWidth);
+      }
+
+      function cancel() {
+        setTransform(0, 0, 0, 100);
+        setTimeout(() => current.style.transition = '', 100);
+      }
+
+      function sendDecision(futureWifeId, status) {
+        const apiUrl = "http://0.0.0.0:5008/api/decision/match";
+
+        $.post(apiUrl, {
+          csrf_token: "{{ csrf_token() }}", // Include CSRF token
+          future_wife_id: futureWifeId,
+          status: status
+        })
+        .done(function(response) {
+          console.log(`Match decision sent: ${status}`, response);
+        })
+        .fail(function(error) {
+          console.error("Error sending match decision:", error);
+        });
+      }
+
+   </script>
+
+</body>
+{% endautoescape %}
+
+</html>

@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Favico -->
+    <link rel="shortcut icon" href="../../static/assets/img/favicon.png" type="image/x-icon">
+    <link rel="icon" href="../../static/assets/img/favicon.png" type="image/x-icon">
+    <title></title>
+    <!-- vendor css -->
+    <link href="../../static/lib/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="../../static/lib/ionicons/css/ionicons.min.css" rel="stylesheet">
+    <link href="../../static/lib/select2/css/select2.min.css" rel="stylesheet">
+    <link href="../../static/lib/flatpicker/flatpickr.min.css" rel="stylesheet">
+    <!-- DashForge CSS -->
+    <link rel="stylesheet" href="../../static/assets/css/dashforge.css">
+    <link rel="stylesheet" href="../../static/css/custom.css">
+    <!-- some additional css here -->
+</head>
+
+{% autoescape false %}
+<body>
+
+<div class="formbold-main-wrapper">
+    <!-- Author: FormBold Team -->
+    <!-- Learn More: https://formbold.com -->
+    <div class="formbold-form-wrapper">      
+      <form action="/update/profile" method="POST" enctype="multipart/form-data">
+        <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">  
+        <input name="user_id" type="hidden" value="{{ data_user.user_id }}">  
+        <div class="formbold-steps">            
+            <ul>
+                <li class="formbold-step-menu1 active"><span>1</span> Profile</li>
+                <li class="formbold-step-menu2"><span>2</span> Sex</li>
+                <li class="formbold-step-menu3"><span>3</span> Hobi</li>
+                <li class="formbold-step-menu4"><span>4</span> Asal</li>
+                <li class="formbold-step-menu5"><span>5</span> Status</li>
+                <li class="formbold-step-menu6"><span>6</span> Advent Status</li>
+                <li class="formbold-step-menu7"><span>7</span> Submit</li>
+            </ul>
+        </div>
+    
+        <div class="formbold-form-step-1 active">
+          <!-- Step 1: Sign Up Fields -->
+      
+          <div class="formbold-profile-upload">
+              <div id="profilePreviewWrapper" class="formbold-profile-preview">
+                  <img id="profilePreview" src="" alt="Profile Picture Preview" />
+              </div>
+              <label for="profilePicture" class="formbold-form-label profile-label"> Upload Profile Picture </label>              
+              <input
+                  type="file"
+                  name="image"
+                  id="profilePicture"
+                  accept="image/*"
+                  class="formbold-form-input"
+              />
+          </div>
+          <div class="formbold-input-flex">
+            <div>
+                <label for="username" class="formbold-form-label"> username </label>
+                <input
+                    type="text"
+                    name="username"
+                    id="username"
+                    value="{{data_user['username']}}"
+                    class="formbold-form-input"
+                    disabled
+                />
+            </div>
+            <div>
+                <label for="email" class="formbold-form-label"> Email </label>
+                <input
+                    type="text"
+                    name="email"
+                    id="email"                    
+                    value="{{data_user['email']}}"
+                    class="formbold-form-input"
+                    disabled
+                />
+                {%if data_user.verify_email == 'TRUE'%}
+                <div class="valid-feedback" style="color:green;">
+                  Your email has been verified.
+                </div>
+                {%endif%}
+            </div>
+        </div>
+          <div class="formbold-input-flex">
+              <div>
+                  <label for="name" class="formbold-form-label"> Name </label>
+                  <input
+                      type="text"
+                      name="name"
+                      id="name"
+                      placeholder="John doe"
+                      class="formbold-form-input"
+                      value="{{data_user['email']}}"
+                  />
+              </div>
+              <div>
+                  <!-- <label for="lastname" class="formbold-form-label"> Last Name </label>
+                  <input
+                      type="text"
+                      name="lastname"
+                      id="lastname"
+                      placeholder="Doe"
+                      class="formbold-form-input"
+                  /> -->
+              </div>
+          </div>
+      
+          <div>
+              <label for="dob" class="formbold-form-label"> Date of Birth </label>
+              <input
+                  type="date"
+                  name="dob"
+                  id="dob"
+                  class="formbold-form-input"
+              />
+          </div>
+        </div>
+      
+    
+        <div class="formbold-form-step-2">
+            <!-- Step 2: Sex Fields -->            
+              <label class="formbold-form-label">Sex</label>
+              <div class="formbold-sex-selection">
+                  <button type="button" class="formbold-sex-button" data-value="male" onclick="selectSex('male')">Male</button>
+                  <button type="button" class="formbold-sex-button" data-value="female" onclick="selectSex('female')">Female</button>
+              </div>
+              <input type="hidden" name="sex" id="sex" value="" />            
+        </div>
+    
+        <!-- Step 3: Hobi Fields -->
+        <div class="formbold-form-step-3">
+          <label class="formbold-form-label">Select Your Hobbies</label>
+          <div class="formbold-hobi-selection">
+              <!-- Left Column -->
+              <div class="formbold-hobi-column">
+                  <div class="formbold-hobi-option" data-value="photography" onclick="toggleHobi('photography')">
+                      <img src="https://cdn-icons-png.flaticon.com/512/1042/1042339.png" alt="Photography" class="formbold-hobi-icon" />
+                      <span>Photography</span>
+                  </div>
+                  <div class="formbold-hobi-option" data-value="karaoke" onclick="toggleHobi('karaoke')">
+                      <img src="https://cdn-icons-png.flaticon.com/512/3612/3612561.png" alt="Karaoke" class="formbold-hobi-icon" />
+                      <span>Karaoke</span>
+                  </div>
+                  <div class="formbold-hobi-option" data-value="cooking" onclick="toggleHobi('cooking')">
+                      <img src="https://cdn-icons-png.flaticon.com/512/3081/3081984.png" alt="Cooking" class="formbold-hobi-icon" />
+                      <span>Cooking</span>
+                  </div>
+                  <div class="formbold-hobi-option" data-value="running" onclick="toggleHobi('running')">
+                      <img src="https://cdn-icons-png.flaticon.com/512/6972/6972995.png" alt="Running" class="formbold-hobi-icon" />
+                      <span>Running</span>
+                  </div>
+                  <div class="formbold-hobi-option" data-value="art" onclick="toggleHobi('art')">
+                      <img src="https://cdn-icons-png.flaticon.com/512/2933/2933245.png" alt="Art" class="formbold-hobi-icon" />
+                      <span>Art</span>
+                  </div>
+                  <div class="formbold-hobi-option" data-value="extreme" onclick="toggleHobi('extreme')">
+                      <img src="https://cdn-icons-png.flaticon.com/512/619/619010.png" alt="Extreme Sports" class="formbold-hobi-icon" />
+                      <span>Extreme Sports</span>
+                  </div>
+                  <div class="formbold-hobi-option" data-value="read-bible" onclick="toggleHobi('read-bible')">
+                      <img src="https://cdn-icons-png.flaticon.com/512/3275/3275427.png" alt="Read Bible" class="formbold-hobi-icon" />
+                      <span>Read Bible</span>
+                  </div>
+              </div>
+
+              <!-- Right Column -->
+              <div class="formbold-hobi-column">
+                  <div class="formbold-hobi-option" data-value="shopping" onclick="toggleHobi('shopping')">
+                      <img src="https://cdn-icons-png.flaticon.com/512/891/891462.png" alt="Shopping" class="formbold-hobi-icon" />
+                      <span>Shopping</span>
+                  </div>
+                  <div class="formbold-hobi-option" data-value="tennis" onclick="toggleHobi('tennis')">
+                      <img src="https://cdn-icons-png.flaticon.com/512/502/502195.png" alt="Tennis" class="formbold-hobi-icon" />
+                      <span>Tennis</span>
+                  </div>
+                  <div class="formbold-hobi-option" data-value="yoga" onclick="toggleHobi('yoga')">
+                      <img src="https://cdn-icons-png.flaticon.com/512/1900/1900933.png" alt="Yoga" class="formbold-hobi-icon" />
+                      <span>Yoga</span>
+                  </div>
+                  <div class="formbold-hobi-option" data-value="swimming" onclick="toggleHobi('swimming')">
+                      <img src="https://cdn-icons-png.flaticon.com/512/1688/1688408.png" alt="Swimming" class="formbold-hobi-icon" />
+                      <span>Swimming</span>
+                  </div>
+                  <div class="formbold-hobi-option" data-value="traveling" onclick="toggleHobi('traveling')">
+                      <img src="https://cdn-icons-png.flaticon.com/512/809/809969.png" alt="Traveling" class="formbold-hobi-icon" />
+                      <span>Traveling</span>
+                  </div>
+                  <div class="formbold-hobi-option" data-value="music" onclick="toggleHobi('music')">
+                      <img src="https://cdn-icons-png.flaticon.com/512/727/727218.png" alt="Music" class="formbold-hobi-icon" />
+                      <span>Music</span>
+                  </div>
+                  <div class="formbold-hobi-option" data-value="video-games" onclick="toggleHobi('video-games')">
+                      <img src="https://cdn-icons-png.flaticon.com/512/3612/3612563.png" alt="Video Games" class="formbold-hobi-icon" />
+                      <span>Video Games</span>
+                  </div>
+              </div>
+          </div>
+          <input type="hidden" name="hobbies" id="hobbies" value="" />
+        </div>
+        
+        <!-- Step 4: Additional Details -->
+        <div class="formbold-form-step-4">       
+            <div class="formbold-additional-selection">
+              <div class="formbold-input-group">
+                <label for="city" class="formbold-form-label">City</label>
+                <input type="text" name="city" id="city" class="formbold-form-input" placeholder="Enter your city" />
+              </div>
+            
+              <div class="formbold-input-group">
+                <label for="tribe" class="formbold-form-label">Tribe</label>
+                <input type="text" name="tribe" id="tribe" class="formbold-form-input" placeholder="Enter your tribe" />
+              </div>
+            
+              <div class="formbold-input-group">
+                <label for="congregation" class="formbold-form-label">Registered Congregation</label>
+                <input type="text" name="congregation" id="congregation" class="formbold-form-input" placeholder="Enter your registered congregation" />
+              </div>            
+            </div>       
+        </div>
+    
+        <!-- Step 5: married Details -->
+        <div class="formbold-form-step-5">
+          <!-- Marital Status Selection -->
+          <div class="formbold-marital-selection">
+            <label class="formbold-form-label">Marital Status</label>
+            <div class="formbold-status-option-maritals">
+              <div 
+                class="formbold-status-option-marital" 
+                data-value="never-married" 
+                onclick="selectMaritalStatus('never-married')"
+              >
+                Single - Never Married
+              </div>
+              <div 
+                class="formbold-status-option-marital" 
+                data-value="abandoned" 
+                onclick="selectMaritalStatus('abandoned')"
+              >
+                Single - Abandoned
+              </div>
+              <div 
+                class="formbold-status-option-marital" 
+                data-value="separated" 
+                onclick="selectMaritalStatus('separated')"
+              >
+                Single - Separated
+              </div>
+              <div 
+                class="formbold-status-option-marital" 
+                data-value="divorced" 
+                onclick="selectMaritalStatus('divorced')"
+              >
+                Single - Divorced
+              </div>
+              <div 
+                class="formbold-status-option-marital" 
+                data-value="widowed" 
+                onclick="selectMaritalStatus('widowed')"
+              >
+                Single - Widower/Widow
+              </div>
+              <div 
+                class="formbold-status-option-marital" 
+                data-value="complicated" 
+                onclick="selectMaritalStatus('complicated')"
+              >
+                Complicated
+              </div>
+              <div 
+                class="formbold-status-option-marital" 
+                data-value="other" 
+                onclick="selectMaritalStatus('other')"
+              >
+                Other
+              </div>
+            </div>
+            <input type="hidden" name="marital_status" id="marital_status" value="">
+          </div>
+
+          <!-- Job Input -->
+          <div class="formbold-input-group">
+            <label for="job" class="formbold-form-label">Job/Profession</label>
+            <input 
+              type="text" 
+              name="job" 
+              id="job" 
+              class="formbold-form-input" 
+              placeholder="Enter your job/profession"
+            >
+          </div>
+
+          <!-- About Textarea -->
+          <div class="formbold-input-group">
+            <label for="about" class="formbold-form-label">About Yourself</label>
+            <textarea 
+              name="about" 
+              id="about" 
+              class="formbold-form-input formbold-textarea" 
+              placeholder="Tell us about yourself..."
+              rows="4"
+            ></textarea>
+          </div>
+        </div>
+    
+        <div class="formbold-form-step-6">
+            <!-- Step 6: Review -->
+            <!-- Advenr Status Selection -->
+          <div class="formbold-advent-selection">
+            <label class="formbold-form-label">Advent Status</label>
+            <div class="formbold-status-option-advents">
+              <div 
+                class="formbold-status-option-advent" 
+                data-value="not_advent" 
+                onclick="selectAdventStatus('not_advent')"
+              >
+                Bukan Seorang Advent
+              </div>
+              <div 
+                class="formbold-status-option-advent" 
+                data-value="progresif" 
+                onclick="selectAdventStatus('progresif')"
+              >
+                Advent Progresif
+              </div>
+              <div 
+                class="formbold-status-option-advent" 
+                data-value="still-learn" 
+                onclick="selectAdventStatus('still-learn')"
+              >
+                Masih Belajar Ajaran Advent (belum)
+              </div>
+              <div 
+                class="formbold-status-option-advent" 
+                data-value="since-birth" 
+                onclick="selectAdventStatus('since-birth')"
+              >
+                Sejak Lahir Advent
+              </div>
+              <div 
+                class="formbold-status-option-advent" 
+                data-value="conservative" 
+                onclick="selectAdventStatus('conservative')"
+              >
+                Advent konservatif
+              </div>
+              <div 
+                class="formbold-status-option-advent" 
+                data-value="liberal" 
+                onclick="selectAdventStatus('liberal')"
+              >
+                Advent Liberal
+              </div>
+              <div 
+                class="formbold-status-option-advent" 
+                data-value="new-member" 
+                onclick="selectAdventStatus('new-member')"
+              >
+                Baru Menjadi Advent
+              </div>
+              <div 
+                class="formbold-status-option-advent" 
+                data-value="Moderat" 
+                onclick="selectAdventStatus('Moderat')"
+              >
+                Advent Moderat
+              </div>
+              <div 
+                class="formbold-status-option-advent" 
+                data-value="try-return" 
+                onclick="selectAdventStatus('try-return')"
+              >
+                Berusaha Kembali Advent
+              </div>
+              <div 
+                class="formbold-status-option-advent" 
+                data-value="re-baptized" 
+                onclick="selectAdventStatus('re-baptized')"
+              >
+                Advent Dibabtis Ulang
+              </div>
+              <div 
+                class="formbold-status-option-advent" 
+                data-value="Davidian" 
+                onclick="selectAdventStatus('Davidian')"
+              >
+                Davidian
+              </div>              
+              <div 
+                class="formbold-status-option-advent" 
+                data-value="other" 
+                onclick="selectAdventStatus('other')"
+              >
+                Other
+              </div>
+            </div>
+            <input type="hidden" name="advent_status" id="advent_status" value="">
+          </div>
+        </div>
+    
+        <div class="formbold-form-step-7">
+          
+            <input type="hidden" name="img_removed" id="img_removed">
+            <div class="image-gallery">
+                                    
+                
+            </div>
+          <input type="file" id="filePic" class="d-none" name="image[]" multiple="">                             
+            <label id="filePicButton" for="filePic" class="d-flex Cur(p) mg-t-10">
+                <i class="rounded-left bg-dark text-white pd-10 fas fa-cloud-upload-alt cbs-1"></i>
+                <span class="bg-success pd-7 cbs-1 text-white rounded-right">Upload Photo</span> <span class="ml-3 mt-2" style="color: red;"> *ukuran maksimal file 1MB</span>
+            </label>
+        
+          <label class="formbold-form-label">Jangan Kuatir, Anda bisa melakukan perubahan nanti, pada menu profile anda</label>
+            <!-- Step 7: Submit -->
+        </div>
+    
+        <div class="formbold-form-btn-wrapper">
+            <button class="formbold-back-btn">Back</button>
+            <button class="formbold-btn">Next Step</button>
+        </div>
+    </form>
+    
+    </div>
+  </div>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Inter", sans-serif;
+    }
+    .formbold-main-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+    }
+    
+  
+    .formbold-form-wrapper {
+      margin: 0 auto;
+      max-width: 550px;
+      width: 100%;
+      background: white;
+    }
+  
+    .formbold-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.formbold-steps {
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #DDE3EC;
+    text-align: center;
+}
+
+.formbold-steps ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+}
+
+.formbold-steps ul::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    width: 80%;
+    height: 2px;
+    background: #DDE3EC;
+    z-index: -1;
+}
+
+.formbold-steps li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    font-size: 14px;
+    color: #536387;
+    position: relative;
+}
+
+.formbold-steps li span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #DDE3EC;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-weight: 600;
+    font-size: 16px;
+    color: #536387;
+    transition: background 0.3s, color 0.3s;
+}
+
+.formbold-steps li.active {
+    color: #07074D;
+}
+
+.formbold-steps li.active span {
+    background: #6A64F1;
+    color: #FFFFFF;
+}
+
+.formbold-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.formbold-input-flex {
+    display: flex;
+    gap: 15px;
+}
+
+.formbold-form-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #DDE3EC;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.formbold-form-btn-wrapper {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.formbold-btn, .formbold-back-btn {
+    padding: 12px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.formbold-btn {
+    background: #6A64F1;
+    color: white;
+}
+
+.formbold-btn:hover {
+    background: #5148d6;
+}
+
+.formbold-back-btn {
+    background: #DDE3EC;
+    color: #536387;
+}
+
+.formbold-back-btn:hover {
+    background: #c5cad8;
+}
+
+  
+    .formbold-input-flex {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+    .formbold-input-flex > div {
+      width: 50%;
+    }
+    .formbold-form-input {
+      width: 100%;
+      padding: 13px 22px;
+      border-radius: 5px;
+      border: 1px solid #DDE3EC;
+      background: #FFFFFF;
+      font-weight: 500;
+      font-size: 16px;
+      color: #536387;
+      outline: none;
+      resize: none;
+    }
+    .formbold-form-input:focus {
+      border-color: #6a64f1;
+      box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.05);
+    }
+    .formbold-form-label {
+      color: #07074D;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 24px;
+      display: block;
+      margin-bottom: 10px;
+    }
+  
+    .formbold-form-confirm {
+      border-bottom: 1px solid #DDE3EC;
+      padding-bottom: 35px;
+    }
+    .formbold-form-confirm p {
+      font-size: 16px;
+      line-height: 24px;
+      color: #536387;
+      margin-bottom: 22px;
+      width: 75%;
+    }
+    .formbold-form-confirm > div {
+      display: flex;
+      gap: 15px;
+    }
+  
+    .formbold-confirm-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #FFFFFF;
+      border: 0.5px solid #DDE3EC;
+      border-radius: 5px;
+      font-size: 16px;
+      line-height: 24px;
+      color: #536387;
+      cursor: pointer;
+      padding: 10px 20px;
+      transition: all .3s ease-in-out;
+    }
+    .formbold-confirm-btn {
+      box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.12);
+    }
+    .formbold-confirm-btn.active {
+      background: #6A64F1;
+      color: #FFFFFF;
+    }
+  
+    .formbold-form-step-1,
+    .formbold-form-step-2,
+    .formbold-form-step-3,
+    .formbold-form-step-4,
+    .formbold-form-step-5,
+    .formbold-form-step-6,
+    .formbold-form-step-7 {
+      display: none;
+    }
+    .formbold-form-step-1.active,
+    .formbold-form-step-2.active,
+    .formbold-form-step-3.active,
+    .formbold-form-step-4.active,
+    .formbold-form-step-5.active,
+    .formbold-form-step-6.active,
+    .formbold-form-step-7.active{
+      display: block;
+    }
+  
+    .formbold-form-btn-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 25px;
+      margin-top: 25px;
+    }
+    .formbold-back-btn {
+      cursor: pointer;
+      background: #FFFFFF;
+      border: none;
+      color: #07074D;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 24px;
+      display: none;
+    }
+    .formbold-back-btn.active {
+      display: block;
+    }
+    .formbold-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 16px;
+      border-radius: 5px;
+      padding: 10px 25px;
+      border: none;
+      font-weight: 500;
+      background-color: #6A64F1;
+      color: white;
+      cursor: pointer;
+    }
+    .formbold-btn:hover {
+      box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .formbold-profile-upload {
+    text-align: center;
+    margin-bottom: 20px;
+    }
+
+    .formbold-profile-preview {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        max-width: 100%;
+        max-height: 200px; /* Adjust max height to fit the page */
+        margin: 0 auto 10px;
+    }
+
+    .formbold-profile-preview img {
+        max-width: 100%;
+        max-height: 200px;
+        display: none; /* Hide until an image is uploaded */
+    }
+
+    .profile-label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 8px;
+    }
+    
+    .formbold-sex-selection {
+        display: flex;
+        gap: 10px;
+    }
+
+    .formbold-sex-button {
+        padding: 10px 20px;
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+    .formbold-sex-button.selected {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+    /* Hobi selection container */
+    .formbold-hobi-selection {
+        display: flex;
+        gap: 20px; /* Space between left and right columns */
+        margin-top: 10px;
+    }
+
+    /* Hobi column styling */
+    .formbold-hobi-column {
+        display: flex;
+        flex-direction: column;
+        gap: 10px; /* Space between options */
+        width: 50%; /* Each column takes 50% of the container */
+    }
+
+    /* Hobi option styling */
+    .formbold-hobi-option {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    .formbold-hobi-option.selected {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white;
+    }
+
+    .formbold-hobi-option img {
+        width: 30px;
+        height: 30px;
+        margin-right: 10px;
+    }
+
+    .formbold-hobi-option span {
+        font-size: 14px;
+    }
+
+    /* Marital Status Styling */
+  .formbold-status-option-maritals {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .formbold-status-option-marital {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .formbold-status-option-marital.selected {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+
+  /* Textarea Styling */
+  .formbold-textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  /* Consistent Input Group Spacing */
+  .formbold-input-group {
+    margin-top: 20px;
+  }
+
+  /* Advent Status Styling */
+  .formbold-status-option-advents {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .formbold-status-option-advent {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .formbold-status-option-advent.selected {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+  </style>
+  <script src="../../static/lib/jquery/jquery.min.js"></script>
+  <script src="../../static/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="../../static/lib/feather-icons/feather.min.js"></script>
+  <script src="../../static/lib/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+  <script src="../../static/lib/select2/js/select2.min.js"></script>
+  <script src="../../static/lib/flatpicker/flatpickr.js"></script>
+  <script src="../../static/assets/js/dashforge.js"></script>
+  <script src="../../static/assets/js/dashforge.aside.js"></script>
+  <script src="../../static/js/pytavia-js/custom/ckeditor/ckeditor.js"></script>
+
+  <script>
+    const stepMenuOne = document.querySelector('.formbold-step-menu1');
+    const stepMenuTwo = document.querySelector('.formbold-step-menu2');
+    const stepMenuThree = document.querySelector('.formbold-step-menu3');
+    const stepMenuFour = document.querySelector('.formbold-step-menu4');
+    const stepMenuFive = document.querySelector('.formbold-step-menu5');
+    const stepMenuSix = document.querySelector('.formbold-step-menu6');
+    const stepMenuSeven = document.querySelector('.formbold-step-menu7');
+
+    const stepOne = document.querySelector('.formbold-form-step-1');
+    const stepTwo = document.querySelector('.formbold-form-step-2');
+    const stepThree = document.querySelector('.formbold-form-step-3');
+    const stepFour = document.querySelector('.formbold-form-step-4');
+    const stepFive = document.querySelector('.formbold-form-step-5');
+    const stepSix = document.querySelector('.formbold-form-step-6');
+    const stepSeven = document.querySelector('.formbold-form-step-7');
+
+    const formSubmitBtn = document.querySelector('.formbold-btn');
+    const formBackBtn = document.querySelector('.formbold-back-btn');
+
+    formSubmitBtn.addEventListener("click", function(event){
+        event.preventDefault();
+        if(stepMenuOne.classList.contains('active')) {
+            stepMenuOne.classList.remove('active');
+            stepMenuTwo.classList.add('active');
+            stepOne.classList.remove('active');
+            stepTwo.classList.add('active');
+            formBackBtn.classList.add('active');
+        } else if(stepMenuTwo.classList.contains('active')) {
+            stepMenuTwo.classList.remove('active');
+            stepMenuThree.classList.add('active');
+            stepTwo.classList.remove('active');
+            stepThree.classList.add('active');
+        } else if(stepMenuThree.classList.contains('active')) {
+            stepMenuThree.classList.remove('active');
+            stepMenuFour.classList.add('active');
+            stepThree.classList.remove('active');
+            stepFour.classList.add('active');
+        } else if(stepMenuFour.classList.contains('active')) {
+            stepMenuFour.classList.remove('active');
+            stepMenuFive.classList.add('active');
+            stepFour.classList.remove('active');
+            stepFive.classList.add('active');
+        } else if(stepMenuFive.classList.contains('active')) {
+            stepMenuFive.classList.remove('active');
+            stepMenuSix.classList.add('active');
+            stepFive.classList.remove('active');
+            stepSix.classList.add('active');
+        } else if(stepMenuSix.classList.contains('active')) {
+            stepMenuSix.classList.remove('active');
+            stepMenuSeven.classList.add('active');
+            stepSix.classList.remove('active');
+            stepSeven.classList.add('active');
+            formSubmitBtn.textContent = 'Submit';
+        } else if(stepMenuSeven.classList.contains('active')) {
+            document.querySelector('form').submit();
+        }
+    });
+
+    formBackBtn.addEventListener("click", function(event){
+        event.preventDefault();
+        if(stepMenuSeven.classList.contains('active')) {
+            stepMenuSeven.classList.remove('active');
+            stepMenuSix.classList.add('active');
+            stepSeven.classList.remove('active');
+            stepSix.classList.add('active');
+            formSubmitBtn.textContent = 'Next Step';
+        } else if(stepMenuSix.classList.contains('active')) {
+            stepMenuSix.classList.remove('active');
+            stepMenuFive.classList.add('active');
+            stepSix.classList.remove('active');
+            stepFive.classList.add('active');
+        } else if(stepMenuFive.classList.contains('active')) {
+            stepMenuFive.classList.remove('active');
+            stepMenuFour.classList.add('active');
+            stepFive.classList.remove('active');
+            stepFour.classList.add('active');
+        } else if(stepMenuFour.classList.contains('active')) {
+            stepMenuFour.classList.remove('active');
+            stepMenuThree.classList.add('active');
+            stepFour.classList.remove('active');
+            stepThree.classList.add('active');
+        } else if(stepMenuThree.classList.contains('active')) {
+            stepMenuThree.classList.remove('active');
+            stepMenuTwo.classList.add('active');
+            stepThree.classList.remove('active');
+            stepTwo.classList.add('active');
+        } else if(stepMenuTwo.classList.contains('active')) {
+            stepMenuTwo.classList.remove('active');
+            stepMenuOne.classList.add('active');
+            stepTwo.classList.remove('active');
+            stepOne.classList.add('active');
+            formBackBtn.classList.remove('active');
+        }
+    });
+
+    const profilePictureInput = document.getElementById('profilePicture');
+    const profilePreview = document.getElementById('profilePreview');
+
+    profilePictureInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                profilePreview.src = e.target.result;
+                profilePreview.style.display = 'block'; // Show image preview
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    function selectSex(sex) {
+        // Set the value of the hidden input
+        document.getElementById('sex').value = sex;
+
+        // Optionally, add visual feedback for the selected button
+        const buttons = document.querySelectorAll('.formbold-sex-button');
+        buttons.forEach(button => {
+            if (button.getAttribute('data-value') === sex) {
+                button.classList.add('selected');
+            } else {
+                button.classList.remove('selected');
+            }
+        });
+    }
+
+    // Array to store selected hobbies
+    let selectedHobbies = [];
+
+    function toggleHobi(hobi) {
+        const hobiOption = document.querySelector(`.formbold-hobi-option[data-value="${hobi}"]`);
+        const index = selectedHobbies.indexOf(hobi);
+
+        // Toggle selection
+        if (index === -1) {
+            selectedHobbies.push(hobi); // Add to selected hobbies
+            hobiOption.classList.add('selected'); // Add visual feedback
+        } else {
+            selectedHobbies.splice(index, 1); // Remove from selected hobbies
+            hobiOption.classList.remove('selected'); // Remove visual feedback
+        }
+
+        // Update the hidden input value
+        document.getElementById('hobbies').value = selectedHobbies.join(',');
+    }
+
+    // Marital Status Selection
+    let selectedMaritalStatus = null;
+
+    function selectMaritalStatus(status) {
+      const options = document.querySelectorAll('.formbold-status-option-marital');
+      
+      // Remove selection from all options
+      options.forEach(option => {
+        option.classList.remove('selected');
+      });
+
+      // Set new selection
+      const selectedOption = document.querySelector(`.formbold-status-option-marital[data-value="${status}"]`);
+      selectedOption.classList.add('selected');
+      document.getElementById('marital_status').value = status;
+    }
+
+    function selectAdventStatus(status) {
+      const options = document.querySelectorAll('.formbold-status-option-advent');
+      
+      // Remove selection from all options
+      options.forEach(option => {
+        option.classList.remove('selected');
+      });
+
+      // Set new selection
+      const selectedOption = document.querySelector(`.formbold-status-option-advent[data-value="${status}"]`);
+      selectedOption.classList.add('selected');
+      document.getElementById('advent_status').value = status;
+    }
+
+    //upload image
+    const file = document.getElementById('profilePicture');     
+
+    file.addEventListener('change', function(){
+      const file = this.files[0];            
+      if (file && file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => {
+          upContainer.src = reader.result;             
+          };
+      };
+    })
+
+    //image from edit langsung show
+    var profileImage = {{ data_user['profile_photo'] | tojson }};
+    console.log(profileImage);  // Cek di console apakah nilainya benar
+    $(document).ready(function() {
+      $("#profilePreview").attr("src", profileImage).css("display", "block");
+    });
+    
+  </script>
+  </body>
+  {% endautoescape %}
+  
+  </html>

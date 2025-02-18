@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Favico -->
+  <link rel="shortcut icon" href="../../static/assets/img/favicon.png" type="image/x-icon">
+  <link rel="icon" href="../../static/assets/img/favicon.png" type="image/x-icon">
+  <title>TrainingTracker.space - Sign In</title>
+  <!-- Lib Css -->
+  <link href="../../static/lib/ionicons/css/ionicons.min.css" rel="stylesheet">
+  <!-- DashForge CSS -->
+  <link rel="stylesheet" href="../../static/assets/css/dashforge.css">
+  <link rel="stylesheet" href="../../static/css/atomic.css">
+</head>
+
+<style>
+  @import url('https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900&display=swap');
+
+button:focus,
+input:focus{
+  outline: none;
+  box-shadow: none;
+}
+a,
+a:hover{
+  text-decoration: none;
+}
+
+body{
+  font-family: 'Roboto', sans-serif;
+}
+
+/*------------------  */
+.otp-form-group{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.otp-inputbar{
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+    text-align: center;
+    margin-right: 10px;
+    font-size: 16px;
+    color: #333;
+}
+#errmsg
+{
+color: red;
+}
+</style>
+
+<body>  
+  <div class="container text-center mb-5 mt-5">
+    <div class="row">
+      <div class="col-md-12">
+        <h4><a href="https://codepen.io/piyushpd/pen/MWewXBG" target="_blank">OTP Input Section</a></h4>
+      </div>
+    </div>
+  </div>
+  
+  {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+          <div class="flash-messages">
+              {% for category, message in messages %}
+                  <div class="alert alert-{{ category }}">
+                      {{ message }}
+                  </div>
+              {% endfor %}
+          </div>
+      {% endif %}
+  {% endwith %}
+  
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group text-center">
+          <label class="margin-align">Enter the OTP, we sent to {{email}}</label>
+          <form id="otpForm" action="/auth/check_verification_email" method="POST">
+            <div class="form-group-input otp-form-group mb-3">
+                <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">                  
+                <input type="hidden" id="otpNumber" name="otp_number">
+                <input type="text" minlength="1" maxlength="1" class="form-control otp-inputbar" oninput="handleInput(this, 0)">
+                <input type="text" minlength="1" maxlength="1" class="form-control otp-inputbar" oninput="handleInput(this, 1)">
+                <input type="text" minlength="1" maxlength="1" class="form-control otp-inputbar" oninput="handleInput(this, 2)">
+                <input type="text" minlength="1" maxlength="1" class="form-control otp-inputbar" oninput="handleInput(this, 3)">
+                <input type="text" minlength="1" maxlength="1" class="form-control otp-inputbar" oninput="handleInput(this, 4)">
+                <input type="text" minlength="1" maxlength="1" class="form-control otp-inputbar" oninput="handleInput(this, 5)">
+            </div>
+        </form>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div id="errmsg" class="text-center"></div>
+
+
+  <!-- Atomic Watch this is just to reload the page if you make any changes to the html -->
+  <!-- <script src="//localhost:35729/livereload.js"></script> -->
+  <script src="../../static/lib/jquery/jquery.min.js"></script>
+  <script src="../../static/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // automatic otp section
+    const otpInputs = document.querySelectorAll(".otp-inputbar");
+
+    function handleInput(input, index) {
+        // Move to the next field if the current one is filled
+        if (input.value && index < otpInputs.length - 1) {
+            otpInputs[index + 1].focus();
+        }
+
+        // Combine values into a single string
+        const otpNumber = Array.from(otpInputs).map(field => field.value).join("");
+
+        // Set the combined OTP value in the hidden input
+        document.getElementById("otpNumber").value = otpNumber;
+
+        // If all fields are filled, automatically submit the form
+        if (otpNumber.length === otpInputs.length) {
+            document.getElementById("otpForm").submit();
+        }
+    }
+
+    // Handle backspace to focus the previous input
+    otpInputs.forEach((input, index) => {
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Backspace" && !input.value && index > 0) {
+                otpInputs[index - 1].focus();
+            }
+        });
+    });
+    // --------otp section------
+$(".otp-inputbar").keypress(function (e) {
+    if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
+        $("#errmsg").html("Digits Only").show().fadeOut("slow");
+        return false;
+    }
+});
+$(".otp-inputbar").on("keyup keydown keypress", function (e) {
+    if ($(this).val()) {
+        $(this).next().focus();
+    }
+    var KeyID = e.keyCode;
+    switch (KeyID) {
+        case 8:
+            $(this).val("");
+            $(this).prev().focus();
+            break;
+        case 46:
+            $(this).val("");
+            $(this).prev().focus();
+            break;
+        default:
+            break;
+    }
+});
+  </script>
+</body>
+
+</html>
