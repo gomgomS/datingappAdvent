@@ -7,7 +7,7 @@
     <!-- Favico -->
     <link rel="shortcut icon" href="../../static//assets/img/favicon.png" type="image/x-icon">
     <link rel="icon" href="../../static/assets/img/favicon.png" type="image/x-icon">
-    <title>TrainingTracker</title>
+    <title>AdventMatch</title>
     <!-- vendor css -->
     <link href="../../static/lib/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="../../static/lib/ionicons/css/ionicons.min.css" rel="stylesheet">
@@ -24,7 +24,7 @@
     </div>
     <aside class="aside aside-fixed">
         <div class="aside-header">
-            <a href="#" class="aside-logo img-logo"><img src="../../static/assets/img/trainingtracker-logo-white.png" class="w-75"></a>
+            <a href="#" class="aside-logo img-logo"><img src="../../static/assets/img/AdventMatch-logo-white.png" class="w-75"></a>
             <a href="" class="aside-menu-link">
                 <i data-feather="menu"></i>
                 <i data-feather="x"></i>
@@ -34,7 +34,7 @@
             <ul class="nav nav-aside">
                 {% for menu_item in menu_list_html %}  
                     <!-- khusus operasional -->
-                    {% if current_menu.value in ['OPERASIONAL_TrainingTracker','OPERASIONAL_FEEDER','OPERASIONAL_TrainingTracker_V2']%}    
+                    {% if current_menu.value in ['OPERASIONAL_AdventMatch','OPERASIONAL_FEEDER','OPERASIONAL_AdventMatch_V2']%}    
                         {% if menu_item.value == 'OPERASIONAL' %}
                         <li class="nav-item nav-item-active ">
                             <a href="{{menu_item.url}}" class="nav-link nav-link-active"><i data-feather="{{ menu_item.icon_class }}"></i>
@@ -61,7 +61,7 @@
 
     <div class="content pd-0">
         <!-- khusus operasional -->
-        {% if current_menu.value in ['OPERASIONAL_TrainingTracker','OPERASIONAL_FEEDER','OPERASIONAL_TrainingTracker_V2']%}    
+        {% if current_menu.value in ['OPERASIONAL_AdventMatch','OPERASIONAL_FEEDER','OPERASIONAL_AdventMatch_V2']%}    
         <div class="content-header">
             <h5 class="mg-b-0 text-primary">
                 <a href="/starter?menu_value=OPERASIONAL">Operasional</a> 
@@ -158,7 +158,7 @@
                     </a>
                 {% endfor %}                
                 {% if starter_button_list[0]['menu_value'] == 'OPERASIONAL' %}
-                <a href="/trainingtracker/update_gapeka_status" >
+                <a href="/AdventMatch/update_gapeka_status" >
                     <div class="starter mg-r-8 mg-t-8">
                         {% if gapeka_api_status == 'on' %}
                         <i data-feather="cloud"></i>  
@@ -174,7 +174,7 @@
                 {% endif %}
                 
             </div>
-            <footer class="text-center mg-t-auto font-weight-bold">#TrainingTrackersekarang</footer>
+            <footer class="text-center mg-t-auto font-weight-bold">#AdventMatchsekarang</footer>
         </div>
        
     </div>

@@ -59,7 +59,9 @@ class view_match:
             core_css            = core_css                , 
             core_dialog_message = core_dialog_message     ,    
             find_match          = _find_match             ,
-            img_dispatch_url    = config.G_IMAGE_URL_DISPATCH
+            img_dispatch_url    = config.G_IMAGE_URL_DISPATCH,
+            socketio_chat_server= config.G_CHAT_URL_DISPATCH,
+            sender_id           = params['user_id']
         )                
     # end def   
 

@@ -7,7 +7,7 @@
     <!-- Favico -->
     <link rel="shortcut icon" href="../../static/assets/img/favicon.png" type="image/x-icon">
     <link rel="icon" href="../../static/assets/img/favicon.png" type="image/x-icon">
-    <title>TrainingTracker ADMIN - USERS</title>
+    <title>AdventMatch ADMIN - USERS</title>
     <!-- vendor css -->
     <link href="../../static/lib/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="../../static/lib/ionicons/css/ionicons.min.css" rel="stylesheet">
@@ -29,7 +29,7 @@
             height: 100%;
             overflow: hidden;
             font-family: 'Nunito', sans-serif;
-            background: linear-gradient(135deg, #2b2c41, #404066);
+            background: #fff;
         }
 
         .frame {
@@ -102,13 +102,13 @@
         }
 
         .card_swipe .like::after {
-          content: "YUMM";
+          content: "KASIH";
           color: #4dca93;
           border: 0.1em solid #4dca93;
         }
 
         .card_swipe .nope::after {
-          content: "YUCK";
+          content: "X KASIH";
           color: #fb4f68;
           border: 0.1em solid #fb4f68;
         }
@@ -198,27 +198,27 @@
 
         /* Menu Box Styling */
         .menu-top, .menu-bottom {
-            width: 90%;
-            max-width: 420px;
-            display: flex;
-            justify-content: space-between;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(12px);
-            padding: 14px 24px;
-            border-radius: 20px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            position: absolute;
-        }
+          width: 90%;
+          max-width: 420px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center; /* Menjaga ikon tetap sejajar */
+          background: rgba(255, 255, 255, 0.2);
+          backdrop-filter: blur(12px);
+          padding: 12px 20px;
+          border-radius: 20px;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+          position: absolute;
+      }
 
         /* Top Menu */
         .menu-top {
-            top: 20px;
+            top: 15px;
         }
 
-        /* Bottom Menu */
         .menu-bottom {
-            bottom: 20px;
-            justify-content: space-around;
+            bottom: 15px;
+            justify-content: space-around; /* Agar merata */
         }
 
         /* Menu Items */
@@ -227,25 +227,25 @@
             flex-direction: column;
             align-items: center;
             text-decoration: none;
-            font-size: 1rem;
+            font-size: 14px;
             transition: transform 0.2s ease, color 0.3s ease;
         }
 
         /* Icon Styling */
         .menu-icon {
-            font-size: 2rem;
-            margin-bottom: 5px;
+            font-size: 20px; /* Ukuran ikon lebih pas */
+            margin-bottom: 4px;
         }
 
         /* Updated Colors */
         .menu-top, .menu-bottom {
-            background: #404066;
-            border: 2px solid #edcc6f;
-            color: #d2ebff;
+            /* background:#fff; */
+            border: 2px solid #fff;
+            color: #000000;
         }
 
         .menu-item {
-            color: #d2ebff;
+            color: #000000;
         }
 
         .menu-item:hover {
@@ -253,7 +253,7 @@
             color: #88cafc;
         }
 
-        /* Active Match Button */
+        /* Item aktif */
         .menu-item.active {
             color: #edcc6f;
             pointer-events: none;
@@ -263,18 +263,11 @@
 
         /* Responsive Fixes */
         @media screen and (max-width: 768px) {
-            .frame {
-                width: 90vw;
-                height: 65vh;
-                max-height: 500px;
+            .menu-icon {
+                font-size: 18px;
             }
-
-            .menu-top {
-                top: 10px;
-            }
-
-            .menu-bottom {                
-                bottom: 10px;
+            .menu-item {
+                font-size: 12px;
             }
         }
 
@@ -290,11 +283,15 @@
 {% autoescape false %}
 <body>
     <!-- Top Menu -->
-    <!-- Top Menu -->
     <div class="menu-top">
-      <div class="menu-icon">🔍</div>  <!-- Top Left -->
-      <div class="menu-icon">💎</div>  <!-- Top Right -->
-    </div>
+        <div class="menu-icon">🔍</div>  <!-- Top Left -->
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div class="menu-icon">💎</div>  <!-- Top Right -->
+            <a href="/auth/logout" class="menu-icon" style="text-decoration: none; color: black;">
+                <i class="fas fa-sign-out-alt"></i> <!-- Logout Icon -->
+            </a>
+        </div>
+    </div>  
 
     <!-- Middle Image -->
     <div class="frame"></div>
@@ -320,7 +317,7 @@
       </a>
 
       <!-- Profile (Directs to /profile) -->
-      <a href="/profile" class="menu-item">
+      <a href="/profile_intro" class="menu-item">
           <div class="menu-icon">👤</div>
           <span>Profile</span>
       </a>
@@ -352,7 +349,7 @@
       let likeText = null;
       let startX = 0, startY = 0, moveX = 0, moveY = 0;
 
-      var apiUrl = "http://0.0.0.0:5008/api/find/match";
+      var apiUrl = "{{main_app_url}}/api/find/match";
 
       $.get(apiUrl, function(resp, status) {
         console.log(resp);

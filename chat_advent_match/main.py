@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from flask_socketio import SocketIO, join_room, leave_room, send, emit
+from flask_socketio import SocketIO, join_room, send, emit
 from pymongo import MongoClient
 from datetime import datetime
 from bson import ObjectId
@@ -15,8 +15,11 @@ db = client[mainDB]
 db_matches = db["db_matches"]
 db_users = db["db_users"]
 db_chat = db["db_chat"]
+main_url="http://0.0.0.0:50011/chat"
+chat_dispatch_url="http://0.0.0.0:50013"
 
-rooms = {}
+# Room dictionary to keep track of messages in memory
+room_messages = {}
 
 @app.route("/")
 def home():
@@ -49,13 +52,25 @@ def chat():
     if not receiver:
         return "Error: receiver user not found", 404
 
-    # Fetch previous messages
-    chat_messages = list(db_chat.find({"match_id": match_id}).sort("timestamp", 1))  # Sort by timestamp (oldest first)
-    
+    # Fetch previous messages from MongoDB
+    chat_messages = list(db_chat.find({"match_id": match_id}).sort("timestamp", 1))
+
     # Convert MongoDB ObjectId to string & format timestamps
     for msg in chat_messages:
         msg["_id"] = str(msg["_id"])
         msg["timestamp"] = msg["timestamp"] if isinstance(msg["timestamp"], str) else msg["timestamp"].isoformat()
+
+    # Store messages in memory for quick access
+    room_messages[match_id] = chat_messages
+
+    # Mark unread messages as read
+    db_chat.update_many(
+        {"match_id": match_id, "receiver_user_id": sender_id, "is_read": False},
+        {"$set": {"is_read": True}}
+    )
+
+    # Notify sender that messages have been read
+    socketio.emit("messages_read", {"match_id": match_id, "receiver_id": sender_id}, room=match_id)
 
     return render_template(
         "room.html",
@@ -65,15 +80,38 @@ def chat():
         sender_name=sender["name"],
         sender_username=sender["username"],
         receiver_name=receiver["name"],
-        chat_messages=chat_messages  # Send chat history to template
+        main_url=main_url,
+        chat_messages=chat_messages
     )
-    
+
 @socketio.on("join")
 def handle_join(data):
     room = data["room"]
     join_room(room)
+
+    # Send past messages to the user who just joined
+    if room in room_messages:
+        emit("load_previous_messages", room_messages[room], room=room)
+
     print(f"User joined room: {room}")
 
+@socketio.on("chat_opened")
+def handle_chat_opened(data):
+    """Mark messages as read when the opponent opens the chat"""
+    match_id = data.get("match_id")
+    receiver_id = data.get("receiver_id")  # The user who just opened the chat
+
+    # Mark messages as read in the database
+    db_chat.update_many(
+        {"match_id": match_id, "receiver_user_id": receiver_id, "is_read": False},
+        {"$set": {"is_read": True}}
+    )
+
+    # Notify the sender that their messages are now read
+    emit("messages_read", {"match_id": match_id, "receiver_id": receiver_id}, room=match_id)
+
+    print(f"Messages marked as read for match {match_id} by {receiver_id}")
+    
 @socketio.on("message")
 def handle_message(data):
     room = data["room"]
@@ -108,9 +146,17 @@ def handle_message(data):
         "is_deleted": False,
     })
 
-    # Gunakan `emit()` dengan `room`
+    # Store in memory
+    if match_id not in room_messages:
+        room_messages[match_id] = []
+    room_messages[match_id].append(message_data)
+
+    # Send new message to room
     emit("message", message_data, room=room)
 
+    # Notify receiver of new message
+    emit("new_message", {"match_id": match_id, "receiver_id": receiver}, room=match_id)
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    # socketio.run(app, debug=True)
+    socketio.run(app, debug=True, port=50013)

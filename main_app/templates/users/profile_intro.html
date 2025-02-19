@@ -93,9 +93,9 @@
                       type="text"
                       name="name"
                       id="name"
-                      placeholder="John doe"
+                      placeholder="{{data_user.name}}"
                       class="formbold-form-input"
-                      value="{{data_user['email']}}"
+                      value="{{data_user.name}}"
                   />
               </div>
               <div>
@@ -117,6 +117,7 @@
                   name="dob"
                   id="dob"
                   class="formbold-form-input"
+                  value="{{data_user.dob}}"
               />
           </div>
         </div>
@@ -124,12 +125,12 @@
     
         <div class="formbold-form-step-2">
             <!-- Step 2: Sex Fields -->            
-              <label class="formbold-form-label">Sex</label>
-              <div class="formbold-sex-selection">
-                  <button type="button" class="formbold-sex-button" data-value="male" onclick="selectSex('male')">Male</button>
-                  <button type="button" class="formbold-sex-button" data-value="female" onclick="selectSex('female')">Female</button>
-              </div>
-              <input type="hidden" name="sex" id="sex" value="" />            
+            <label class="formbold-form-label">Sex</label>
+            <div class="formbold-sex-selection">
+                <button type="button" class="formbold-sex-button" data-value="male" onclick="selectSex('male')">Male</button>
+                <button type="button" class="formbold-sex-button" data-value="female" onclick="selectSex('female')">Female</button>
+            </div>
+            <input type="hidden" name="sex" id="sex" value="{{ data_user.sex }}" />            
         </div>
     
         <!-- Step 3: Hobi Fields -->
@@ -421,6 +422,11 @@
     
         <div class="formbold-form-btn-wrapper">
             <button class="formbold-back-btn">Back</button>
+        
+            {% if data_user['profile_intro'] == 'TRUE' %}
+                <a href="/swipe">Cancel</a>
+            {% endif %}
+        
             <button class="formbold-btn">Next Step</button>
         </div>
     </form>
@@ -1051,6 +1057,28 @@
     $(document).ready(function() {
       $("#profilePreview").attr("src", profileImage).css("display", "block");
     });
+
+
+    //EDIT SECTION
+    // SEX
+    document.addEventListener("DOMContentLoaded", function() {
+        let selectedSex = "{{ data_user.sex }}"; // Get user sex value from backend
+        if (selectedSex) {
+            selectSex(selectedSex); // Auto-select button
+        }
+    });
+
+    function selectSex(value) {
+        document.getElementById("sex").value = value;
+
+        // Remove active class from all buttons
+        document.querySelectorAll('.formbold-sex-button').forEach(button => {
+            button.classList.remove('active');
+        });
+
+        // Add active class to selected button
+        document.querySelector(`.formbold-sex-button[data-value="${value}"]`).classList.add('active');
+    }
     
   </script>
   </body>

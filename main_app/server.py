@@ -47,7 +47,6 @@ from auth               import auth_proc
 from configuration      import config_all
 from configuration      import config_config_general
 from configuration      import config_menu_webapp_item_all
-from configuration      import config_role
 from configuration      import config_setting_menu
 from configuration      import config_setting_security_timeout
 
@@ -100,6 +99,12 @@ from swipe              import swipe_proc
 from view               import view_match
 
 ##########################################################
+# chat
+##########################################################
+
+from view               import view_chat
+
+##########################################################
 # DATINGAPP
 ##########################################################
 
@@ -109,7 +114,6 @@ from view               import view_config_menu_permission
 from view               import view_config_starter
 from view               import view_starter
 
-from configuration      import general_config_proc
 from configuration      import config_menu_proc
 from configuration      import config_menu_permission_proc
 from configuration      import config_starter_proc
@@ -441,3 +445,19 @@ def match():
     html   = view_match.view_match(app).html( params )
     return html
 
+#
+# CHAT
+#
+
+@app.route("/chat")
+def chat():    
+    redirect_return = login_precheck({})
+    if redirect_return:
+        return redirect_return
+    # end if
+
+    params = request.form.to_dict()   
+    params['user_id']  = session.get("user_id")
+
+    html   = view_chat.view_chat(app).html( params )
+    return html

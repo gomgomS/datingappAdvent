@@ -22,7 +22,7 @@ from pytavia_stdlib     import cfs_lib
 from xml.sax            import saxutils as su
 
 
-class trainingtracker_user_proc:
+class AdventMatch_user_proc:
 
     mgdDB = database.get_db_conn(config.mainDB)
 

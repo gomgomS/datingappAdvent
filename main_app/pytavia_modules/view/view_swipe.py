@@ -55,7 +55,8 @@ class view_swipe:
             core_footer         = core_footer             , 
             core_script         = core_script             , 
             core_css            = core_css                , 
-            core_dialog_message = core_dialog_message     ,                      
+            core_dialog_message = core_dialog_message     ,   
+            main_app_url        = config.MAIN_APP_URL     ,                   
             
         )                
     # end def   
