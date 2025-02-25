@@ -491,7 +491,7 @@
       }
 
       function sendDecision(futureWifeId, status) {
-        const apiUrl = "http://0.0.0.0:5008/api/decision/match";
+        const apiUrl = "{{main_app_url}}/api/decision/match";
 
         $.post(apiUrl, {
           csrf_token: "{{ csrf_token() }}", // Include CSRF token

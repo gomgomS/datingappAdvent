@@ -7,94 +7,50 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
-  min-height: 100vh;
   background-color: #f6f6f6;
-}
-
-hr {
-  margin: 20px 0;
 }
 
 #root {
   background-color: white;
   width: 100%;
   height: 100vh;
-  max-width: 720px;
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
 }
 
-#home-container {
-  height: 100%;
-  display: grid;
-  grid-template-rows: auto auto 1fr;
+/* Container utama */
+#room-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
+/* Header dan subheader tetap di atas */
 #home-header {
   text-align: center;
-  margin: 20px 0;
   color: #333;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: bold;
-}
-
-#chat-widget-home {
-  padding: 30px;
-}
-
-#chat-widget-home input {
-  width: 100%;
-  max-width: 300px;
-  padding: 10px;
-  font-size: 1rem;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  outline: none;
-  background-color: #f1f1f1;
-}
-
-#chat-widget-home label {
-  font-size: 0.9rem;
-  margin-bottom: 5px;
-}
-
-#chat-widget-home div {
-  margin-bottom: 20px;
-}
-
-#chat-widget-home button {
-  height: 40px;
-  padding: 5px 15px;
-  border-radius: 10px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-}
-
-#join {
-  border: 2px solid green;
-  color: white;
-  background-color: green;
-  transition: all 0.1s ease-in;
-}
-
-#join:hover {
   background-color: white;
-  color: green;
-}
-
-#room-container {
-  height: 100%;
-  display: grid;
-  grid-template-rows: auto auto 1fr;
-  padding: 0 20px;
-  padding-bottom: 20px;
+  width: 100%;
+  padding: 16px 0;
+  position: fixed; /* Tetap di atas */
+  top: 0;
+  left: 0;
+  z-index: 1000; /* Agar di atas elemen lain */
+  border-bottom: 1px solid #ddd;
 }
 
 #room-subsection {
-  margin-bottom: 15px;
   text-align: center;
+  background-color: white;
+  width: 100%;
+  padding: 12px 0;
+  position: fixed; /* Tetap di atas */
+  top: 60px; /* Beri jarak di bawah header */
+  left: 0;
+  z-index: 1000;
+  border-bottom: 1px solid #ddd;
 }
 
 #room-code-display {
@@ -102,107 +58,123 @@ hr {
   color: #333;
 }
 
-#room-code-display strong {
-  color: black;
-}
-
+/* Tombol keluar */
 #leave-chat-btn {
-  color: white;
-  background-color: red;
-  font-weight: 700;
-  text-decoration: none;
-  padding: 8px 15px;
   display: inline-block;
   margin-top: 5px;
+  padding: 10px 16px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background-color: red;
   border-radius: 8px;
-  border: 2px solid red;
-  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  border: none;
 }
 
-#leave-chat-btn:hover {
-  background-color: white;
-  color: red;
-}
-
+/* Chat Room */
 #chat-room-widget {
-  height: 100%;
-  position: relative;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
   background-color: white;
   border-radius: 10px;
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 12px;
 }
 
+/* Container Pesan */
 #msgs-container {
-  position: absolute;
-  height: calc(100% - 60px);
-  width: 100%;
+  flex-grow: 1;
   overflow-y: auto;
-  padding: 15px;
-  background-color: white;
+  padding: 14px;
+  margin-top: 110px; /* Tambahkan margin supaya tidak ketutupan header */
+  margin-bottom: 80px; /* Supaya tidak ketutupan input */
 }
 
-#msgs-container > ul {
+/* List pesan */
+#messages {
   list-style: none;
 }
 
+/* Pesan */
 .message-item {
-  padding: 12px;
-  border-radius: 10px;
-  width: fit-content;
-  max-width: 70%;
-  margin: 8px 0;
-  font-size: 14px;
-  line-height: 1.4;
+  padding: 12px 16px;
+  border-radius: 14px;
+  max-width: 80%;
+  font-size: 16px;
+  line-height: 1.5;
+  word-wrap: break-word;
+  position: relative;
+  margin: 10px 0;
 }
 
+/* Pesan dari lawan bicara */
 .peer-message-item {
   background-color: #f1f1f1;
   color: #333;
   border-bottom-left-radius: 0;
+  text-align: left;
 }
 
+/* Pesan sendiri */
 .self-message-item {
   background-color: #e3f6ff;
   color: #333;
   margin-left: auto;
   margin-right: 0;
   border-bottom-right-radius: 0;
+  text-align: right;
 }
 
+/* Timestamp untuk lawan bicara (rata kiri) */
+.peer-message-item .muted-text {
+  text-align: left;
+  margin-left: 5px;
+}
+
+/* Timestamp untuk user sendiri (rata kanan) */
+.self-message-item .muted-text {
+  text-align: right;
+  margin-right: 5px;
+}
+
+/* Tanggal/Waktu di atas pesan */
 .muted-text {
   font-size: 12px;
   color: grey;
   display: block;
-  margin-top: 5px;
+  margin-bottom: 3px;
+  text-align: left;
 }
 
 #message-box {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 60px;
   display: flex;
-  padding: 10px;
+  padding: 16px;
   background-color: white;
   border-top: 1px solid #ddd;
+  position: fixed; /* Tetap di tempat */
+  bottom: 0; /* Menempel di bawah */
+  left: 0;
+  width: 100%; /* Lebar penuh */
 }
 
 #message-input {
   flex-grow: 1;
-  padding: 10px;
-  border-radius: 20px;
+  padding: 18px;
+  border-radius: 25px;
   border: 1px solid #ccc;
-  font-size: 14px;
+  font-size: 22px;
   outline: none;
 }
 
 #send-btn {
   background-color: #007bff;
   color: white;
-  padding: 8px 15px;
-  border-radius: 20px;
-  margin-left: 10px;
-  font-size: 14px;
+  padding: 16px 22px;
+  border-radius: 25px;
+  margin-left: 12px;
+  font-size: 22px;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
@@ -210,6 +182,40 @@ hr {
 
 #send-btn:hover {
   background-color: #0056b3;
+}
+
+#msgs-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 14px;
+  margin-bottom: 80px; /* Tambahkan margin agar tidak tertutup oleh input */
+}
+
+
+/* Responsive Adjustment */
+@media screen and (max-width: 480px) {
+  #home-header {
+    font-size: 20px;
+  }
+
+  #room-code-display {
+    font-size: 16px;
+  }
+
+  .message-item {
+    font-size: 14px;
+    max-width: 85%;
+  }
+
+  #message-input {
+    font-size: 14px;
+    padding: 12px;
+  }
+
+  #send-btn {
+    font-size: 14px;
+    padding: 8px 14px;
+  }
 }
 
 </style>
@@ -226,95 +232,95 @@ hr {
         <ul id="messages">
           {% for msg in chat_messages %}
             <li class="message-item {% if msg.sender_user_id == sender %}self-message-item{% else %}peer-message-item{% endif %}">
+              <small class="muted-text">{{ msg.timestamp }}{% if msg.is_read %} ✅ {% endif %}</small>
               <p>{{ msg.message }}</p>
-              <small class="muted-text">
-                {{ msg.timestamp }}
-                {% if msg.is_read %} ✅ {% endif %}
-              </small>
             </li>
           {% endfor %}
         </ul>
       </div>
-      <div id="message-box">
-        <input type="text" placeholder="Enter your message" id="message-input" name="message" />
-        <button type="submit" id="send-btn" onclick="sendMessage()">Send</button>
-      </div>
     </div>  
+    <div id="message-box">
+      <input type="text" placeholder="Enter your message" id="message-input" name="message" />
+      <button type="submit" id="send-btn" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
 
-    <script>
-      var socketio = io("{{chat_dispatch_url}}:50013", { transports: ["websocket", "polling"] });
-      console.log(socketio)
-      console.log("langit dan bumi")
-      const match_id = "{{ match_id }}";
-      const sender_id = "{{ sender }}";
-      const receiver_id = "{{ receiver }}";
+  <script>
+    // Inisialisasi Socket.IO
+    var socketio = io("{{chat_dispatch_url}}:50013", { transports: ["websocket", "polling"] });
   
-      // Join room
-      socketio.emit("join", { room: match_id });
+    const match_id = "{{ match_id }}";
+    const sender_id = "{{ sender }}";
   
-      // Notify the server when the chat page is opened
-      socketio.emit("chat_opened", { match_id: match_id, receiver_id: sender_id });
+    // Bergabung ke room chat
+    socketio.emit("join", { room: match_id });
   
-      // Load previous messages
-      socketio.on("load_previous_messages", function (messages) {
-          messages.forEach(appendNewMessage);
+    // Beritahu server bahwa chat dibuka
+    socketio.emit("chat_opened", { match_id: match_id, receiver_id: sender_id });
+  
+    // Fungsi untuk scroll ke pesan terakhir
+    function scrollToBottom() {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    }
+  
+    socketio.on("load_previous_messages", function (messages) {
+      messages.forEach(appendNewMessage);
+      scrollToBottom()
+    });
+  
+    // Menerima pesan baru
+    socketio.on("message", function (data) {
+      appendNewMessage(data);
+      setTimeout(scrollToBottom, 500);
+    });
+  
+    // Fungsi untuk menambahkan pesan baru ke dalam UI
+    function appendNewMessage(data) {
+      const messages = document.getElementById("messages");
+      const isSender = data.sender_user_id === sender_id;
+  
+      const newMessage = document.createElement("li");
+      newMessage.className = `message-item ${isSender ? "self-message-item" : "peer-message-item"}`;
+  
+      const formattedTime = data.timestamp ? new Date(data.timestamp).toLocaleString() : "Just now";
+      newMessage.innerHTML = `
+          <p>${data.message}</p>
+          <small class="muted-text">${formattedTime}</small>
+      `;
+  
+      messages.appendChild(newMessage);
+      scrollToBottom();
+    }
+  
+    // Fungsi untuk mengirim pesan
+    function sendMessage() {
+      const msgInput = document.getElementById("message-input");
+      const message = msgInput.value.trim();
+  
+      if (!message) return;
+  
+      socketio.emit("message", {
+        message: message,
+        sender: sender_id,
+        match_id: match_id,
+        room: match_id
       });
   
-      // Listen for new messages
-      socketio.on("message", function (data) {
-          appendNewMessage(data);
-      });
+      msgInput.value = "";
+      scrollToBottom();
+    }
   
-      // Listen for read receipts
-      socketio.on("messages_read", function (data) {
-          if (data.match_id === match_id) {
-              markMessagesAsRead();
-          }
-      });
-  
-      function appendNewMessage(data) {
-          const messages = document.getElementById("messages");
-          const isSender = data.sender_user_id === sender_id;
-  
-          const newMessage = document.createElement("li");
-          newMessage.className = `message-item ${isSender ? "self-message-item" : "peer-message-item"}`;
-  
-          let checkmark = isSender ? `<span class="checkmark">✓</span>` : "";
-  
-          newMessage.innerHTML = `
-              <p>${data.message} ${checkmark}</p>
-              <small class="muted-text">${new Date(data.timestamp).toLocaleString()}</small>
-          `;
-  
-          messages.appendChild(newMessage);
-          messages.scrollTop = messages.scrollHeight;
+    // Kirim pesan dengan tombol Enter
+    document.getElementById("message-input").addEventListener("keypress", function (event) {
+      if (event.key === "Enter") {
+        sendMessage();
       }
+    });
   
-      function markMessagesAsRead() {
-          document.querySelectorAll(".checkmark").forEach(check => {
-              check.innerHTML = "✓✓"; // Double checkmark for read messages
-              check.style.color = "blue"; // Optional: Change color to blue
-          });
-      }
-  
-      function sendMessage() {
-          const msgInput = document.getElementById("message-input");
-          const message = msgInput.value.trim();
-  
-          if (!message) return;
-  
-          socketio.emit("message", {
-              message: message,
-              sender: sender_id,
-              match_id: match_id,
-              room: match_id
-          });
-  
-          msgInput.value = "";
-      }
+    // Pasang event listener untuk tombol kirim
+    document.getElementById("send-btn").addEventListener("click", sendMessage);
   </script>
   
-  </div>
 {% endblock %}
 
   
