@@ -385,7 +385,7 @@ db = {
 
     # CHAT
     "db_chat": {
-        "chat_id"                     : "",
+        "chat_id"                     : "",        
         "match_id"                    : "",
         "sender_user_id"              : "",
         "receiver_user_id"            : "",
@@ -393,7 +393,8 @@ db = {
         "type"                        : "",
         "timestamp"                   : "",
         "is_read"                     : "false",        
-        "is_deleted"                  : "false",        
+        "is_deleted"                  : "false",   
+        "sequence"                    : 0,     
     },  
 
     # PAYMENTS

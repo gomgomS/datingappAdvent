@@ -72,6 +72,10 @@ def chat():
     # Notify sender that messages have been read
     socketio.emit("messages_read", {"match_id": match_id, "receiver_id": sender_id}, room=match_id)
 
+    last_message = db_chat.find_one({"match_id": match_id}, sort=[("sequence", -1)])
+    last_sequence = last_message["sequence"] if last_message else 0
+    latest_sequence = last_sequence
+
     return render_template(
         "room.html",
         match_id=match_id,
@@ -81,7 +85,8 @@ def chat():
         sender_username=sender["username"],
         receiver_name=receiver["name"],
         main_url=main_url,
-        chat_messages=chat_messages
+        chat_messages=chat_messages,
+        latest_sequence=latest_sequence
     )
 
 @socketio.on("join")
@@ -89,11 +94,21 @@ def handle_join(data):
     room = data["room"]
     join_room(room)
 
-    # Send past messages to the user who just joined
-    if room in room_messages:
-        emit("load_previous_messages", room_messages[room], room=room)
+    print(room_messages)
+    print("minggir")
 
-    print(f"User joined room: {room}")
+    # Fetch messages from database instead of memory
+    chat_messages = list(db_chat.find({"match_id": room}).sort("timestamp", 1))
+
+    # Convert MongoDB ObjectId to string & format timestamps
+    for msg in chat_messages:
+        msg["_id"] = str(msg["_id"])
+        msg["timestamp"] = msg["timestamp"] if isinstance(msg["timestamp"], str) else msg["timestamp"].isoformat()
+
+    # Send messages to the user
+    emit("load_previous_messages", chat_messages, room=room)
+
+    print(f"User joined room: {room} and messages were loaded from database.")
 
 @socketio.on("chat_opened")
 def handle_chat_opened(data):
@@ -111,13 +126,14 @@ def handle_chat_opened(data):
     emit("messages_read", {"match_id": match_id, "receiver_id": receiver_id}, room=match_id)
 
     print(f"Messages marked as read for match {match_id} by {receiver_id}")
-    
+
 @socketio.on("message")
 def handle_message(data):
     room = data["room"]
     message = data["message"]
     sender = data["sender"]
     match_id = data.get("match_id", "")
+    sequence = data.get("sequence", 1)
 
     match = db_matches.find_one({"match_id": match_id})
     if not match:
@@ -134,7 +150,8 @@ def handle_message(data):
         "message": message,
         "sender_user_id": sender,
         "timestamp": datetime.utcnow().isoformat(),
-        "match_id": match_id
+        "match_id": match_id,
+        "sequence": sequence
     }
 
     db_chat.insert_one({
@@ -146,16 +163,24 @@ def handle_message(data):
         "is_deleted": False,
     })
 
-    # Store in memory
-    if match_id not in room_messages:
-        room_messages[match_id] = []
-    room_messages[match_id].append(message_data)
-
-    # Send new message to room
+    # Kirim pesan ke semua user di room (termasuk pengirim)
     emit("message", message_data, room=room)
 
-    # Notify receiver of new message
-    emit("new_message", {"match_id": match_id, "receiver_id": receiver}, room=match_id)
+@socketio.on("leave")
+def handle_leave(data):
+    room = data["room"]
+    sender = data["sender"]
+
+    # Remove the room messages from memory
+    if room in room_messages:
+        del room_messages[room]
+    print(room_messages)
+    print("awas dek")
+
+    # Notify others in the room
+    emit("user_left", {"sender": sender, "message": "has left the chat."}, room=room)
+
+    print(f"User {sender} left room: {room} and messages were cleared.")
 
 if __name__ == "__main__":
     # socketio.run(app, debug=True)
