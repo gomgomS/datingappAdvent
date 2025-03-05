@@ -17,6 +17,7 @@ from pytavia_core     import database
 from pytavia_core     import helper
 from pytavia_core     import config
 from pytavia_stdlib   import cfs_lib
+from xml.sax            import saxutils as su
 
 class profile_proc:
 
@@ -42,12 +43,45 @@ class profile_proc:
         response = helper.response_msg(
             "UPDATE_PROFILE_SUCCESS", "UPDATE PROFILE SUCCESS", {} , "0000"
         )
-        try:
-            image                   = params["files"]["image"]
-            file_image              = ""
+        try:     
+
+            update_fields = {
+                # "is_premium"              : params.get("is_premium", "FALSE"),
+                # "subscription_type"       : params.get("subscription_type", "free"),
+                "name"                    : params.get("name", ""),
+                "dob"                     : params.get("dob", ""),
+                "sex"                     : params.get("sex", ""),
+                # "hobbies"                 : params.get("hobbies", ""),
+                "city"                    : params.get("city", ""),
+                "tribe"                   : params.get("tribe", ""),
+                "congregation"            : params.get("congregation", ""),
+                # "marital_status"          : params.get("marital_status", ""),
+                "job"                     : params.get("job", ""),
+                "about"                   : params.get("about", ""),
+                # "advent_status"           : params.get("advent_status", ""),
+                "profile_intro"           : "TRUE",                
+                "location"                : params.get("location", {"latitude": 0.0, "longitude": 0.0}),
+                # "preferences": params.get("preferences", {
+                #     "age_range"           : {"min": 18, "max": 50},
+                #     "distance_range_km"   : 50
+                # }),
+                "updated_at"              : datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            }
+            
+            if params['hobbies'] != '':
+                update_fields["hobbies"] = params['hobbies']
+
+            if params['marital_status'] != '':
+                update_fields["marital_status"] = params['marital_status']
+            
+            if params['advent_status'] != '':
+                update_fields["advent_status"] = params['advent_status']
+            
+            image_profile           = params["files"]["image_profile"]
+            file_image_profile      = ""
             file_name               = ""
 
-            if image.filename != "":
+            if image_profile.filename != "":
                 try:    
                     now_time        = int(time.time() * 1000)
                     random_int      = random.randint(1000000,9999999)
@@ -56,7 +90,7 @@ class profile_proc:
                     file_resp       = cfs_lib.store_file_to_cfs({
                         "bucket"     : config.G_IMAGE_BUCKET,
                         "label"      : config.G_IMAGE_LABEL,
-                        "file_data"  : image,
+                        "file_data"  : image_profile,
                         "extension"  : "DEFAULT",
                         "allow_type" : ["DEFAULT"],
                         "file_name"  : "/profile_photo/"  + created_time + "/" + file_name
@@ -78,39 +112,81 @@ class profile_proc:
                         return response
                     #endif
 
-                    file_image      = data_file["path"]
-                    file_name       = data_file["key"] 
-                   
+                    file_image_profile = data_file["path"]
+                    file_name          = data_file["key"] 
+
+                    update_fields["profile_photo"] = file_image_profile                   
 
                 except:
                     self.webapp.logger.debug(traceback.format_exc())
-                    file_image      = ""
+                    file_image_profile      = ""
 
                 #end try                        
+            
 
-            update_fields = {
-                # "is_premium"              : params.get("is_premium", "FALSE"),
-                # "subscription_type"       : params.get("subscription_type", "free"),
-                "name"                    : params.get("name", ""),
-                "dob"                     : params.get("dob", ""),
-                "sex"                     : params.get("sex", ""),
-                "hobbies"                 : params.get("hobbies", ""),
-                "city"                    : params.get("city", ""),
-                "tribe"                   : params.get("tribe", ""),
-                "congregation"            : params.get("congregation", ""),
-                "marital_status"          : params.get("marital_status", ""),
-                "job"                     : params.get("job", ""),
-                "about"                   : params.get("about", ""),
-                "advent_status"           : params.get("advent_status", ""),
-                "profile_intro"           : "TRUE",
-                "profile_photo"           : file_image,
-                "location"                : params.get("location", {"latitude": 0.0, "longitude": 0.0}),
-                # "preferences": params.get("preferences", {
-                #     "age_range"           : {"min": 18, "max": 50},
-                #     "distance_range_km"   : 50
-                # }),
-                "updated_at"              : datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            }
+            #process image
+            removed_img = params.get("img_removed", None)            
+            
+            if removed_img:
+                removed_img_clean = su.unescape(removed_img)
+                removed_img_arr = removed_img_clean.split(",")
+                if len(removed_img_arr) > 0:
+                    for img in removed_img_arr:
+                        self.mgdDB.db_users.update({"user_id"   : params.get("user_id", "")},
+                                {"$pull": {"image" : img }})
+                    # end for
+                # end if
+              
+            #for looping multiple image save to cfs 
+            if params.get("image"):
+                for image_data in params["image"]:                                       
+                    image           = image_data
+                    file_name       = ""
+                    if image.filename != "":
+                        try:    
+                            now_time        = int(time.time() * 1000)
+                            random_int      = random.randint(1000000,9999999)
+                            file_name       = "file_" + str( now_time ) + "_" + str(random_int)
+                            created_time    = time.strftime("%d-%m-%Y", time.localtime(int(time.time())))
+                            file_resp       = cfs_lib.store_file_to_cfs({
+                                "bucket"     : config.G_IMAGE_BUCKET,
+                                "label"      : config.G_IMAGE_LABEL,
+                                "file_data"  : image,
+                                "extension"  : "DEFAULT",
+                                "allow_type" : ["DEFAULT"],
+                                "file_name"  : "/gallery/"  + created_time + "/" + file_name
+                            })
+                            
+                            self.webapp.logger.debug( "------------------------------------------" )
+                            self.webapp.logger.debug( file_resp )
+                            self.webapp.logger.debug( "------------------------------------------" )
+                            
+                            action_file     = file_resp["message_action"]
+                            desc_file       = file_resp["message_desc"  ]
+                            data_file       = file_resp["message_data"  ]
+                            
+                            if action_file != "ADD_CFS_FILE_SUCCES":
+                                response.put( "status"      , "ADD_PENGELOLAAN_HUNIAN_FAILED" )
+                                response.put( "desc"        , "Upload Image Failed" )
+                                response.put( "status_code" , "1001" )
+                                response.put( "data"        , { "error_message" : desc_file })
+                                return response
+                            #endif                                                        
+                                                                                    
+                            self.mgdDB.db_users.update(
+                                {
+                                    "user_id"   : params.get("user_id", "")
+                                },
+                                {"$push": {"image" : data_file["path"] }}
+                            )
+                 
+                        except:
+                            self.webapp.logger.debug(traceback.format_exc())
+
+                        #end try
+                    #end if
+                #end for
+            #end if
 
             self.mgdDB.db_users.update(
                 {"user_id"               : params.get("user_id", "")},

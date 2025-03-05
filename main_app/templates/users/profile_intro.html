@@ -17,6 +17,424 @@
     <link rel="stylesheet" href="../../static/assets/css/dashforge.css">
     <link rel="stylesheet" href="../../static/css/custom.css">
     <!-- some additional css here -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .formbold-main-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px;
+      }
+      
+    
+      .formbold-form-wrapper {
+        margin: 0 auto;
+        max-width: 550px;
+        width: 100%;
+        background: white;
+      }
+    
+      .formbold-container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 30px;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .formbold-steps {
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #DDE3EC;
+      text-align: center;
+  }
+  
+  .formbold-steps ul {
+      padding: 0;
+      margin: 0;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+  }
+  
+  .formbold-steps ul::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 10%;
+      width: 80%;
+      height: 2px;
+      background: #DDE3EC;
+      z-index: -1;
+  }
+  
+  .formbold-steps li {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      font-size: 14px;
+      color: #536387;
+      position: relative;
+  }
+  
+  .formbold-steps li span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #DDE3EC;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-weight: 600;
+      font-size: 16px;
+      color: #536387;
+      transition: background 0.3s, color 0.3s;
+  }
+  
+  .formbold-steps li.active {
+      color: #07074D;
+  }
+  
+  .formbold-steps li.active span {
+      background: #6A64F1;
+      color: #FFFFFF;
+  }
+  
+  .formbold-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+  }
+  
+  .formbold-input-flex {
+      display: flex;
+      gap: 15px;
+  }
+  
+  .formbold-form-input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #DDE3EC;
+      border-radius: 6px;
+      font-size: 14px;
+  }
+  
+  .formbold-form-btn-wrapper {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+  }
+  
+  .formbold-btn, .formbold-back-btn {
+      padding: 12px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s;
+  }
+  
+  .formbold-btn {
+      background: #6A64F1;
+      color: white;
+  }
+  
+  .formbold-btn:hover {
+      background: #5148d6;
+  }
+  
+  .formbold-back-btn {
+      background: #DDE3EC;
+      color: #536387;
+  }
+  
+  .formbold-back-btn:hover {
+      background: #c5cad8;
+  }
+  
+    
+      .formbold-input-flex {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 22px;
+      }
+      .formbold-input-flex > div {
+        width: 50%;
+      }
+      .formbold-form-input {
+        width: 100%;
+        padding: 13px 22px;
+        border-radius: 5px;
+        border: 1px solid #DDE3EC;
+        background: #FFFFFF;
+        font-weight: 500;
+        font-size: 16px;
+        color: #536387;
+        outline: none;
+        resize: none;
+      }
+      .formbold-form-input:focus {
+        border-color: #6a64f1;
+        box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.05);
+      }
+      .formbold-form-label {
+        color: #07074D;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 24px;
+        display: block;
+        margin-bottom: 10px;
+      }
+    
+      .formbold-form-confirm {
+        border-bottom: 1px solid #DDE3EC;
+        padding-bottom: 35px;
+      }
+      .formbold-form-confirm p {
+        font-size: 16px;
+        line-height: 24px;
+        color: #536387;
+        margin-bottom: 22px;
+        width: 75%;
+      }
+      .formbold-form-confirm > div {
+        display: flex;
+        gap: 15px;
+      }
+    
+      .formbold-confirm-btn {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #FFFFFF;
+        border: 0.5px solid #DDE3EC;
+        border-radius: 5px;
+        font-size: 16px;
+        line-height: 24px;
+        color: #536387;
+        cursor: pointer;
+        padding: 10px 20px;
+        transition: all .3s ease-in-out;
+      }
+      .formbold-confirm-btn {
+        box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.12);
+      }
+      .formbold-confirm-btn.active {
+        background: #6A64F1;
+        color: #FFFFFF;
+      }
+    
+      .formbold-form-step-1,
+      .formbold-form-step-2,
+      .formbold-form-step-3,
+      .formbold-form-step-4,
+      .formbold-form-step-5,
+      .formbold-form-step-6,
+      .formbold-form-step-7 {
+        display: none;
+      }
+      .formbold-form-step-1.active,
+      .formbold-form-step-2.active,
+      .formbold-form-step-3.active,
+      .formbold-form-step-4.active,
+      .formbold-form-step-5.active,
+      .formbold-form-step-6.active,
+      .formbold-form-step-7.active{
+        display: block;
+      }
+    
+      .formbold-form-btn-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 25px;
+        margin-top: 25px;
+      }
+      .formbold-back-btn {
+        cursor: pointer;
+        background: #FFFFFF;
+        border: none;
+        color: #07074D;
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 24px;
+        display: none;
+      }
+      .formbold-back-btn.active {
+        display: block;
+      }
+      .formbold-btn {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 16px;
+        border-radius: 5px;
+        padding: 10px 25px;
+        border: none;
+        font-weight: 500;
+        background-color: #6A64F1;
+        color: white;
+        cursor: pointer;
+      }
+      .formbold-btn:hover {
+        box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.05);
+      }
+  
+      .formbold-profile-upload {
+      text-align: center;
+      margin-bottom: 20px;
+      }
+  
+      .formbold-profile-preview {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          max-width: 100%;
+          max-height: 200px; /* Adjust max height to fit the page */
+          margin: 0 auto 10px;
+      }
+  
+      .formbold-profile-preview img {
+          max-width: 100%;
+          max-height: 200px;
+          display: none; /* Hide until an image_profile is uploaded */
+      }
+  
+      .profile-label {
+          font-weight: bold;
+          display: block;
+          margin-bottom: 8px;
+      }
+      
+      .formbold-sex-selection {
+          display: flex;
+          gap: 10px;
+      }
+  
+      .formbold-sex-button {
+          padding: 10px 20px;
+          border: 1px solid #ccc;
+          background-color: #f9f9f9;
+          cursor: pointer;
+          border-radius: 5px;
+      }
+  
+      .formbold-sex-button.selected {
+          background-color: #007bff;
+          color: white;
+          border-color: #007bff;
+      }
+      /* Hobi selection container */
+      .formbold-hobi-selection {
+          display: flex;
+          gap: 20px; /* Space between left and right columns */
+          margin-top: 10px;
+      }
+  
+      /* Hobi column styling */
+      .formbold-hobi-column {
+          display: flex;
+          flex-direction: column;
+          gap: 10px; /* Space between options */
+          width: 50%; /* Each column takes 50% of the container */
+      }
+  
+      /* Hobi option styling */
+      .formbold-hobi-option {
+          display: flex;
+          align-items: center;
+          padding: 10px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background-color 0.3s, border-color 0.3s;
+      }
+  
+      .formbold-hobi-option.selected {
+          background-color: #007bff;
+          border-color: #007bff;
+          color: white;
+      }
+  
+      .formbold-hobi-option img {
+          width: 30px;
+          height: 30px;
+          margin-right: 10px;
+      }
+  
+      .formbold-hobi-option span {
+          font-size: 14px;
+      }
+  
+      /* Marital Status Styling */
+    .formbold-status-option-maritals {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+  
+    .formbold-status-option-marital {
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+  
+    .formbold-status-option-marital.selected {
+      background-color: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+  
+    /* Textarea Styling */
+    .formbold-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+  
+    /* Consistent Input Group Spacing */
+    .formbold-input-group {
+      margin-top: 20px;
+    }
+  
+    /* Advent Status Styling */
+    .formbold-status-option-advents {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+  
+    .formbold-status-option-advent {
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+  
+    .formbold-status-option-advent.selected {
+      background-color: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+    </style>
 </head>
 
 {% autoescape false %}
@@ -51,10 +469,11 @@
               <label for="profilePicture" class="formbold-form-label profile-label"> Upload Profile Picture </label>              
               <input
                   type="file"
-                  name="image"
+                  name="image_profile"
                   id="profilePicture"
-                  accept="image/*"
+                  accept="image_profile/*"
                   class="formbold-form-input"
+                  value="{{data_user['profile_photo']}}"
               />
           </div>
           <div class="formbold-input-flex">
@@ -135,7 +554,7 @@
     
         <!-- Step 3: Hobi Fields -->
         <div class="formbold-form-step-3">
-          <label class="formbold-form-label">Select Your Hobbies</label>
+          <label class="formbold-form-label">Select Your Hobbies {{ data_user.hobbies }}</label>
           <div class="formbold-hobi-selection">
               <!-- Left Column -->
               <div class="formbold-hobi-column">
@@ -209,17 +628,17 @@
             <div class="formbold-additional-selection">
               <div class="formbold-input-group">
                 <label for="city" class="formbold-form-label">City</label>
-                <input type="text" name="city" id="city" class="formbold-form-input" placeholder="Enter your city" />
+                <input type="text" name="city" id="city" class="formbold-form-input" placeholder="Enter your city" value="{{ data_user.city }}"/>
               </div>
             
               <div class="formbold-input-group">
                 <label for="tribe" class="formbold-form-label">Tribe</label>
-                <input type="text" name="tribe" id="tribe" class="formbold-form-input" placeholder="Enter your tribe" />
+                <input type="text" name="tribe" id="tribe" class="formbold-form-input" placeholder="Enter your tribe" value="{{ data_user.tribe }}" />
               </div>
             
               <div class="formbold-input-group">
                 <label for="congregation" class="formbold-form-label">Registered Congregation</label>
-                <input type="text" name="congregation" id="congregation" class="formbold-form-input" placeholder="Enter your registered congregation" />
+                <input type="text" name="congregation" id="congregation" class="formbold-form-input" placeholder="Enter your registered congregation" value="{{ data_user.congregation }}"/>
               </div>            
             </div>       
         </div>
@@ -292,6 +711,7 @@
               id="job" 
               class="formbold-form-input" 
               placeholder="Enter your job/profession"
+              value="{{data_user.job}}"
             >
           </div>
 
@@ -303,8 +723,8 @@
               id="about" 
               class="formbold-form-input formbold-textarea" 
               placeholder="Tell us about yourself..."
-              rows="4"
-            ></textarea>
+              rows="4"              
+            >{{ data_user.about }}</textarea>
           </div>
         </div>
     
@@ -403,18 +823,29 @@
           </div>
         </div>
     
-        <div class="formbold-form-step-7">
+        <div class="formbold-form-step-7">                  
           
-            <input type="hidden" name="img_removed" id="img_removed">
-            <div class="image-gallery">
-                                    
-                
-            </div>
-          <input type="file" id="filePic" class="d-none" name="image[]" multiple="">                             
-            <label id="filePicButton" for="filePic" class="d-flex Cur(p) mg-t-10">
-                <i class="rounded-left bg-dark text-white pd-10 fas fa-cloud-upload-alt cbs-1"></i>
-                <span class="bg-success pd-7 cbs-1 text-white rounded-right">Upload Photo</span> <span class="ml-3 mt-2" style="color: red;"> *ukuran maksimal file 1MB</span>
-            </label>
+          <div class="form-group row">
+            <div class="alert alert-warning alert-dismissible fade" role="alert">
+                <strong>Files is too large</strong> Image more than 1 MB.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+            </div>              
+              <div class="col-sm-7">   
+                  <input type="hidden" name="img_removed" id="img_removed">
+                  <div class="image-gallery">
+                      {% for image in data_user.image %}                                        
+                          <div class="image-area"><img src="{{image_base_url}}{{ image }}" style="width: 100px;height: 100px;margin:5px;"><a class="remove-image" data-values="{{ image }}" style="display: inline; color:red;">&#215;</a></div>                                                                                                      
+                      {%endfor%}
+                  </div>
+                <input type="file" id="filePic" class="d-none" name="image[]" multiple="">                             
+                  <label id="filePicButton" for="filePic" class="d-flex Cur(p) mg-t-10">
+                      <i class="rounded-left bg-dark text-white pd-10 fas fa-cloud-upload-alt cbs-1"></i>
+                      <span class="bg-success pd-7 cbs-1 text-white rounded-right">Upload Your Gallery</span> <span class="ml-3 mt-2" style="color: red;"> *ukuran maksimal file 1MB</span>
+                  </label>
+              </div>
+          </div> 
         
           <label class="formbold-form-label">Jangan Kuatir, Anda bisa melakukan perubahan nanti, pada menu profile anda</label>
             <!-- Step 7: Submit -->
@@ -433,424 +864,7 @@
     
     </div>
   </div>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: "Inter", sans-serif;
-    }
-    .formbold-main-wrapper {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 48px;
-    }
-    
-  
-    .formbold-form-wrapper {
-      margin: 0 auto;
-      max-width: 550px;
-      width: 100%;
-      background: white;
-    }
-  
-    .formbold-container {
-    max-width: 600px;
-    margin: 50px auto;
-    padding: 30px;
-    background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
 
-.formbold-steps {
-    padding-bottom: 20px;
-    margin-bottom: 30px;
-    border-bottom: 2px solid #DDE3EC;
-    text-align: center;
-}
-
-.formbold-steps ul {
-    padding: 0;
-    margin: 0;
-    list-style: none;
-    display: flex;
-    justify-content: space-between;
-    position: relative;
-}
-
-.formbold-steps ul::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 10%;
-    width: 80%;
-    height: 2px;
-    background: #DDE3EC;
-    z-index: -1;
-}
-
-.formbold-steps li {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    font-weight: 500;
-    font-size: 14px;
-    color: #536387;
-    position: relative;
-}
-
-.formbold-steps li span {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #DDE3EC;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    font-weight: 600;
-    font-size: 16px;
-    color: #536387;
-    transition: background 0.3s, color 0.3s;
-}
-
-.formbold-steps li.active {
-    color: #07074D;
-}
-
-.formbold-steps li.active span {
-    background: #6A64F1;
-    color: #FFFFFF;
-}
-
-.formbold-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.formbold-input-flex {
-    display: flex;
-    gap: 15px;
-}
-
-.formbold-form-input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #DDE3EC;
-    border-radius: 6px;
-    font-size: 14px;
-}
-
-.formbold-form-btn-wrapper {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-}
-
-.formbold-btn, .formbold-back-btn {
-    padding: 12px 20px;
-    font-size: 16px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.formbold-btn {
-    background: #6A64F1;
-    color: white;
-}
-
-.formbold-btn:hover {
-    background: #5148d6;
-}
-
-.formbold-back-btn {
-    background: #DDE3EC;
-    color: #536387;
-}
-
-.formbold-back-btn:hover {
-    background: #c5cad8;
-}
-
-  
-    .formbold-input-flex {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 22px;
-    }
-    .formbold-input-flex > div {
-      width: 50%;
-    }
-    .formbold-form-input {
-      width: 100%;
-      padding: 13px 22px;
-      border-radius: 5px;
-      border: 1px solid #DDE3EC;
-      background: #FFFFFF;
-      font-weight: 500;
-      font-size: 16px;
-      color: #536387;
-      outline: none;
-      resize: none;
-    }
-    .formbold-form-input:focus {
-      border-color: #6a64f1;
-      box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.05);
-    }
-    .formbold-form-label {
-      color: #07074D;
-      font-weight: 500;
-      font-size: 14px;
-      line-height: 24px;
-      display: block;
-      margin-bottom: 10px;
-    }
-  
-    .formbold-form-confirm {
-      border-bottom: 1px solid #DDE3EC;
-      padding-bottom: 35px;
-    }
-    .formbold-form-confirm p {
-      font-size: 16px;
-      line-height: 24px;
-      color: #536387;
-      margin-bottom: 22px;
-      width: 75%;
-    }
-    .formbold-form-confirm > div {
-      display: flex;
-      gap: 15px;
-    }
-  
-    .formbold-confirm-btn {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: #FFFFFF;
-      border: 0.5px solid #DDE3EC;
-      border-radius: 5px;
-      font-size: 16px;
-      line-height: 24px;
-      color: #536387;
-      cursor: pointer;
-      padding: 10px 20px;
-      transition: all .3s ease-in-out;
-    }
-    .formbold-confirm-btn {
-      box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.12);
-    }
-    .formbold-confirm-btn.active {
-      background: #6A64F1;
-      color: #FFFFFF;
-    }
-  
-    .formbold-form-step-1,
-    .formbold-form-step-2,
-    .formbold-form-step-3,
-    .formbold-form-step-4,
-    .formbold-form-step-5,
-    .formbold-form-step-6,
-    .formbold-form-step-7 {
-      display: none;
-    }
-    .formbold-form-step-1.active,
-    .formbold-form-step-2.active,
-    .formbold-form-step-3.active,
-    .formbold-form-step-4.active,
-    .formbold-form-step-5.active,
-    .formbold-form-step-6.active,
-    .formbold-form-step-7.active{
-      display: block;
-    }
-  
-    .formbold-form-btn-wrapper {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 25px;
-      margin-top: 25px;
-    }
-    .formbold-back-btn {
-      cursor: pointer;
-      background: #FFFFFF;
-      border: none;
-      color: #07074D;
-      font-weight: 500;
-      font-size: 16px;
-      line-height: 24px;
-      display: none;
-    }
-    .formbold-back-btn.active {
-      display: block;
-    }
-    .formbold-btn {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 16px;
-      border-radius: 5px;
-      padding: 10px 25px;
-      border: none;
-      font-weight: 500;
-      background-color: #6A64F1;
-      color: white;
-      cursor: pointer;
-    }
-    .formbold-btn:hover {
-      box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .formbold-profile-upload {
-    text-align: center;
-    margin-bottom: 20px;
-    }
-
-    .formbold-profile-preview {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        max-width: 100%;
-        max-height: 200px; /* Adjust max height to fit the page */
-        margin: 0 auto 10px;
-    }
-
-    .formbold-profile-preview img {
-        max-width: 100%;
-        max-height: 200px;
-        display: none; /* Hide until an image is uploaded */
-    }
-
-    .profile-label {
-        font-weight: bold;
-        display: block;
-        margin-bottom: 8px;
-    }
-    
-    .formbold-sex-selection {
-        display: flex;
-        gap: 10px;
-    }
-
-    .formbold-sex-button {
-        padding: 10px 20px;
-        border: 1px solid #ccc;
-        background-color: #f9f9f9;
-        cursor: pointer;
-        border-radius: 5px;
-    }
-
-    .formbold-sex-button.selected {
-        background-color: #007bff;
-        color: white;
-        border-color: #007bff;
-    }
-    /* Hobi selection container */
-    .formbold-hobi-selection {
-        display: flex;
-        gap: 20px; /* Space between left and right columns */
-        margin-top: 10px;
-    }
-
-    /* Hobi column styling */
-    .formbold-hobi-column {
-        display: flex;
-        flex-direction: column;
-        gap: 10px; /* Space between options */
-        width: 50%; /* Each column takes 50% of the container */
-    }
-
-    /* Hobi option styling */
-    .formbold-hobi-option {
-        display: flex;
-        align-items: center;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s, border-color 0.3s;
-    }
-
-    .formbold-hobi-option.selected {
-        background-color: #007bff;
-        border-color: #007bff;
-        color: white;
-    }
-
-    .formbold-hobi-option img {
-        width: 30px;
-        height: 30px;
-        margin-right: 10px;
-    }
-
-    .formbold-hobi-option span {
-        font-size: 14px;
-    }
-
-    /* Marital Status Styling */
-  .formbold-status-option-maritals {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-top: 10px;
-  }
-
-  .formbold-status-option-marital {
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.3s ease;
-  }
-
-  .formbold-status-option-marital.selected {
-    background-color: #007bff;
-    color: white;
-    border-color: #007bff;
-  }
-
-  /* Textarea Styling */
-  .formbold-textarea {
-    resize: vertical;
-    min-height: 100px;
-  }
-
-  /* Consistent Input Group Spacing */
-  .formbold-input-group {
-    margin-top: 20px;
-  }
-
-  /* Advent Status Styling */
-  .formbold-status-option-advents {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-top: 10px;
-  }
-
-  .formbold-status-option-advent {
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.3s ease;
-  }
-
-  .formbold-status-option-advent.selected {
-    background-color: #007bff;
-    color: white;
-    border-color: #007bff;
-  }
-  </style>
   <script src="../../static/lib/jquery/jquery.min.js"></script>
   <script src="../../static/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="../../static/lib/feather-icons/feather.min.js"></script>
@@ -966,11 +980,22 @@
             const reader = new FileReader();
             reader.onload = function (e) {
                 profilePreview.src = e.target.result;
-                profilePreview.style.display = 'block'; // Show image preview
+                profilePreview.style.display = 'block'; // Show image_profile preview
             };
             reader.readAsDataURL(file);
         }
     });
+    //EDIT SECTION
+    // ================ start SEX
+    document.addEventListener("DOMContentLoaded", function() {
+        let current_sex = {{data_user.sex | tojson}}; // Get user sex value from backend
+        if (current_sex) {
+            console.log(current_sex);
+            console.log("boom");
+            selectSex(current_sex); // Auto-select button
+        }
+    });
+   
     function selectSex(sex) {
         // Set the value of the hidden input
         document.getElementById('sex').value = sex;
@@ -985,9 +1010,11 @@
             }
         });
     }
+    // end ================== 
 
     // Array to store selected hobbies
-    let selectedHobbies = [];
+    //=========== Initialize selected hobbies from backend
+    let selectedHobbies = {{ data_user['hobbies'] | tojson }}.split(',').map(h => h.trim()).filter(h => h !== "");
 
     function toggleHobi(hobi) {
         const hobiOption = document.querySelector(`.formbold-hobi-option[data-value="${hobi}"]`);
@@ -1006,43 +1033,98 @@
         document.getElementById('hobbies').value = selectedHobbies.join(',');
     }
 
-    // Marital Status Selection
-    let selectedMaritalStatus = null;
+    // Preselect hobbies on page load
+    document.addEventListener("DOMContentLoaded", function () {
+        selectedHobbies.forEach(hobi => {
+            const hobiOption = document.querySelector(`.formbold-hobi-option[data-value="${hobi}"]`);
+            if (hobiOption) {
+                hobiOption.classList.add('selected');
+            }
+        });
+    });
+    // end ================== 
+
+    // =============== Initialize selected marital status from backend  
+    let selectedMaritalStatus = {{ data_user['marital_status'] | tojson }}.trim();
 
     function selectMaritalStatus(status) {
-      const options = document.querySelectorAll('.formbold-status-option-marital');
-      
-      // Remove selection from all options
-      options.forEach(option => {
-        option.classList.remove('selected');
-      });
+        const options = document.querySelectorAll('.formbold-status-option-marital');
+        
+        // Remove selection from all options
+        options.forEach(option => {
+            option.classList.remove('selected');
+        });
 
-      // Set new selection
-      const selectedOption = document.querySelector(`.formbold-status-option-marital[data-value="${status}"]`);
-      selectedOption.classList.add('selected');
-      document.getElementById('marital_status').value = status;
+        if (selectedMaritalStatus !== status) {
+            selectedMaritalStatus = status; // Set new selection
+            const selectedOption = document.querySelector(`.formbold-status-option-marital[data-value="${status}"]`);
+            if (selectedOption) {
+                selectedOption.classList.add('selected'); // Add visual feedback
+            }
+        } else {
+            selectedMaritalStatus = ""; // Deselect if clicked again
+        }
+        
+        // Update the hidden input value
+        document.getElementById('marital_status').value = selectedMaritalStatus;
     }
+
+    // Preselect marital status on page load
+    document.addEventListener("DOMContentLoaded", function () {
+        if (selectedMaritalStatus) {
+            const selectedOption = document.querySelector(`.formbold-status-option-marital[data-value="${selectedMaritalStatus}"]`);
+            if (selectedOption) {
+                selectedOption.classList.add('selected');
+            }
+        }
+    });
+
+
+    // end ================== 
+    // ================== Initialize selected advent status from backend
+    let selectedAdventStatus = {{ data_user['advent_status'] | tojson }}.trim();
 
     function selectAdventStatus(status) {
-      const options = document.querySelectorAll('.formbold-status-option-advent');
-      
-      // Remove selection from all options
-      options.forEach(option => {
-        option.classList.remove('selected');
-      });
+        const options = document.querySelectorAll('.formbold-status-option-advent');
+        
+        // Remove selection from all options
+        options.forEach(option => {
+            option.classList.remove('selected');
+        });
 
-      // Set new selection
-      const selectedOption = document.querySelector(`.formbold-status-option-advent[data-value="${status}"]`);
-      selectedOption.classList.add('selected');
-      document.getElementById('advent_status').value = status;
+        if (selectedAdventStatus !== status) {
+            selectedAdventStatus = status; // Set new selection
+            const selectedOption = document.querySelector(`.formbold-status-option-advent[data-value="${status}"]`);
+            if (selectedOption) {
+                selectedOption.classList.add('selected'); // Add visual feedback
+            }
+        } else {
+            selectedAdventStatus = ""; // Deselect if clicked again
+        }
+        
+        // Update the hidden input value
+        document.getElementById('advent_status').value = selectedAdventStatus;
     }
 
-    //upload image
+    // Preselect advent status on page load
+    document.addEventListener("DOMContentLoaded", function () {
+        if (selectedAdventStatus) {
+            const selectedOption = document.querySelector(`.formbold-status-option-advent[data-value="${selectedAdventStatus}"]`);
+            if (selectedOption) {
+                selectedOption.classList.add('selected');
+            }
+        }
+    });
+
+    // end ================== 
+
+
+    //upload image_profile
     const file = document.getElementById('profilePicture');     
 
     file.addEventListener('change', function(){
       const file = this.files[0];            
-      if (file && file.type.startsWith('image/')) {
+      if (file && file.type.startsWith('image_profile/')) {
           const reader = new FileReader();
           reader.readAsDataURL(file);
           reader.onload = () => {
@@ -1051,34 +1133,194 @@
       };
     })
 
-    //image from edit langsung show
+    //image_profile from edit langsung show
     var profileImage = {{ data_user['profile_photo'] | tojson }};
     console.log(profileImage);  // Cek di console apakah nilainya benar
     $(document).ready(function() {
       $("#profilePreview").attr("src", profileImage).css("display", "block");
-    });
+    });    
+    
+    var imgs = {{data_user.image | tojson}};
+
+        $( document ).ready(function() {
+            var removed_img_list = [];
+            var temp_files = [];
+            var old_pic = [];
+
+            const lists = [
+                {
+                    id: 'kategori',
+                    placeholder: '- Kategori -'
+                }
+            ];
 
 
-    //EDIT SECTION
-    // SEX
-    document.addEventListener("DOMContentLoaded", function() {
-        let selectedSex = "{{ data_user.sex }}"; // Get user sex value from backend
-        if (selectedSex) {
-            selectSex(selectedSex); // Auto-select button
-        }
-    });
+            lists.forEach(list => {
+                $(`#${list.id}`).select2({
+                    width: '100%',
+                    placeholder: list.placeholder
+                })
+                $(`#${list.id}`).one('select2:open', function (e) {
+                    $('input.select2-search__field').prop('placeholder', 'Search');
+                });
+            });
 
-    function selectSex(value) {
-        document.getElementById("sex").value = value;
+            const file = document.getElementById('filePic');
+            const upContainer = document.querySelector('.upload-photo');    
 
-        // Remove active class from all buttons
-        document.querySelectorAll('.formbold-sex-button').forEach(button => {
-            button.classList.remove('active');
+            file.addEventListener('change', function(){
+            const file = this.files[0];            
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                upContainer.src = reader.result;             
+                };
+            };
+            })
+        
+            //view img
+            // $(function() {
+            // $('.upload-photo').on('click', function() {        
+            //     $('.imagepreview').attr('src', $(this).attr('src'));
+            //     $('#imagemodal').modal('show');   
+            // });		
+            // });
+
+            //view img
+            $(function() {
+                //multiple image prview code
+                var imagepreview = function(input,placeToInsertImagePreview){                    
+
+                                        
+                    if(input.files){
+                        var filesAmount = input.files.length;
+
+                        for (i=0; i<filesAmount; i++){
+
+                            var f = event.target.files[i]
+
+                            if(f.size > 1000000){
+                                // alert('data more than 1 MB');                                
+                                $('#filePic').val('');
+                                $('.alert').addClass('show');
+
+                                 //scroll to alert boostrap
+                                 $('html, body').animate({
+                                    scrollTop:$('.alert').offset().top
+                                },2000);
+
+                                var blink = setInterval(function() {
+                                    $('.alert').fadeOut(100).fadeIn(500);
+                                }, 600); // 1000 is the delay in milliseconds
+
+                                setTimeout(function() {
+                                    clearInterval(blink);
+                                }, 4000); //                               
+                               
+                                return;
+                            }
+                            
+                            var reader = new FileReader();                            
+
+                            reader.onload = function(event){
+                                // console.log(event.target.result,"event.target.result");
+                                var file = event.target;
+                                $('<div class="image-area" id="1"><img src="'+event.target.result+'" style="width: 100px;height: 100px;margin:5px;"><a class="remove-image" data-values="'+i+'" style="display: inline; color:red;">&#215;</a></div>').appendTo(placeToInsertImagePreview);                                                                
+                            }                                                 
+                            reader.readAsDataURL(f);
+                        }
+                    }
+
+
+                };    
+                
+                $('.image-gallery').on('click','.remove-image',function(){
+                    $cek_id = $(this).parent(".image-area").attr('id'); 
+                    
+                    if($cek_id != undefined)
+                    {   //add remove_one id to every selected removed
+                        $(this).parent(".image-area").attr('id','remove_one'); 
+                        
+                        //get all id with class image-area as array
+                        var ids = $('.image-area').map(function() {
+                            return $(this).attr('id');
+                        });
+                        datax = ids.toArray();
+                        
+                        //get every index with id remove_one
+                        var results = [];
+                        for ( i=0; i < datax.length; i++ ){
+                            if ( datax[i] == 'remove_one' ){
+                                results.push( i );
+                            }
+                        }
+                        
+                        //remove visual div
+                        $(this).parent(".image-area").remove();      
+                                             
+                        //get fileList input img                
+                        var files_pic = document.getElementById("filePic").files; 
+                        
+                        var fileBuffer = new DataTransfer();
+                            // append the file list to an array iteratively
+                        for (let i = 0; i <files_pic.length; i++) {
+                            // Exclude file in specified index                            
+                            if (!results.includes(i)){                                                                
+                                //console.log(files_pic[i]);                                
+                                    fileBuffer.items.add(files_pic[i]);
+                            }
+                        }
+
+                        //reset array for next remove
+                        datax = [];
+                        results = [];
+    
+                        // Assign buffer to file input
+                        temp_files = fileBuffer.files
+                        document.getElementById("filePic").files = fileBuffer.files; // <-- according to your file input reference                        
+                    }
+                    else{
+                        $(this).parent(".image-area").remove();
+                    }
+                    
+                    var removed_img = $(this).attr("data-values");
+
+                    removed_img_list.push(removed_img);
+                    $("#img_removed").val(removed_img_list.toString());
+                    
+                });
+
+                $('#filePicButton').on('click', function() {
+                    //put old files in global var to prevent reset(prevent old pic remove from fileList)
+                    old_pic = document.getElementById("filePic").files; 
+                   
+                });
+
+                $('#filePic').on('change', function() {                    
+                    imagepreview(this, 'div.image-gallery');   
+                    //get new input img in fileLIst               
+                    var files_pic_two = document.getElementById("filePic").files; 
+                    //combined old list and new in 'joined' array
+                    const joined = Array.from(old_pic).concat(Array.from(files_pic_two));                    
+                    
+                    console.log(joined);
+                    // put in new fileList using DataTransfer()
+                    var fileBuffer2 = new DataTransfer();
+                    // append the file list to an array iteratively
+                    for (let i = 0; i <joined.length; i++) {
+                        fileBuffer2.items.add(joined[i]);
+                    }
+            
+                    //input into 'input files' by ID
+                    document.getElementById("filePic").files = fileBuffer2.files;
+                });                                            
+            });                                   
+        
+
+
         });
-
-        // Add active class to selected button
-        document.querySelector(`.formbold-sex-button[data-value="${value}"]`).classList.add('active');
-    }
+         
     
   </script>
   </body>

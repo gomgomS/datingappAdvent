@@ -373,8 +373,18 @@ def profile():
 
     params                = sanitize.clean_html_dic(request.form.to_dict())
     params["user_id" ]    = session.get("user_id")
-    params["files"      ] = request.files        
     token   = session.pop('_csrf_token', None)    
+
+    # for profile photo
+    params["files"      ] = request.files        
+    
+    # for gallery
+    list_image = request.files.getlist('image[]')
+        
+    if request.files['image[]'].filename != '':
+        params["image"] = list_image        
+    else:
+        params["image"] = None
     
     response   = profile_proc.profile_proc(app).update( params )
     m_action   = response.get("status"  )

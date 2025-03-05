@@ -328,7 +328,7 @@ db = {
         "location"                    : { "latitude": 0.0, "longitude": 0.0 },
         "fk_user_id_like"             : [],
         "fk_user_id_dislike"          : [],
-        "gallery_photo"               : [],
+        "image"                       : [], # max 5 image //gallery photo
         "preferences": {
             "age_range"               : { "min": 18, "max": 50 },
             "distance_range_km"       : 50,

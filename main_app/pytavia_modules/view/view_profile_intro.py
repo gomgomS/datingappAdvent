@@ -57,7 +57,8 @@ class view_profile_intro:
             core_script         = core_script             , 
             core_css            = core_css                , 
             core_dialog_message = core_dialog_message     , 
-            data_user           = data_user,         
+            data_user           = data_user,        
+            image_base_url      = config.G_IMAGE_URL_DISPATCH 
         )                
     # end def
     def data_user(self,params):              
