@@ -359,11 +359,11 @@
           return;
         }
 
-        const cloudUrl = "your_cloud_url_here/";
+        // const cloudUrl = "your_cloud_url_here/";
         const data = resp.map(item => ({
           img: item.img,
           name: item.name,
-          price: item.price,
+          age: item.age,
           distance: item.distance,
           future_wife_id: item.user_id // ✅ Add user ID
         }));
@@ -411,10 +411,10 @@
                 <div class="bottom">
                   <div class="title">
                     <span>${data.name}</span>
-                    <span><b>$</b>${data.price}</span>
+                    <p>${data.age} thn</p>
                   </div>
                   <div class="info">
-                    ${data.distance} miles away
+                    
                   </div>
                 </div>
               `;

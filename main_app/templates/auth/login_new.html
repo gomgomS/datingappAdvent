@@ -345,6 +345,9 @@ h6 span{
                           {% endif %}
                       {% endwith %}
                       <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">  
+                       <!-- Hidden fields for coordinates -->
+                      <input type="hidden" id="latitude" name="latitude">
+                      <input type="hidden" id="longitude" name="longitude">
 											<div class="form-group">
 												<input type="text" name="txt_l_username" class="form-style" placeholder="Your Username" id="username" autocomplete="off">
 												<i class="input-icon uil uil-at"></i>
@@ -409,17 +412,47 @@ h6 span{
   <script src="../../static/lib/jquery/jquery.min.js"></script>
   <script src="../../static/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script>
-    const signUpButton = document.getElementById('signUp');
-const signInButton = document.getElementById('signIn');
-const container = document.getElementById('container');
 
-signUpButton.addEventListener('click', () => {
-	container.classList.add("right-panel-active");
-});
+    document.addEventListener("DOMContentLoaded", function () {
+      // Sign Up & Sign In Toggle
+      const signUpButton = document.getElementById("signUp");
+      const signInButton = document.getElementById("signIn");
+      const container = document.getElementById("container");
 
-signInButton.addEventListener('click', () => {
-	container.classList.remove("right-panel-active");
-});
+      if (signUpButton && signInButton && container) {
+          signUpButton.addEventListener("click", () => {
+              container.classList.add("right-panel-active");
+          });
+
+          signInButton.addEventListener("click", () => {
+              container.classList.remove("right-panel-active");
+          });
+      }
+
+      // Geolocation Setup
+      if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+              function (position) {
+                  console.log("Latitude:", position.coords.latitude);
+                  console.log("Longitude:", position.coords.longitude);
+
+                  const latInput = document.getElementById("latitude");
+                  const longInput = document.getElementById("longitude");
+
+                  if (latInput && longInput) {
+                      latInput.value = position.coords.latitude;
+                      longInput.value = position.coords.longitude;
+                  }
+              },
+              function (error) {
+                  console.error("Geolocation error:", error.message);
+              }
+          );
+      } else {
+          console.warn("Geolocation is not supported by this browser.");
+      }
+  });
+
   </script>
 </body>
 

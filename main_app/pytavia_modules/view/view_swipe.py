@@ -65,6 +65,7 @@ class view_swipe:
     def _find_potential_match(self, params):
         now            = utils._get_current_datetime(hours = config.JKTA_TZ)
         timestamp      = utils._convert_datetime_to_timestamp(now)
+        today_timestamp = int(datetime.utcnow().timestamp() * 1000)
         
         # Define the age range
         min_age = 0
@@ -165,6 +166,21 @@ class view_swipe:
         if target_sex:  # Apply sex filter only if sex is found
             match_query["sex"] = target_sex
 
+        # Define the age range
+        min_age = 0
+        max_age = 50
+
+        # Calculate birthdate range
+        today = datetime.today()
+        max_birthdate = today - timedelta(days=(min_age * 365))  # Oldest date of birth allowed
+        min_birthdate = today - timedelta(days=(max_age * 365))  # Youngest date of birth allowed
+
+        # Add age range filter
+        match_query["dob"] = {
+            "$gte": min_birthdate.strftime("%Y-%m-%d"),  # Users must be at least min_age
+            "$lte": max_birthdate.strftime("%Y-%m-%d")   # Users must be at most max_age
+        }
+
         user_view = self.mgdDB.db_users.aggregate([
             { "$match": match_query },
             {
@@ -181,6 +197,14 @@ class view_swipe:
                     "email": 1,
                     "pkey": 1,
                     "dob": 1,
+                    "age": {
+                        "$floor": {
+                            "$divide": [
+                                { "$subtract": [today_timestamp, { "$toLong": { "$toDate": "$dob" } }] },
+                                1000 * 60 * 60 * 24 * 365  # Convert milliseconds to years
+                            ]
+                        }
+                    },
                     "sex": 1,
                     "_id": 0
                 }

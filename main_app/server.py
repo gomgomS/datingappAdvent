@@ -105,6 +105,12 @@ from view               import view_match
 from view               import view_chat
 
 ##########################################################
+# ADMIN
+##########################################################
+
+from view               import view_admin_panel_customer
+
+##########################################################
 # DATINGAPP
 ##########################################################
 
@@ -165,6 +171,15 @@ def login_precheck(params):
     user_id  = session.get("user_id")
 
     if user_id == None:
+        session.clear()
+        return redirect(url_for("login_html"))
+    # end if
+# end def
+
+def login_admin_precheck(params):
+    role  = session.get("role")
+
+    if role != "superadmin":
         session.clear()
         return redirect(url_for("login_html"))
     # end if
@@ -308,8 +323,9 @@ def auth_login():
     #end if
     if m_action == "LOGIN_SUCCESS":
         session["user_id"       ] = m_data["user_id"       ]        
-        session["username"      ] = m_data["username"       ]    
-        session["email"         ] = m_data["email"           ]
+        session["username"      ] = m_data["username"      ]    
+        session["email"         ] = m_data["email"         ]
+        session["role"         ] = m_data["role"           ]
         
         security_login.security_login(app).add_cookie({})
         
@@ -470,4 +486,24 @@ def chat():
     params['user_id']  = session.get("user_id")
 
     html   = view_chat.view_chat(app).html( params )
+    return html
+
+
+#
+# ADMIN PANEL
+#
+
+@app.route("/admin/panel/customer")
+def admin_panel_customer():    
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    # end if
+   
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    params['per_page'   ] = request.args.get('per_page', 10)
+    params['page'       ] = request.args.get('page', 1)
+    params['keyword'    ] = request.args.get('keyword', '')
+
+    html   = view_admin_panel_customer.view_admin_panel_customer(app).html( params )
     return html

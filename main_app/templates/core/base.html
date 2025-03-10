@@ -1,115 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-      <!-- Required meta tags -->
-      <meta charset="utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+<head>
+  <meta charset="UTF-8">
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="/static/assets/img/favico.png" type="image/x-icon" />
+  <link rel="icon" href="/static/assets/img/favico.png" type="image/x-icon" />
 
-      <!-- Meta -->
-      <meta name="description" content="Responsive Bootstrap 4 Dashboard Template" />
-      <meta name="author" content="ThemePixels" />
-      <!-- Favicon -->
-      <link rel="shortcut icon" type="image/x-icon" href=" {{ url_for('static', filename='dashforge/img/favicon.png') }}" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdventMatch Portal &#8210; {% block title %}{% endblock %}</title>
 
-      <title>Welcome TMP ERP</title>
+  <!-- some additional css here -->
+  {% block styles %}{% endblock  %}
 
-      {% block styles %}
-      {{ core_css | safe }}
-      <style>
-      
-        .uif-hidden {
-            display: none;
-        }
-        button.sneaky {
-            border: 1px solid transparent;
-            border-bottom: 1px dashed transparent;
-            display: inline-block;
-            padding: 2px;
-            background: transparent;
-            width: 100%;
-            text-align: left;
-        }
-        .dot.green{
-          height: 10px;
-          width: 10px;
-          background-color: greenyellow;
-          border-radius: 50%;
-          display: inline-block;
-        }
-        .dot.yellow{
-          height: 10px;
-          width: 10px;
-          background-color: rgb(243, 247, 45);
-          border-radius: 50%;
-          display: inline-block;
-        }
-        .dot.blue{
-          height: 10px;
-          width: 10px;
-          background-color: rgb(7, 145, 224);
-          border-radius: 50%;
-          display: inline-block;
-        }
-        .ff{
-          background-color: white;
-        }
-        .btn {
-          margin: 0px
-        }
-
-
-      </style>
-      {% endblock %}
-
-    </head>
-
-
-  <body class="app-filemgr">
-
-    
-    <header class="navbar navbar-header navbar-header-fixed">
-      <a href="" id="sidebarMenuOpen" class="burger-menu"><i data-feather="arrow-left"></i></a>
-      <div class="navbar-brand">
-        <a href="/user/dashboard" class="df-logo">TMP<span>ERP</span></a>
-      </div>
-
-      {% block header %}
-   
-        <div class="navbar-right" >
-          {% block navbar_right %}
-          {% endblock %}
-        </div>
-      {% endblock %}
-    </header>
+  <!-- vendor css -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='lib/datepicker/css/datepicker.css') }}">
+  <link href="{{ url_for('static', filename='lib/@fortawesome/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='lib/ionicons/css/ionicons.min.css') }}" rel="stylesheet">    
   
-
-      {% block content %}
-
-      {% endblock %}
+  <!-- DashForge CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/dashforge.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
   
-    
+</head>
+<body class="body">
+  <aside class="aside aside-fixed">
+    <div class="aside-header">
+      <!-- <a href="" class="aside-logo img-logo"><img class="ht-36" src="/static/assets/img/logo/logo_main.svg"></a> -->
+      <div style="color:whitesmoke">AdventMatch</div>
+      <a href="" class="aside-menu-link">
+        <i data-feather="menu" class="text-success"></i>
+        <i data-feather="x" class="text-danger"></i>
+      </a>
+    </div>
+    <div class="aside-body">      
+      <ul class="nav nav-aside" style="height: 100%;">        
+        
+        <li class="nav-item"><a href="{{ url_for('admin_panel_customer') }}" class="nav-link tx-16"><i class="far fa-image mg-r-15 tx-20"></i> <span>Customer Panel</span></a></li>
+        <li class="nav-item" style="margin-top: auto;"><a href="/auth/logout" class="nav-link tx-16"><i class="fas fa-sign-out-alt mg-r-15 tx-20"></i> <span>Logout</span></a></li>
+      </ul>
+    </div>
+  </aside>
+  <div class="content ht-100v pd-0 position-relative">
+    <div class="content-header ">       
+    </div>
 
-    {% block scripts %}
-    {{ core_script | safe }}
-    <script>
-      $('script').each(function (e) {
-
-        if ($(this).attr('src') != undefined && $(this).attr('src').lastIndexOf('jquery') == -1) {
-            var old_src = $(this).attr('src');
-            var that = $(this);
-            $(this).attr('src', '');
-
-            setTimeout(function () {
-                that.attr('src', old_src + '?' + new Date().getTime());
-            }, 250);
-        }
-    });
-    </script>
-    {% endblock %}
-
-  </body>
-
+    {% block content %}{% endblock %}             
+    <footer class="footer" style="position: absolute;bottom: 0;width: 100%;"> 
+    </footer> 
+  </div>
   
-
-  {{ core_footer | safe }}
+  <script src="{{ url_for('static', filename='lib/jquery/jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='lib/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='lib/feather-icons/feather.min.js') }}"></script>  
+  <script src="{{ url_for('static', filename='lib/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>  
+  <script src="{{ url_for('static', filename='assets/js/dashforge.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/dashforge.aside.js') }}"></script>
+  <script src="{{ url_for('static', filename='lib/datepicker/js/bootstrap-datepicker.js') }}"></script>
+  {% block scripts %}{% endblock %}
+  
+</body>
 </html>

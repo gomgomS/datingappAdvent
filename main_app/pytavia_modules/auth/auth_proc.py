@@ -220,10 +220,7 @@ class auth_proc:
                 "username" : username,
                 "password" : hashed_password
             })         
-            
-       
-            print(user_rec)
-            print("atas adalah print")    
+                     
             if user_rec == None :    
                 # NO RECORD FOUND
                 error_msg_rec = self.mgdDB.db_config_general.find_one({                            
@@ -231,19 +228,24 @@ class auth_proc:
                         })
 
             else :
-                # if user_rec["inactive_status"] == "TRUE" :
-                #     error_msg_rec = self.mgdDB.db_config_general.find_one({                            
-                #             "value" : "ERROR_LOGIN_TYPE_002"                            
-                #         })
+                # super admin validation
+                if user_rec['sex'] == "superadmin":
+                    user_rec["role"] = "superadmin"
+                else:
+                    user_rec["role"] = "customer"
+
                     
-                # else :
-                    
-                self.mgdDB.db_users.update(
-                    {"pkey"     : user_rec["pkey"]},
-                    {"$set"     : {
-                        "login_status"    : "TRUE",
+                self.mgdDB.db_users.update_one(
+                    {"pkey": user_rec["pkey"]},
+                    {"$set": {
+                        "login_status": "TRUE",
+                        "location": {  # Store coordinates
+                            "latitude": params.get("latitude"),
+                            "longitude": params.get("longitude")
+                        }
                     }}
                 )
+
 
                 response["message_action"] = "LOGIN_SUCCESS"
                 response["message_code"  ] = ""
@@ -256,6 +258,7 @@ class auth_proc:
                     "email"           : user_rec["email"                ],
                     "verify_email"    : user_rec["verify_email"         ],
                     "profile_intro"   : user_rec["profile_intro"        ],
+                    "role"            : user_rec["role"        ],
                 }
                 return response
 
@@ -393,6 +396,9 @@ class auth_proc:
     # end def
 
     def check_step(self, params):
+        if params.get('role') == "superadmin":            
+            return '/admin/panel/customer'
+
         if params.get('verify_email') != "TRUE":
             self.send_verification_email(params)
             return '/otp_email'
