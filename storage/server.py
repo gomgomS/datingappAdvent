@@ -16,7 +16,7 @@ sys.path.append("pytavia_modules/configuration" )
 sys.path.append("pytavia_modules/security"      ) 
 sys.path.append("pytavia_modules/auth"          ) 
 sys.path.append("pytavia_modules/bucket"        ) 
-sys.path.append("pytavia_modules/directory"     ) 
+
 
 from configuration   import cfs_put_file
 from configuration   import cfs_convert_file
@@ -29,7 +29,7 @@ from auth            import auth_register
 from auth            import auth_login
 
 from bucket          import bucket_proc
-from directory       import directory_proc
+
 
 from pytavia_core    import database 
 from pytavia_core    import config 
@@ -38,7 +38,7 @@ from pytavia_stdlib  import idgen
 ####################################
 from view            import chk_server
 from view            import view_bucket_level
-from view            import view_directory_level
+
 
 from flask           import request
 from flask           import render_template
@@ -66,36 +66,6 @@ def hello():
     return redirect(url_for('user_login'))
 # end def
 
-@app.route("/login", methods=["GET"])
-def user_login():
-    return render_template( "login.html" )
-# end def
-
-@app.route("/register", methods=["GET"])
-def user_register():
-    username = request.args.get('username')
-    password = request.args.get('password')
-    response = auth_register.auth_register(app).register({
-        "username" : username,
-        "password" : password
-    })
-    return json.dumps( response ) 
-# end def
-
-@app.route("/console/bucket", methods=["GET"])
-def console_root():
-    html = view_bucket_level.view_bucket_level(app).html({})
-    return html
-# end def
-
-@app.route("/console/directory", methods=["GET"])
-def console_directory():
-    node_id = request.args.get('pnode_id')
-    html    = view_directory_level.view_directory_level(app).html({
-        "pnode_id" : node_id 
-    })
-    return html
-# end def
 
 ####################### UI PROCESS API's BELOW ##################################
 
@@ -125,18 +95,6 @@ def create_directory():
 # end def
 
 ################################## API's BELOW ##################################
-
-@app.route("/auth/login", methods=["POST"])
-def proc_auth_login():
-    params   = request.form.to_dict()
-    response = auth_login.auth_login(app).login( params )
-    m_action = response["message_action"]
-    if m_action == "LOGIN_SUCCESS":
-        return redirect(url_for("console_root"))
-    else:
-        return redirect("/login")
-    # end if
-# end def
 
 """
     Will get the security token before calling any of the other
@@ -199,14 +157,14 @@ def api_vi_cfs_get_file():
 
     cfs_rec = None
     if bucket != None:
-        cfs_rec = mgdDB.db_blipcom_cfs.find_one({
+        cfs_rec = mgdDB.db_cfs.find_one({
             "$and" : [
                 {"key"    : key    },
                 {"bucket" : bucket }
             ]
         })
     else:
-        cfs_rec = mgdDB.db_blipcom_cfs.find_one({
+        cfs_rec = mgdDB.db_cfs.find_one({
             "key" : key   
         })
     # end if
@@ -214,7 +172,7 @@ def api_vi_cfs_get_file():
     content_type   = cfs_rec["content_type"] 
     def generate():
         mgdDB      = database.get_db_conn(config.mainDB)
-        cfs_rec    = mgdDB.db_blipcom_cfs.find_one({
+        cfs_rec    = mgdDB.db_cfs.find_one({
             "$and" : [{"key" : key }, {"bucket" : bucket }]
         })
         if cfs_rec  != None:

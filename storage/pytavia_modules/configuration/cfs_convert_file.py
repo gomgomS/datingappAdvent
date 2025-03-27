@@ -35,7 +35,7 @@ class cfs_convert_file:
             bucket          = params["bucket"   ]
             #label           = params["label"]            
             
-            cfs_rec =  self.mgdDB.db_blipcom_cfs.find_one({
+            cfs_rec =  self.mgdDB.db_cfs.find_one({
                     "$and" : [
                             {"key"      : key       },
                             {"bucket"   : bucket    }
@@ -71,7 +71,7 @@ class cfs_convert_file:
             bucket          = params["bucket"   ]
             #label           = params["label"]            
             
-            cfs_rec =  self.mgdDB.db_blipcom_cfs.find_one({
+            cfs_rec =  self.mgdDB.db_cfs.find_one({
                     "$and" : [
                             {"key"      : key       },
                             {"bucket"   : bucket    }

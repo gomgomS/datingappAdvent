@@ -41,7 +41,7 @@ class view_directory_level:
             if child_node == None:
                 key_file_path = filesystem_rec["file_path"   ]
                 fk_bucket_id  = filesystem_rec["fk_bucket_id"]
-                cfs_rec = self.mgdDB.db_blipcom_cfs.find_one({
+                cfs_rec = self.mgdDB.db_cfs.find_one({
                     "key" : key_file_path
                 })
                 file_download_link = config.G_FILE_LINK.replace(

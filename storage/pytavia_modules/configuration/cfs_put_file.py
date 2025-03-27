@@ -83,7 +83,7 @@ class cfs_put_file:
             #
             #  now we add it into the file system
             #
-            cfs_rec = database.get_record("db_blipcom_cfs")
+            cfs_rec = database.get_record("db_cfs")
             cfs_rec["key"               ] = save_file_name
             cfs_rec["file_md5"          ] = file_md5
             cfs_rec["fk_file_id"        ] = fk_file_id
@@ -94,14 +94,14 @@ class cfs_put_file:
             cfs_rec["label"             ] = label
             cfs_rec["convert_size_bytes"] = file_size
             cfs_rec["ori_size_bytes"    ] = chunk_size
-            cfs_rec_check = self.mgdDB.db_blipcom_cfs.find_one({
+            cfs_rec_check = self.mgdDB.db_cfs.find_one({
                 "$and" : [
                     {"key"    : key_file_name },
                     {"bucket" : bucket }
                 ]
             })
             if cfs_rec_check == None:
-                self.mgdDB.db_blipcom_cfs.insert( cfs_rec )
+                self.mgdDB.db_cfs.insert( cfs_rec )
                 response["message_data"] = {
                     "key"  :  key_file_name,
                     "path" : "key=" + key_file_name + "&bucket=" + bucket ,
@@ -260,7 +260,7 @@ class cfs_put_file:
             encode_size = encode_file.tell()
             encode_file.close()         
             
-            cfs_rec = database.get_record("db_blipcom_cfs")       
+            cfs_rec = database.get_record("db_cfs")       
             cfs_rec["key"               ] = key
             cfs_rec["content_type"      ] = conType
             cfs_rec["extension"         ] = extension            
@@ -269,14 +269,14 @@ class cfs_put_file:
             cfs_rec["label"             ] = label
             cfs_rec["convert_size_bytes"] = encode_size
             cfs_rec["ori_size_bytes"    ] = file_size
-            cfs_rec_check = self.mgdDB.db_blipcom_cfs.find_one({
+            cfs_rec_check = self.mgdDB.db_cfs.find_one({
                 "$and" : [
                     {"key"    : key    },
                     {"bucket" : bucket }
                 ]
             })
             if cfs_rec_check == None:
-                self.mgdDB.db_blipcom_cfs.insert( cfs_rec )                
+                self.mgdDB.db_cfs.insert( cfs_rec )                
                 response["message_data"] = {
                     "key"  : key                          ,
                     "path" : "key="+key+"&bucket="+bucket ,

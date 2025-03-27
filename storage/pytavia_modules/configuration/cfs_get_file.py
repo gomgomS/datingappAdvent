@@ -46,14 +46,14 @@ class cfs_get_file:
             # end if
             cfs_rec = None
             if bucket != None:
-                cfs_rec = self.mgdDB.db_blipcom_cfs.find_one({
+                cfs_rec = self.mgdDB.db_cfs.find_one({
                     "$and" : [
                         {"key"    : key    },
                         {"bucket" : bucket }
                     ]
                 })
             else:
-                cfs_rec = self.mgdDB.db_blipcom_cfs.find_one({
+                cfs_rec = self.mgdDB.db_cfs.find_one({
                     "key" : key
                 })
             # end if
@@ -97,7 +97,7 @@ class cfs_get_file:
             types   = params["type"  ]
             bucket  = params["bucket"]
             label   = params["label" ]
-            cfs_rec = self.mgdDB.db_blipcom_cfs.find({
+            cfs_rec = self.mgdDB.db_cfs.find({
                 "$and" : [
                     {"key"    : key    },
                     {"bucket" : bucket },
@@ -138,7 +138,7 @@ class cfs_get_file:
             bucket = params["bucket"]
             label  = params["label" ]
 
-            cfs_list = self.mgdDB.db_blipcom_cfs.find_one({
+            cfs_list = self.mgdDB.db_cfs.find_one({
                 "$and" : [
                     {"key"    : key     },
                     {"bucket" : bucket  },

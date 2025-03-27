@@ -64,7 +64,7 @@ db = {
         "str_created_time"   : "",
         "fk_bucket_id"       : "",
     },
-    "db_blipcom_cfs"         : {
+    "db_cfs"         : {
         "key"                : "",
         "file_md5"           : "",
         "fk_file_id"         : "",
