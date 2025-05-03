@@ -108,7 +108,7 @@
   }
   
   .formbold-steps li.active span {
-      background: #6A64F1;
+      background: #F96699;
       color: #FFFFFF;
   }
   
@@ -147,7 +147,7 @@
   }
   
   .formbold-btn {
-      background: #6A64F1;
+      background: #F96699;
       color: white;
   }
   
@@ -186,7 +186,7 @@
         resize: none;
       }
       .formbold-form-input:focus {
-        border-color: #6a64f1;
+        border-color: #F96699;
         box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.05);
       }
       .formbold-form-label {
@@ -232,7 +232,7 @@
         box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.12);
       }
       .formbold-confirm-btn.active {
-        background: #6A64F1;
+        background: #F96699;
         color: #FFFFFF;
       }
     
@@ -284,7 +284,7 @@
         padding: 10px 25px;
         border: none;
         font-weight: 500;
-        background-color: #6A64F1;
+        background-color: #F96699;
         color: white;
         cursor: pointer;
       }
@@ -332,9 +332,9 @@
       }
   
       .formbold-sex-button.selected {
-          background-color: #007bff;
+          background-color: #38CCCC;
           color: white;
-          border-color: #007bff;
+          border-color: #38CCCC;
       }
       /* Hobi selection container */
       .formbold-hobi-selection {
@@ -363,8 +363,8 @@
       }
   
       .formbold-hobi-option.selected {
-          background-color: #007bff;
-          border-color: #007bff;
+          background-color: #38CCCC;
+          border-color: #38CCCC;
           color: white;
       }
   
@@ -396,9 +396,9 @@
     }
   
     .formbold-status-option-marital.selected {
-      background-color: #007bff;
+      background-color: #38CCCC;
       color: white;
-      border-color: #007bff;
+      border-color: #38CCCC;
     }
   
     /* Textarea Styling */
@@ -430,10 +430,16 @@
     }
   
     .formbold-status-option-advent.selected {
-      background-color: #007bff;
+      background-color: #38CCCC;
       color: white;
-      border-color: #007bff;
+      border-color: #38CCCC;
     }
+
+    .formbold-steps ul li {
+        font-size: 14px; /* atau 12px sesuai kebutuhan */
+        cursor: pointer;
+    }
+
     </style>
 </head>
 
@@ -1320,6 +1326,27 @@
 
 
         });
+        
+        document.addEventListener('DOMContentLoaded', function () {
+            const stepMenus = document.querySelectorAll('.formbold-steps ul li');
+            const formSteps = document.querySelectorAll('[class^="formbold-form-step-"]');
+
+            stepMenus.forEach((menu, index) => {
+                menu.addEventListener('click', () => {
+                    // Remove 'active' from all steps
+                    stepMenus.forEach(m => m.classList.remove('active'));
+                    formSteps.forEach(f => f.classList.remove('active'));
+
+                    // Add 'active' to the clicked step and corresponding form step
+                    menu.classList.add('active');
+                    const formStep = document.querySelector(`.formbold-form-step-${index + 1}`);
+                    if (formStep) {
+                        formStep.classList.add('active');
+                    }
+                });
+            });
+        });        
+
          
     
   </script>

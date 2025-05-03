@@ -1,8 +1,14 @@
 import smtplib
 import sys
 
+import base64
+from datetime import datetime
+
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
+from cryptography.fernet import Fernet
+from urllib.parse import quote
 
 sys.path.append("../")
 sys.path.append("../pytavia_core"    )
@@ -84,4 +90,63 @@ def attach_send(params):
     server.sendmail("bersihinyabang@gmail.com", to_email , msg.as_string())
     server.quit()
 # end def
+
+
+def send_reset_password_via_email(params):
+    try:
+        # Use a securely stored key (DO NOT regenerate every time)
+        SECRET_KEY = b'KD1wZ6X1zRb9-jVnTr_a3C_sPlkDdGo5aMu8Hq4FR3A='  # Replace with your own securely stored key
+        fernet = Fernet(SECRET_KEY)
+
+        my_email = "bersihinyabang@gmail.com"
+        my_password = "mxfk ezha kgjh sixk"
+        receiver_email = params["email"]
+        contact_url = "https://adventmatch.com/contact"
+
+        # Combine email + timestamp for extra validation during decryption
+        payload = f"{receiver_email}|{datetime.now().isoformat()}"
+        encrypted_payload = fernet.encrypt(payload.encode()).decode()
+
+        # 🔒 Encode token safely for URL (avoid incorrect padding issues)
+        token_encoded = quote(encrypted_payload)
+
+        # 🔗 Reset link
+        reset_link = f"https://adventmatch.com/resetpassword?token_reset_ps={token_encoded}"
+
+        # ✉️ Email content
+        subject = "Reset Your Password - adventmatch.com"
+        body = f"""
+        <html>
+        <body>
+            <hr><b>Reset your password at adventmatch.com</b>
+            <br /><br />Hello! You requested to reset your password. Click the button below:
+            <br /><br />
+            <a href='{reset_link}' style='padding: 10px 28px; color: #fff; background:#7A32B2; text-decoration: none; border-radius: 5px;'>
+                Reset Password
+            </a>
+            <br /><br /><b>Can't see the button?</b> Paste this link into your browser:
+            <br />{reset_link}
+            <br /><br />If you did not request this, you can safely ignore this email.
+            <br /><br />Need help? <a href='{contact_url}'>Contact us</a>.
+        </body>
+        </html>
+        """
+
+        message = MIMEMultipart()
+        message['From'] = my_email
+        message['To'] = receiver_email
+        message['Subject'] = subject
+        message.attach(MIMEText(body, 'html'))
+
+        # 📤 Send email
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login(my_email, my_password)
+            smtp.sendmail(my_email, receiver_email, message.as_string())
+            print("Reset password email sent successfully.")
+            return "success"
+
+    except Exception as e:
+        print(params)
+        print(f'Error sending email: {e}')
+        return "failed"
 

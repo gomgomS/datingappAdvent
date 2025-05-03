@@ -201,6 +201,24 @@ def api_vi_cfs_get_file():
         )
     # end if
     return file_response
+
+    @app.route("/api/set-login-session", methods=["POST"])
+    def set_login_session():
+        data = request.json
+        secret_key = request.headers.get("X-AUTH-KEY")
+        
+        if secret_key != "SHARED_SECRET_KEY":
+            return {"message": "Unauthorized"}, 403
+        
+        user_id = data.get("user_id")
+        username = data.get("username")
+
+        if user_id and username:
+            session["user_id"] = user_id
+            session["username"] = username
+            return {"message": "Session created"}, 200
+        return {"message": "Missing data"}, 400
+
 # end def
 #
 #

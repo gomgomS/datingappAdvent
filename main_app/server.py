@@ -12,6 +12,12 @@ import random
 from typing import List
 from string import ascii_letters
 
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+from cryptography.fernet import Fernet
+from urllib.parse import quote
+
 from urllib.parse import urlencode
 
 sys.path.append("pytavia_core")
@@ -66,6 +72,8 @@ from view               import view_config_setting_menu
 from view               import view_dashboard
 from view               import view_login
 from view               import view_signup
+from view               import view_forgetpassword
+from view               import view_resetpassword
 from view               import view_otp_email
 
 
@@ -362,6 +370,57 @@ def auth_logout():
         return False
     # end if
 # end def
+
+@app.route("/forgetpassword")
+def forgetpassword_html():
+    user_id  = session.get("user_id")
+    if user_id is not None:
+        return redirect(url_for("swipe"))
+        
+    params = request.form.to_dict()
+
+    html   = view_forgetpassword.view_forgetpassword().html( params )
+    return html
+# end def
+
+
+@app.route("/auth/reset-password/send", methods=["POST"])
+def account_reset_password_job():
+    token = session.pop('_csrf_token', None)
+    params = sanitize.clean_html_dic(request.form.to_dict())   
+    
+    response = auth_proc.auth_proc(app).send_reset_password_email( params )    
+    if response == "success":
+        flash("success send please reset your password!!", "success")
+    else:
+        flash("failed send please contact admin!", "warning")
+    return redirect(url_for("login_html"))
+
+@app.route("/resetpassword")
+def account_reset_password_html():
+    user_id  = session.get("user_id")
+    params = request.form.to_dict()   
+
+    html   = view_resetpassword.view_resetpassword().html( params )
+    return html
+# end def
+
+@app.route("/account/new-password/submit", methods=["POST"])
+def account_new_password_submit():
+    token = session.pop('_csrf_token', None)
+    params = sanitize.clean_html_dic(request.form.to_dict()) 
+
+    # Get token from query parameter   
+    if not params["token_reset_ps"]:
+        flash("Missing token in the URL.", "error")
+        return redirect(url_for("login_html"))
+    
+    response = auth_proc.auth_proc(app).confirm_new_password( params )    
+    flash("success change password!!", "success")
+    return redirect(url_for("login_html"))
+
+# end def
+
 
 #
 # Profile

@@ -23,6 +23,9 @@ from pytavia_core   import config
 from uuid     import uuid4
 from flask import request 
 
+from cryptography.fernet import Fernet
+from urllib.parse import unquote_plus  # 
+
 class auth_proc:
 
     mgdDB = database.get_db_conn(config.mainDB)
@@ -417,8 +420,7 @@ class auth_proc:
 
         # Get the current date
         verification_date           = datetime.now().strftime('%Y-%m-%d %H:%M:%S')       
-        print(params)
-        print("atas oi")
+    
         # Update the document in MongoDB
         user_rec                    = self.mgdDB.db_users.update_one(
             {"user_id"              : params["user_id"]},
@@ -461,6 +463,85 @@ class auth_proc:
         return user_rec
 
     #end def
+
+    def send_reset_password_email(self, params):
+        try:
+            email = params.get("email")       
+            base_url = "https://yourwebsite.com/emailverify"                
+            
+            # Send email
+            email_sent = emailproc.send_reset_password_via_email(params)            
+            
+            if email_sent == 'success':
+                return "success" 
+            return "failed"                 
+        except Exception as e:
+            print(f"Error in send_reset_password_email: {e}")
+            return "failed"
+    #end def
+
+    def confirm_new_password(self, params):
+        try:
+            print(params)
+            print("atas adalah params")
+
+            # Decrypt token_reset_ps
+            SECRET_KEY = b'KD1wZ6X1zRb9-jVnTr_a3C_sPlkDdGo5aMu8Hq4FR3A='  # Your actual Fernet key
+            fernet = Fernet(SECRET_KEY)
+
+            encrypted_token = params.get("token_reset_ps")
+            if not encrypted_token:
+                return "Missing token."
+
+            # ✅ URL decode the token (important!)
+            encrypted_token = unquote_plus(encrypted_token)
+
+            # Decrypt and extract email
+            try:
+                decrypted_payload = fernet.decrypt(encrypted_token.encode()).decode()
+                email, timestamp = decrypted_payload.split("|")
+                print("Decrypted email:", email)
+            except Exception as e:
+                print(f"Failed to decrypt token: {e}")
+                return "Invalid or expired token."
+
+            user_rec = self.mgdDB.db_users.find_one(
+                {"email": email},
+                {"username": 1, "_id": 0}
+            )
+            print(user_rec)
+
+            # Validate passwords
+            new_password = params.get("NewPassword")
+            confirm_password = params.get("ConfirmPassword")
+
+            hashed_password   = utils._get_passwd_hash({"id": user_rec['username'], "password": new_password})   
+
+            if new_password != confirm_password:
+                return "Passwords do not match."
+
+            # Update user password in DB
+            print(hashed_password)
+            print("new hash")
+            try:
+                self.mgdDB.db_users.update_one(
+                    {"email": email},
+                    {
+                        "$set": {
+                            "password": hashed_password,  # Hash in production!
+                            "is_confirm": "TRUE"
+                        }
+                    }
+                )
+                return "SUCCESS_CONFIRMATION"
+            except Exception as e:
+                print(f"DB error: {e}")
+                return "FAILED_CONFIRMATION"
+
+        except Exception as e:
+            print(f"Error in confirm_new_password: {e}")
+            return "Error processing verification email."
+
 
 # end class
 

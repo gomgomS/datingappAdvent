@@ -184,11 +184,24 @@
             <span>Profile</span>
         </a>
     </div>
+    <!-- Hidden form for secure POST submission -->
+    <form id="chatForm" method="POST" action="{{ socketio_chat_server }}/chat" style="display: none;">
+        <input type="hidden" name="match_id" id="match_id_input">
+        <input type="hidden" name="sender" id="sender_id_input">
+    </form>
 
     <script>
-         function openChat(matchId, senderId) {
-        window.location.href = `{{socketio_chat_server}}/chat?match_id=${matchId}&sender=${senderId}`;
-    }
+
+        // below old one
+        // function openChat(matchId, senderId) {
+        //     window.location.href = `{{socketio_chat_server}}/chat?match_id=${matchId}&sender=${senderId}`;
+        // }
+
+        function openChat(matchId, senderId) {
+            document.getElementById("match_id_input").value = matchId;
+            document.getElementById("sender_id_input").value = senderId;
+            document.getElementById("chatForm").submit();
+        }
     </script>
 
     <!-- Bootstrap JS -->

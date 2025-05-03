@@ -25,10 +25,12 @@ room_messages = {}
 def home():
     return render_template("room.html")
 
-@app.route("/chat")
+@app.route("/chat", methods=["POST"])
 def chat():
-    match_id = request.args.get("match_id")
-    sender_id = request.args.get("sender")
+    # match_id = request.args.get("match_id")
+    # sender_id = request.args.get("sender")
+    match_id = request.form.get("match_id")
+    sender_id = request.form.get("sender")
 
     if not match_id or not sender_id:
         return "Error: match_id and sender are required", 400
@@ -93,9 +95,6 @@ def chat():
 def handle_join(data):
     room = data["room"]
     join_room(room)
-
-    print(room_messages)
-    print("minggir")
 
     # Fetch messages from database instead of memory
     chat_messages = list(db_chat.find({"match_id": room}).sort("timestamp", 1))
@@ -173,12 +172,10 @@ def handle_leave(data):
 
     # Remove the room messages from memory
     if room in room_messages:
-        del room_messages[room]
-    print(room_messages)
-    print("awas dek")
+        del room_messages[room]    
 
     # Notify others in the room
-    emit("user_left", {"sender": sender, "message": "has left the chat."}, room=room)
+    # emit("user_left", {"sender": sender, "message": "has left the chat."}, room=room)
 
     print(f"User {sender} left room: {room} and messages were cleared.")
 
