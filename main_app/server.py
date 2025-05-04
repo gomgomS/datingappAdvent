@@ -496,11 +496,10 @@ def swipe():
 # cari data yang tidak ada di like dan dislike
 @app.route('/api/find/match', methods=["GET"])
 def api_find_match():
-    params  = sanitize.clean_html_dic(request.form.to_dict())
-    params['user_id']  = session.get("user_id")    
+    params = sanitize.clean_html_dic(request.args.to_dict())  # Changed from request.form
+    params['user_id'] = session.get("user_id")
 
-    response    = view_swipe.view_swipe(app)._find_potential_match(params )
-    
+    response = view_swipe.view_swipe(app)._find_potential_match(params)
     return jsonify(response)
 # end def
 
@@ -512,6 +511,15 @@ def api_decision_match():
     response    = swipe_proc.swipe_proc(app)._decision_match(params )
     return jsonify(response)
 # end def
+
+@app.route('/api/detail/match', methods=["GET"])
+def api_detail_match():
+    params = sanitize.clean_html_dic(request.args.to_dict())
+    params['user_id'] = session.get("user_id")
+
+    response = swipe_proc.swipe_proc(app)._detail_match(params)
+    return jsonify(response)
+
 
 #
 # SWIPE

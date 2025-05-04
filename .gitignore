@@ -1,0 +1,17 @@
+important_query
+
+
+
+
+main_app/__pycache__/
+main_app/pytavia_core/__pycache__/
+main_app/pytavia_modules/_profile/__pycache__/
+main_app/pytavia_modules/auth/__pycache__/
+main_app/pytavia_modules/configuration/__pycache__/
+main_app/pytavia_modules/cookie/__pycache__/
+main_app/pytavia_modules/middleware/__pycache__/
+main_app/pytavia_modules/security/__pycache__/
+main_app/pytavia_modules/swipe/__pycache__/
+main_app/pytavia_modules/user/__pycache__/
+main_app/pytavia_modules/view/__pycache__/
+main_app/pytavia_stdlib/__pycache__/

@@ -84,5 +84,18 @@ class swipe_proc:
 
         return {"status": "success", "message": f"User {future_wife_id} added to {update_field}"}
 
+    def _detail_match(self, params):        
+        # Get the user_id of the current session        
+        future_soulmate_id = params.get("future_soulmate_id", "")
+            
+        # Step 1: Check if `user_id` is already inside `fk_user_id_like` of `future_soulmate_id`
+        future_soulmate_rec = self.mgdDB.db_users.find_one({"user_id": future_soulmate_id})
+
+        # Convert ObjectId fields to string before returning
+        if future_soulmate_rec:
+            future_soulmate_rec = {k: str(v) if isinstance(v, ObjectId) else v for k, v in future_soulmate_rec.items()}
+     
+        return {"status": "success", "data": future_soulmate_rec }
+
 
 # end class

@@ -277,6 +277,138 @@
                 max-height: 450px;
             }
         }
+
+        .loading-card {
+          display: none; /* Hidden by default */
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: linear-gradient(135deg, #fce4ec, #f8bbd0); /* light pink tone background */
+          z-index: 9999;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+          font-family: 'Segoe UI', sans-serif;
+          color: #102770; /* dark blue text */
+        }
+
+        .loading-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .sda-logo {
+          font-size: 2rem;
+          font-weight: bold;
+          color: #102770; /* dark blue */
+          margin-bottom: 1rem;
+        }
+
+        .sda-logo span {
+          color: #F96699; /* accent pink */
+          font-weight: normal;
+        }
+
+        .spinner {
+          width: 50px;
+          height: 50px;
+          border: 5px solid #f8bbd0; /* light pink */
+          border-top: 5px solid #F96699; /* vibrant pink */
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        /* Smooth image zoom */
+        #album img {
+          transition: transform 0.3s ease-in-out;
+          border-radius: 10px;
+          cursor: pointer;
+          margin-bottom: 15px;
+        }
+
+        #album img:hover {
+          transform: scale(1.08);
+        }
+
+        .modal-content {
+          border-radius: 15px;
+          background: linear-gradient(135deg, #ffe5ec, #ffffff);
+          box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        }
+
+        .profile-header {
+          text-align: center;
+          background: linear-gradient(145deg, #ff6f91, #ff9472);
+          color: white;
+          padding: 30px 20px;
+          border-top-left-radius: 15px;
+          border-top-right-radius: 15px;
+        }
+
+        .profile-photo {
+          width: 120px;
+          height: 120px;
+          object-fit: cover;
+          border-radius: 50%;
+          border: 4px solid white;
+          margin-bottom: 15px;
+        }
+
+        .info-icons p {
+          margin-bottom: 10px;
+          font-size: 15px;
+        }
+
+        .info-icons strong {
+          color: #ff6f91;
+        }
+
+        .modal-footer {
+          border-top: none;
+        }
+
+        #album h6 {
+          font-weight: 600;
+          margin-bottom: 15px;
+          color: #ff6f91;
+        }
+
+        @media (min-width: 768px) {
+        #fullImageModal .modal-dialog {
+          max-width: 100%;
+          margin: 0;
+          height: 100%;
+        }
+        #fullImageModal .modal-content {
+          height: 100%;
+          border-radius: 0;
+        }
+        #fullImageModal .modal-body {
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+        }
+        #fullImageModal img {
+          max-height: 90vh;
+          max-width: 100%;
+          object-fit: contain;
+        }
+      }
+
+
+
+
     </style>
 </head>
 
@@ -321,7 +453,89 @@
           <div class="menu-icon">👤</div>
           <span>Profile</span>
       </a>
+
+       <!-- Profile (Directs to /profile) -->
+       <a class="menu-item" id="btn-show-detail" onclick="showFutureWifeId()">
+        <div class="menu-icon">👤</div>                   
+        <span>Detail</span>
+      </a>
+      
+      
     </div>
+  
+
+
+    <div id="loading-card" class="loading-card">
+      <div class="loading-content">
+        <div class="sda-logo">SDA<span>Connect</span></div>
+        <div class="spinner"></div>
+        <p>Loading matches...</p>
+      </div>
+    </div>
+
+    <!-- Redesigned Dating App Modal -->
+      <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+
+            <!-- Profile Hero Section -->
+            <div class="profile-header">
+              <img id="profile-photo" class="profile-photo" src="" alt="Profile Photo">
+              <h3 id="name">Name</h3>
+              <p id="job">Job Title</p>
+              <p id="city">City</p>
+            </div>
+
+            <!-- Profile Body -->
+            <div class="modal-body">
+              <!-- Photo Album -->
+              <div id="album" class="mb-4">
+                <h6>Photo Album</h6>
+                <div class="row row-cols-2 row-cols-md-3 g-3" id="album-photos">
+                  <!-- JS will populate images here -->
+                </div>
+              </div>
+
+              <!-- Details Section -->
+              <div class="info-icons">
+                <p><strong>Username:</strong> <span id="username"></span></p>
+                <p><strong>Email:</strong> <span id="email"></span></p>
+                <p><strong>Hobbies:</strong> <span id="hobbies"></span></p>
+                <p><strong>Tribe:</strong> <span id="tribe"></span></p>
+                <p><strong>Marital Status:</strong> <span id="marital-status"></span></p>
+                <p><strong>About:</strong> <span id="about"></span></p>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer justify-content-center">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+              
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Full Image Modal (Bootstrap 4) -->
+      <div class="modal fade" id="fullImageModal" tabindex="-1" role="dialog" aria-labelledby="fullImageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+          <div class="modal-content bg-dark text-white border-0">
+            <div class="modal-header border-0">
+              <button type="button" class="close text-white ml-auto" data-dismiss="modal" aria-label="Close" style="background-color: black;">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body p-0">
+              <img id="full-image" class="img-fluid w-100" src="" alt="Full Image">
+            </div>
+          </div>
+        </div>
+      </div>
+    
+
 
     <!-- Font Awesome -->
     <script src="https://kit.fontawesome.com/41e808b0fd.js" crossorigin="anonymous"></script>
@@ -344,6 +558,10 @@
       //   {img: `${cloudUrl}tender04.jpg`, name: 'Deep Fried', price: '23', distance: '6'}
       // ]    
 
+      let skipCount = 0;
+      const limit = 15;
+      let swipedCount = 0;
+      
       const frame = document.body.querySelector('.frame');
       let current = null; // ✅ Declare `current` globally
       let likeText = null;
@@ -351,39 +569,80 @@
 
       var apiUrl = "{{main_app_url}}/api/find/match";
 
-      $.get(apiUrl, function(resp, status) {
-        console.log(resp);
+      // code below change with fetchMatches, for better paggination 
+      // $.get(apiUrl, function(resp, status) {
+      //   console.log(resp);
 
-        if (status !== "success") {
-          console.error("Network response was not ok");
-          return;
-        }
+      //   if (status !== "success") {
+      //     console.error("Network response was not ok");
+      //     return;
+      //   }
 
-        // const cloudUrl = "your_cloud_url_here/";
-        const data = resp.map(item => ({
-          img: item.img,
-          name: item.name,
-          age: item.age,
-          distance: item.distance,
-          future_wife_id: item.user_id // ✅ Add user ID
-        }));
+      //   // const cloudUrl = "your_cloud_url_here/";
+      //   const data = resp.map(item => ({
+      //     img: item.img,
+      //     name: item.name,
+      //     age: item.age,
+      //     distance: item.distance,
+      //     future_wife_id: item.user_id // ✅ Add user ID
+      //   }));
 
-        console.log("Updated data:", data);
+      //   console.log("Updated data:", data);
 
-        // Append new cards
-        data.forEach(item => appendcard_swipe(item));
+      //   // Append new cards
+      //   data.forEach(item => appendcard_swipe(item));
 
-        // ✅ Set `current` to the last added card
-        current = frame.querySelector('.card_swipe:last-child');
-        if (current) {
-          likeText = current.children[0];
-          initcard_swipe(current);
-        }
+      //   // ✅ Set `current` to the last added card
+      //   current = frame.querySelector('.card_swipe:last-child');
+      //   if (current) {
+      //     likeText = current.children[0];
+      //     initcard_swipe(current);
+      //   }
 
-      }).fail(function(error) {
-        console.error("Error fetching data:", error);
-      });
+      // }).fail(function(error) {
+      //   console.error("Error fetching data:", error);
+      // });      
 
+      function fetchMatches(skip) {
+        const fullUrl = `${apiUrl}?skip=${skip}&limit=${limit}`;
+        $('#loading-card').show(); // Show full-page loader
+
+        $.get(fullUrl, function(resp, status) {
+          if (status !== "success") {
+            console.error("Network response was not ok");
+            $('#loading-card').hide(); // Hide loader
+            return;
+          }
+
+          const data = resp.map(item => ({
+            img: item.img,
+            name: item.name,
+            age: item.age,
+            distance: item.distance,
+            future_wife_id: item.user_id
+          }));
+
+          data.forEach(item => appendcard_swipe(item));
+
+          current = frame.querySelector('.card_swipe:last-child');
+          if (current) {
+            likeText = current.children[0];
+            initcard_swipe(current);
+          }
+
+           // Use a slight delay to ensure rendering is done before hiding loader
+          setTimeout(() => {
+            $('#loading-card').hide();
+          }, 100); // Or increase delay to 100ms if needed
+
+        }).fail(function(error) {
+          console.error("Error fetching data:", error);
+          $('#loading-card').hide(); // Hide loader
+        });
+      }
+
+
+      fetchMatches(skipCount);
       document.querySelector('#like').onclick = () => {
         if (!current) return;
         moveX = 1;
@@ -413,8 +672,7 @@
                     <span>${data.name}</span>
                     <p>${data.age} thn</p>
                   </div>
-                  <div class="info">
-                    
+                  <div class="info">                   
                   </div>
                 </div>
               `;
@@ -466,23 +724,31 @@
 
       function complete() {
         if (!current) return;
+
         const flyX = (Math.abs(moveX) / moveX) * innerWidth * 1.3;
         const flyY = (moveY / moveX) * flyX;
         setTransform(flyX, flyY, flyX / innerWidth * 50, innerWidth);
 
         const prev = current;
         const next = current.previousElementSibling;
+
         if (next) {
           current = next;
           likeText = current.children[0];
           initcard_swipe(current);
         } else {
-          current = null; // No more cards left
+          current = null;
         }
 
         setTimeout(() => {
           if (prev) frame.removeChild(prev);
-        }, innerWidth);
+
+          swipedCount++;
+          if (swipedCount % limit === 0) {
+            skipCount += limit;
+            fetchMatches(skipCount); // 👈 Load next batch after transition ends
+          }
+        }, innerWidth); // Wait for animation duration
       }
 
       function cancel() {
@@ -505,6 +771,96 @@
           console.error("Error sending match decision:", error);
         });
       }
+
+      
+      async function showFutureWifeId() {
+        if (!current || !current.dataset.futureWifeId) {
+          alert('No profile selected.');
+          return;
+        }
+
+        const futureId = current.dataset.futureWifeId;
+
+        try {
+          const res = await fetch(`/api/detail/match?future_soulmate_id=${encodeURIComponent(futureId)}`, {
+            method: 'GET'
+          });
+
+          const json = await res.json();
+          if (json.status === 'success') {
+            const data = json.data;
+
+            // Set Profile Information
+            document.getElementById('profile-photo').src = data.profile_photo ? `{{G_IMAGE_URL_DISPATCH}}${data.profile_photo}` : 'default-profile.jpg';
+            document.getElementById('name').textContent = data.name;
+            document.getElementById('job').textContent = data.job;
+            document.getElementById('city').textContent = data.city;
+            document.getElementById('username').textContent = data.username;
+            document.getElementById('email').textContent = data.email;
+            document.getElementById('hobbies').textContent = data.hobbies;
+            document.getElementById('tribe').textContent = data.tribe;
+            document.getElementById('marital-status').textContent = data.marital_status;
+            document.getElementById('about').textContent = data.about;
+            
+
+            // Set Album Photos
+            const albumContainer = document.getElementById('album-photos');
+            albumContainer.innerHTML = ''; // Clear previous content
+            if (data.image && data.image.length > 0) {
+              data.image.forEach(photo => {
+                const img = document.createElement('img');
+                img.src = `{{G_IMAGE_URL_DISPATCH}}${photo}`;
+                img.alt = 'Album Photo';
+                img.classList.add('col-4', 'mb-2', 'img-fluid', 'rounded');
+                img.style.cursor = 'pointer';
+                
+                img.onclick = function () {
+                  openFullImageModal(img.src);
+                };
+                
+                albumContainer.appendChild(img);
+              });
+            }
+
+            // Open the modal using Bootstrap's modal methods
+            const modal = new bootstrap.Modal(document.getElementById('profileModal'));
+            modal.show();
+          } else {
+            alert('Failed to fetch profile detail.');
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Something went wrong.');
+        }
+      }
+
+      // Open full-screen image modal
+      function openFullImageModal(imageUrl) {
+        const fullImageModal = new bootstrap.Modal(document.getElementById('fullImageModal'));
+        const fullImageElement = document.getElementById('full-image');
+        fullImageElement.src = imageUrl;
+        fullImageModal.show();
+      }
+
+      function openModal() {
+        const modal = document.getElementById('modal'); // Assuming you have a modal element with id "modal"
+        if (modal) {
+          modal.style.display = 'block'; // Show the modal
+        } else {
+          console.error("Modal element not found.");
+        }
+      }
+
+      function closeModal() {
+        const modal = document.getElementById('modal');
+        if (modal) {
+          modal.style.display = 'none'; // Hide the modal
+        } else {
+          console.error("Modal element not found.");
+        }
+      }
+
+
 
       
 

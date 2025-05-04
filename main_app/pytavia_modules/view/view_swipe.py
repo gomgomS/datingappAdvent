@@ -57,15 +57,17 @@ class view_swipe:
             core_css            = core_css                , 
             core_dialog_message = core_dialog_message     ,   
             main_app_url        = config.MAIN_APP_URL     ,                   
+            G_IMAGE_URL_DISPATCH       = config.G_IMAGE_URL_DISPATCH     ,                   
             
         )                
     # end def   
 
 
     def _find_potential_match(self, params):
-        now            = utils._get_current_datetime(hours = config.JKTA_TZ)
-        timestamp      = utils._convert_datetime_to_timestamp(now)
-        today_timestamp = int(datetime.utcnow().timestamp() * 1000)
+        now               = utils._get_current_datetime(hours = config.JKTA_TZ)
+        timestamp         = utils._convert_datetime_to_timestamp(now)
+        today_timestamp   = int(datetime.utcnow().timestamp() * 1000)        
+        params["limit"]   = int(params.get('limit', 15))  # Static limit is fine because previous 15 users are already filtered out (liked/disliked won't appear again)
         
         # Define the age range
         min_age = 0
@@ -180,6 +182,8 @@ class view_swipe:
             "$gte": min_birthdate.strftime("%Y-%m-%d"),  # Users must be at least min_age
             "$lte": max_birthdate.strftime("%Y-%m-%d")   # Users must be at most max_age
         }
+        print(params)
+        print("atas adalah aparams")
 
         user_view = self.mgdDB.db_users.aggregate([
             { "$match": match_query },
@@ -208,7 +212,8 @@ class view_swipe:
                     "sex": 1,
                     "_id": 0
                 }
-            }
+            },            
+            { "$limit": params.get("limit", 15) }
         ])
 
         response = list(user_view)
