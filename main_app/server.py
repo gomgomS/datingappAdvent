@@ -19,6 +19,7 @@ from cryptography.fernet import Fernet
 from urllib.parse import quote
 
 from urllib.parse import urlencode
+from flask_cors import CORS
 
 sys.path.append("pytavia_core")
 sys.path.append("pytavia_settings")
@@ -107,6 +108,12 @@ from swipe              import swipe_proc
 from view               import view_match
 
 ##########################################################
+# premium
+##########################################################
+
+from view               import view_premium
+
+##########################################################
 # chat
 ##########################################################
 
@@ -161,6 +168,8 @@ app                   = Flask( __name__, config.G_STATIC_URL_PATH )
 app.secret_key        = config.G_FLASK_SECRET
 app.session_interface = cookie_engine.MongoSessionInterface()
 csrf                  = CSRFProtect(app)
+CORS(app)
+
 
 app.config['WTF_CSRF_TIME_LIMIT'] = 86400
 
@@ -492,16 +501,32 @@ def swipe():
     return html
 
 
-# API FOR AJAX = SWIPE
-# cari data yang tidak ada di like dan dislike
-@app.route('/api/find/match', methods=["GET"])
+@app.route('/api/find/match', methods=["GET", "POST"])
 def api_find_match():
-    params = sanitize.clean_html_dic(request.args.to_dict())  # Changed from request.form
-    params['user_id'] = session.get("user_id")
+    # Untuk GET request
+    if request.method == "GET":
+        params = sanitize.clean_html_dic(request.args.to_dict())  # Ambil query params dari URL
+        params['user_id'] = session.get("user_id")
+        
+        # Oper ke controller/view layer
+        response = view_swipe.view_swipe(app)._find_potential_match(params)
+        return jsonify(response)
+    
+    # Untuk POST request
+    elif request.method == "POST":                
+        params  = sanitize.clean_html_dic(request.form.to_dict())
+        
+        # Tambahkan user_id dari session
+        params['user_id'] = session.get("user_id")
+        params['skip'] = 0
+        params['limit'] = 15
 
-    response = view_swipe.view_swipe(app)._find_potential_match(params)
-    return jsonify(response)
-# end def
+        
+        # Oper ke controller/view layer
+        response = view_swipe.view_swipe(app)._find_potential_match_filter(params)
+        print("response here")
+        print(response)
+        return jsonify(response)
 
 @app.route('/api/decision/match', methods=["POST"])
 def api_decision_match():
@@ -555,7 +580,6 @@ def chat():
     html   = view_chat.view_chat(app).html( params )
     return html
 
-
 #
 # ADMIN PANEL
 #
@@ -573,4 +597,22 @@ def admin_panel_customer():
     params['keyword'    ] = request.args.get('keyword', '')
 
     html   = view_admin_panel_customer.view_admin_panel_customer(app).html( params )
+    return html
+
+
+#
+# PREMIUM PAGE
+# 
+
+@app.route("/premium")
+def premium():    
+    redirect_return = login_precheck({})
+    if redirect_return:
+        return redirect_return
+    # end if
+
+    params = request.form.to_dict()   
+    params['user_id']  = session.get("user_id")
+
+    html   = view_premium.view_premium().html( params )
     return html

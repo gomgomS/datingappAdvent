@@ -632,14 +632,57 @@
         <!-- Step 4: Additional Details -->
         <div class="formbold-form-step-4">       
             <div class="formbold-additional-selection">
-              <div class="formbold-input-group">
-                <label for="city" class="formbold-form-label">City</label>
-                <input type="text" name="city" id="city" class="formbold-form-input" placeholder="Enter your city" value="{{ data_user.city }}"/>
+              <div class="formbold-input-group" style="position: relative;">
+                <label for="city" class="formbold-form-label">Hometown</label>
+                <input 
+                  type="text" 
+                  name="city" 
+                  id="city" 
+                  class="formbold-form-input" 
+                  placeholder="Enter your city" 
+                  value="{{ data_user.city }}" 
+                  onfocus="showTopCities()" 
+                  oninput="filterCities(this.value)"
+                  autocomplete="off"
+                />
+                <ul id="city-suggestions" style="position:absolute; background:#fff; border:1px solid #ccc; z-index:999; list-style:none; padding:0; margin:0; width:100%; display:none;"></ul>
               </div>
             
-              <div class="formbold-input-group">
+              <div class="formbold-input-group" style="position: relative;">
                 <label for="tribe" class="formbold-form-label">Tribe</label>
-                <input type="text" name="tribe" id="tribe" class="formbold-form-input" placeholder="Enter your tribe" value="{{ data_user.tribe }}" />
+                <input 
+                  type="text" 
+                  name="tribe" 
+                  id="tribe" 
+                  class="formbold-form-input" 
+                  placeholder="Enter your tribe" 
+                  value="{{ data_user.tribe }}" 
+                  onfocus="showTopTribes()" 
+                  oninput="filterTribes(this.value)"
+                  autocomplete="off"
+                />
+                <span 
+                  onclick="document.getElementById('tribe-info-modal').style.display='block'"
+                  style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer;"
+                  title="Info"
+                >
+                  👁️
+                </span>    
+                <ul id="tribe-suggestions" style="position:absolute; background:#fff; border:1px solid #ccc; z-index:999; list-style:none; padding:0; margin:0; width:100%; display:none;"></ul>
+              </div>
+
+              <!-- Modal Info -->
+              <div id="tribe-info-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000;">
+                <div style="background:#fff; padding:20px; max-width:500px; margin:100px auto; border-radius:8px; position:relative;">
+                  <h3>Informasi Pengisian Suku</h3>
+                  <p style="margin-bottom:1em;">
+                    Mohon maaf sebelumnya, kami tidak bermaksud membedakan siapa pun. Fitur ini disediakan karena beberapa teman kita berharap bisa menemukan komunitas atau pasangan yang berasal dari suku yang sama.
+                  </p>
+                  <p>
+                    Silakan isi jika berkenan, dan boleh dikosongkan jika tidak ingin mencantumkan informasi ini.
+                  </p>
+                  <button onclick="document.getElementById('tribe-info-modal').style.display='none'" style="margin-top:1em; padding:8px 16px; border:none; background:#333; color:#fff; border-radius:4px;">Tutup</button>
+                </div>
               </div>
             
               <div class="formbold-input-group">
@@ -1345,7 +1388,159 @@
                     }
                 });
             });
-        });        
+        });  
+
+        const tribeList = [
+          "Jawa", "Sunda", "Batak", "Minangkabau", "Bugis", "Madura", "Aceh", "Betawi", "Dayak", "Bali",
+          "Sasak", "Makassar", "Toraja", "Ambon", "Papua", "Asmat", "Tidore", "Ternate", "Nias", "Manado"
+        ];
+
+        let validTribe = ""; // menyimpan suku yang dipilih valid
+
+        function showTopTribes() {
+          const topTribes = tribeList.slice(0, 10);
+          showSuggestions(topTribes);
+        }
+
+        function filterTribes(value) {
+          const input = value.trim().toLowerCase();
+          validTribe = ""; // reset valid state
+          if (input.length < 3) {
+            showTopTribes();
+            return;
+          }
+
+          const matches = tribeList.filter(tribe => tribe.toLowerCase().startsWith(input));
+          showSuggestions(matches);
+        }
+
+        function showSuggestions(list) {
+          const suggestionBox = document.getElementById("tribe-suggestions");
+          suggestionBox.innerHTML = "";
+
+          if (list.length === 0) {
+            suggestionBox.style.display = "none";
+            return;
+          }
+
+          list.forEach(match => {
+            const li = document.createElement("li");
+            li.textContent = match;
+            li.style.padding = "8px";
+            li.style.cursor = "pointer";
+            li.onmouseover = () => li.style.background = "#eee";
+            li.onmouseout  = () => li.style.background = "#fff";
+            li.onclick = () => {
+              document.getElementById("tribe").value = match;
+              validTribe = match;
+              suggestionBox.style.display = "none";
+            };
+            suggestionBox.appendChild(li);
+          });
+
+          suggestionBox.style.display = "block";
+        }
+
+        // cek validasi saat form disubmit
+        document.querySelector("form").addEventListener("submit", function(e) {
+          const inputValue = document.getElementById("tribe").value;
+          if (inputValue !== validTribe) {
+            // alert("Please select a tribe from the list.");
+            // e.preventDefault(); // hentikan submit
+          }
+        });
+
+        // sembunyikan dropdown kalau klik di luar
+        document.addEventListener("click", function(event) {
+          const box = document.getElementById("tribe-suggestions");
+          if (!document.getElementById("tribe").contains(event.target)) {
+            box.style.display = "none";
+          }
+        });   
+
+        const cityList = [
+          "Jakarta", "Surabaya", "Bandung", "Medan", "Semarang",
+          "Palembang", "Makassar", "Bogor", "Depok", "Bekasi",
+          "Yogyakarta", "Malang", "Padang", "Pekanbaru", "Banjarmasin",
+          "Samarinda", "Pontianak", "Manado", "Denpasar", "Batam",
+          "Tangerang", "South Tangerang", "Bandar Lampung", "Cimahi", "Tasikmalaya",
+          "Serang", "Balikpapan", "Jambi", "Cirebon", "Surakarta",
+          "Kupang", "Mataram", "Jayapura", "Bengkulu", "Palu",
+          "Ambon", "Kendari", "Dumai", "Pekalongan", "Palangka Raya",
+          "Binjai", "Kediri", "Sorong", "Tegal", "Banda Aceh",
+          "Tarakan", "Probolinggo", "Singkawang", "Lubuklinggau", "Tanjungpinang",
+          "Bitung", "Pangkalpinang", "Batu", "Pasuruan", "Banjar",
+          "Gorontalo", "Ternate", "Madiun", "Salatiga", "Prabumulih",
+          "Lhokseumawe", "Langsa", "Bontang", "Tanjungbalai", "Tebing Tinggi",
+          "Metro", "Palopo", "Bima", "Baubau", "Parepare",
+          "Blitar", "Pagar Alam", "Payakumbuh", "Gunungsitoli", "Mojokerto",
+          "Bukittinggi", "Kotamobagu", "Magelang", "Tidore", "Tomohon",
+          "Sungai Penuh", "Subulussalam", "Pariaman", "Sibolga", "Tual",
+          "Solok", "Sawahlunto", "Padang Panjang", "Sabang","Timika"
+        ];
+
+        let validCity = ""; // menyimpan pilihan kota valid
+
+        function showTopCities() {
+          const topCities = cityList.slice(0, 10);
+          showCitySuggestions(topCities);
+        }
+
+        function filterCities(value) {
+          const input = value.trim().toLowerCase();
+          validCity = ""; // reset valid state
+          if (input.length < 3) {
+            showTopCities();
+            return;
+          }
+
+          const matches = cityList.filter(city => city.toLowerCase().startsWith(input));
+          showCitySuggestions(matches);
+        }
+
+        function showCitySuggestions(list) {
+          const suggestionBox = document.getElementById("city-suggestions");
+          suggestionBox.innerHTML = "";
+
+          if (list.length === 0) {
+            suggestionBox.style.display = "none";
+            return;
+          }
+
+          list.forEach(match => {
+            const li = document.createElement("li");
+            li.textContent = match;
+            li.style.padding = "8px";
+            li.style.cursor = "pointer";
+            li.onmouseover = () => li.style.background = "#eee";
+            li.onmouseout  = () => li.style.background = "#fff";
+            li.onclick = () => {
+              document.getElementById("city").value = match;
+              validCity = match;
+              suggestionBox.style.display = "none";
+            };
+            suggestionBox.appendChild(li);
+          });
+
+          suggestionBox.style.display = "block";
+        }
+
+        // validasi submit
+        document.querySelector("form").addEventListener("submit", function(e) {
+          const inputVal = document.getElementById("city").value;
+          if (inputVal !== validCity) {
+            alert("Please select a city from the list.");
+            e.preventDefault();
+          }
+        });
+
+        // klik di luar sembunyikan
+        document.addEventListener("click", function(event) {
+          const box = document.getElementById("city-suggestions");
+          if (!document.getElementById("city").contains(event.target)) {
+            box.style.display = "none";
+          }
+        }); 
 
          
     

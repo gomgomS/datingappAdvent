@@ -325,7 +325,7 @@ db = {
         "advent_status"               : "",
         "profile_intro"               : "FALSE",
         "profile_photo"               : "",
-        "location"                    : { "latitude": 0.0, "longitude": 0.0 },
+        "location"                    : {},
         "fk_user_id_like"             : [],
         "fk_user_id_dislike"          : [],
         "image"                       : [], # max 5 image //gallery photo

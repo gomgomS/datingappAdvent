@@ -45,7 +45,8 @@ class view_swipe:
         core_footer             = view_core_footer.view_core_footer().html(params)
         core_script             = view_core_script.view_core_script().html(params)
         core_css                = view_core_css.view_core_css().html(params)
-        core_dialog_message     = view_core_dialog_message.view_core_dialog_message().html(params)                    
+        core_dialog_message     = view_core_dialog_message.view_core_dialog_message().html(params)   
+        user_rec                = self.mgdDB.db_users.find_one({"user_id": params["user_id"]},{"location":1})                 
 
         return render_template(
             "users/swipe.html",
@@ -57,12 +58,140 @@ class view_swipe:
             core_css            = core_css                , 
             core_dialog_message = core_dialog_message     ,   
             main_app_url        = config.MAIN_APP_URL     ,                   
-            G_IMAGE_URL_DISPATCH       = config.G_IMAGE_URL_DISPATCH     ,                   
+            G_IMAGE_URL_DISPATCH       = config.G_IMAGE_URL_DISPATCH     , 
+            user_rec            = user_rec                  
             
         )                
     # end def   
 
 
+    def _find_potential_match_filter(self, params):        
+        user_id = params.get("user_id")
+        today = datetime.utcnow()
+        today_timestamp = int(today.timestamp() * 1000)
+        
+
+        # Ambil lokasi jika tersedia
+        longitude = params.get("current_position[longitude]")
+        latitude = params.get("current_position[latitude]")
+        current_city = params.get("current_position[city]")
+        current_province = params.get("current_position[prov]")
+        current_country = params.get("current_position[country]")
+
+        if longitude and latitude and current_city:
+            location_data = {
+                "type": "Point",
+                "coordinates": [float(longitude), float(latitude)],
+                "lastGeoDate": today.strftime("%Y-%m-%d"),
+                "current_city": current_city,
+                "current_province": current_province,
+                "current_country": current_country,
+            }
+
+            self.mgdDB.db_users.update_one(
+                {"user_id": user_id},
+                {
+                    "$set": {
+                        "login_status": "TRUE",
+                        "location": location_data
+                    }
+                }
+            )
+
+        # Ambil user sekarang
+        current_user = self.mgdDB.db_users.find_one(
+            {"user_id": user_id}, {"sex": 1, "fk_user_id_like": 1, "fk_user_id_dislike": 1, "location.coordinates":1}
+        )
+
+        # Inisialisasi blocked_ids
+        blocked_ids = set(current_user.get("fk_user_id_like", []) + current_user.get("fk_user_id_dislike", []))
+        blocked_ids.add(user_id)
+
+        # Tambahkan pasangan yang sudah match
+        matched_users = self.mgdDB.db_matches.find(
+            {"$or": [{"user_id_1": user_id}, {"user_id_2": user_id}]}
+        )
+        for match in matched_users:
+            blocked_ids.add(match["user_id_2"] if match["user_id_1"] == user_id else match["user_id_1"])
+
+        # Filter pencarian dasar
+        query = {
+            "user_id": {"$nin": list(blocked_ids)},
+        }
+
+        # Filter umur (default: 0 - 50 tahun)
+        max_age = 50
+        min_age = 0
+        max_birthdate = (today - timedelta(days=(min_age * 365))).strftime("%Y-%m-%d")
+        min_birthdate = (today - timedelta(days=(max_age * 365))).strftime("%Y-%m-%d")
+        query["dob"] = {
+            "$gte": min_birthdate,
+            "$lte": max_birthdate
+        }
+
+        # Filter jenis kelamin lawan
+        sex = current_user.get("sex")
+        if sex in ["male", "female"]:
+            query["sex"] = "female" if sex == "male" else "male"
+
+        # Cek apakah koordinat tersedia, jika tidak, skip geoNear dan return kosong
+        longitude   = current_user["location"]["coordinates"][0]
+        latitude    = current_user["location"]["coordinates"][1]
+        
+        if not longitude or not latitude:
+            return []
+
+        # Ambil distance dan limit dari param, fallback ke default
+        try:
+            distance = int(params.get("distance", 14)) * 1000  # meter
+        except ValueError:
+            distance = 14000
+
+        try:
+            limit = int(params.get("limit", 15))
+        except ValueError:
+            limit = 15
+
+        user_view = self.mgdDB.db_users.aggregate([
+            {
+                "$geoNear": {
+                    "near": {
+                        "type": "Point",
+                        "coordinates": [float(longitude), float(latitude)]
+                    },
+                    "distanceField": "distance",
+                    "maxDistance": distance,
+                    "spherical": True,
+                    "query": query
+                }
+            },
+            {
+                "$project": {
+                    "name": 1,
+                    "user_id": 1,
+                    "img": {"$concat": [config.G_IMAGE_URL_DISPATCH, "$profile_photo"]},
+                    "username": 1,
+                    "email": 1,
+                    "pkey": 1,
+                    "dob": 1,
+                    "sex": 1,
+                    "distance": 1,
+                    "age": {
+                        "$floor": {
+                            "$divide": [
+                                {"$subtract": [today_timestamp, {"$toLong": {"$toDate": "$dob"}}]},
+                                1000 * 60 * 60 * 24 * 365
+                            ]
+                        }
+                    },
+                    "_id": 0
+                }
+            },
+            {"$limit": limit}
+        ])       
+
+        return list(user_view)
+        
     def _find_potential_match(self, params):
         now               = utils._get_current_datetime(hours = config.JKTA_TZ)
         timestamp         = utils._convert_datetime_to_timestamp(now)

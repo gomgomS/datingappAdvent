@@ -405,8 +405,15 @@
           object-fit: contain;
         }
       }
+     
 
+      .custom-range {
+        width: 100%;
+      }
 
+      .custom-control-label {
+        cursor: pointer;
+      }
 
 
     </style>
@@ -416,48 +423,56 @@
 <body>
     <!-- Top Menu -->
     <div class="menu-top">
-        <div class="menu-icon">🔍</div>  <!-- Top Left -->
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <div class="menu-icon">💎</div>  <!-- Top Right -->
-            <a href="/auth/logout" class="menu-icon" style="text-decoration: none; color: black;">
-                <i class="fas fa-sign-out-alt"></i> <!-- Logout Icon -->
-            </a>
-        </div>
-    </div>  
-
+      <!-- Filter Icon -->
+      <div class="menu-icon" data-toggle="modal" data-target="#filterModal">
+        <i class="fas fa-search"></i> 
+      </div>
+    
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <!-- Premium Icon -->
+        <a href="/premium" class="menu-icon" style="text-decoration: none; color: black;">
+          <i class="fas fa-crown"></i> 
+        </a>
+    
+        <!-- Logout Icon -->
+        <a href="/auth/logout" class="menu-icon" style="text-decoration: none; color: black;">
+          <i class="fas fa-sign-out-alt"></i>
+        </a>
+      </div>
+    </div>    
     <!-- Middle Image -->
     <div class="frame"></div>
 
     <!-- Bottom Menu -->
     <div class="menu-bottom">
-      <!-- Match (Active, Not Clickable) -->
+      <!-- Swipe (Aktif) -->
       <div class="menu-item active">
-          <div class="menu-icon">🔥</div>
+          <i class="fas fa-fire"></i>
           <span>Swipe</span>
       </div>
 
-      <!-- Swipe (Directs to /match) -->
+      <!-- Match -->
       <a href="/match" class="menu-item">
-          <div class="menu-icon">❤️</div>
+          <i class="fas fa-heart"></i>
           <span>Match</span>
       </a>
 
-      <!-- Chat (Directs to /chat) -->
+      <!-- Chat -->
       <a href="/chat" class="menu-item">
-          <div class="menu-icon">💬</div>
+          <i class="fas fa-comments"></i>
           <span>Chat</span>
       </a>
 
-      <!-- Profile (Directs to /profile) -->
-      <a href="/profile_intro" class="menu-item">
-          <div class="menu-icon">👤</div>
-          <span>Profile</span>
+      <!-- Detail (Trigger Function) -->
+      <a class="menu-item" id="btn-show-detail" onclick="showFutureWifeId()">
+          <i class="fas fa-id-badge"></i>
+          <span>Detail</span>
       </a>
 
-       <!-- Profile (Directs to /profile) -->
-       <a class="menu-item" id="btn-show-detail" onclick="showFutureWifeId()">
-        <div class="menu-icon">👤</div>                   
-        <span>Detail</span>
+      <!-- Profile -->
+      <a href="/profile_intro" class="menu-item">
+          <i class="fas fa-user-ninja"></i>
+          <span>Profil</span>
       </a>
       
       
@@ -534,6 +549,109 @@
           </div>
         </div>
       </div>
+
+      <!-- 🎯 Modal for Filters -->
+    <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="filterModalLabel">Filter Your Matches</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            
+            <!-- 🔵 Jarak Slider -->
+            <div class="form-group">
+              <label for="distanceRange">📍 Distance (km)</label>
+              <input type="range" id="distanceRange" min="1" max="100" value="50" class="custom-range" oninput="updateDistanceValue()">
+              <p>Selected Distance: <span id="distanceValue">50 km</span></p>
+            </div>
+
+            <!-- 🔵 Umur Slider -->
+            <div class="form-group">
+              <label for="ageRange">🎂 Age Range</label>
+              <input type="range" id="ageRange" min="18" max="60" value="25" class="custom-range" oninput="updateAgeValue()">
+              <p>Selected Age: <span id="ageValue">25</span></p>
+            </div>
+
+            <!-- 🌎 Filter Kota Asal & Kota Sekarang -->
+            <div class="form-group">
+              <label for="hometown">🏡 Hometown</label>
+              <select class="form-control" id="hometown">
+                <option value="">Select Hometown</option>
+                <option value="Jakarta">Jakarta</option>
+                <option value="Surabaya">Surabaya</option>
+                <option value="Bandung">Bandung</option>
+                <option value="Bali">Bali</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="currentCity">📍 Current City</label>
+              <select class="form-control" id="currentCity">
+                <option value="">Select Current City</option>
+                <option value="Jakarta">Jakarta</option>
+                <option value="Surabaya">Surabaya</option>
+                <option value="Bandung">Bandung</option>
+                <option value="Bali">Bali</option>
+              </select>
+            </div>
+
+            <!-- ℹ️ Perbedaan Kota -->
+            <p class="text-muted">
+              🏡 <strong>Hometown</strong>: Where you were born or grew up.<br>
+              📍 <strong>Current City</strong>: Where you currently live.
+            </p>
+
+            <!-- ❤️ Marital Status -->
+            <div class="form-group">
+              <label>💍 Marital Status</label>
+              <div class="custom-control custom-radio">
+                <input type="radio" id="never-married" name="maritalStatus" class="custom-control-input">
+                <label class="custom-control-label" for="never-married">Single - Never Married</label>
+              </div>
+              <div class="custom-control custom-radio">
+                <input type="radio" id="abandoned" name="maritalStatus" class="custom-control-input">
+                <label class="custom-control-label" for="abandoned">Single - Abandoned</label>
+              </div>
+              <div class="custom-control custom-radio">
+                <input type="radio" id="separated" name="maritalStatus" class="custom-control-input">
+                <label class="custom-control-label" for="separated">Single - Separated</label>
+              </div>
+              <div class="custom-control custom-radio">
+                <input type="radio" id="divorced" name="maritalStatus" class="custom-control-input">
+                <label class="custom-control-label" for="divorced">Single - Divorced</label>
+              </div>
+              <div class="custom-control custom-radio">
+                <input type="radio" id="widowed" name="maritalStatus" class="custom-control-input">
+                <label class="custom-control-label" for="widowed">Single - Widower/Widow</label>
+              </div>
+              <div class="custom-control custom-radio">
+                <input type="radio" id="complicated" name="maritalStatus" class="custom-control-input">
+                <label class="custom-control-label" for="complicated">Complicated</label>
+              </div>
+              <div class="custom-control custom-radio">
+                <input type="radio" id="other" name="maritalStatus" class="custom-control-input">
+                <label class="custom-control-label" for="other">Other</label>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <input type="hidden" id="latitude">
+    <input type="hidden" id="longitude">
     
 
 
@@ -569,40 +687,7 @@
 
       var apiUrl = "{{main_app_url}}/api/find/match";
 
-      // code below change with fetchMatches, for better paggination 
-      // $.get(apiUrl, function(resp, status) {
-      //   console.log(resp);
-
-      //   if (status !== "success") {
-      //     console.error("Network response was not ok");
-      //     return;
-      //   }
-
-      //   // const cloudUrl = "your_cloud_url_here/";
-      //   const data = resp.map(item => ({
-      //     img: item.img,
-      //     name: item.name,
-      //     age: item.age,
-      //     distance: item.distance,
-      //     future_wife_id: item.user_id // ✅ Add user ID
-      //   }));
-
-      //   console.log("Updated data:", data);
-
-      //   // Append new cards
-      //   data.forEach(item => appendcard_swipe(item));
-
-      //   // ✅ Set `current` to the last added card
-      //   current = frame.querySelector('.card_swipe:last-child');
-      //   if (current) {
-      //     likeText = current.children[0];
-      //     initcard_swipe(current);
-      //   }
-
-      // }).fail(function(error) {
-      //   console.error("Error fetching data:", error);
-      // });      
-
+     
       function fetchMatches(skip) {
         const fullUrl = `${apiUrl}?skip=${skip}&limit=${limit}`;
         $('#loading-card').show(); // Show full-page loader
@@ -659,7 +744,7 @@
         complete();
       };
 
-      function appendcard_swipe(data) {
+      function appendcard_swipe(data) {        
         const firstcard_swipe = frame.children[0];
         const newcard_swipe = document.createElement('div');
         newcard_swipe.className = 'card_swipe';
@@ -860,9 +945,155 @@
         }
       }
 
+      function updateDistanceValue() {
+        document.getElementById('distanceValue').textContent = document.getElementById('distanceRange').value + ' km';
+      }
 
+      function updateAgeValue() {
+        document.getElementById('ageValue').textContent = document.getElementById('ageRange').value;
+      }  
 
       
+
+      
+      function applyFilters() {
+        const lastGeoDate = "{{ user_rec.location.lastGeoDate }}"; // Format: "YYYY-MM-DD"
+        const today = new Date().toISOString().split('T')[0];
+
+        if (lastGeoDate !== today) {
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              function (position) {
+                // Geolocation Setup
+                const OPENCAGE_API_KEY = "a1ec8bfdf9524ee09594cbacb5537ae6"; // Ganti dengan API key kamu
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+
+                fetch(`https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${OPENCAGE_API_KEY}`)
+                  .then(response => response.json())
+                  .then(data => {
+                    let city = "";
+                    let prov = "";
+                    let country = "";
+
+                    if (data?.results?.length > 0) {
+                      const components = data.results[0].components;
+                      city = components.city || components.town || components.village || components.county || "";
+                      prov = components.state || "";
+                      country = components.country || "";
+                    }
+
+                    // 🚀 Kirim semua filter, dengan current_position dalam satu objek
+                    sendFilterRequest({
+                      age: document.getElementById("ageRange").value,
+                      distance: document.getElementById("distanceRange").value,
+                      hometown: document.getElementById("hometown").value,
+                      currentCity: document.getElementById("currentCity").value,
+                      maritalStatus: document.querySelector("input[name='maritalStatus']:checked")?.id || null,
+                      current_position: {
+                        latitude,
+                        longitude,
+                        city,
+                        prov,
+                        country
+                      }
+                    });
+                  })
+                  .catch(error => {
+                    console.error("Gagal ambil data dari OpenCage:", error);
+
+                    // Tetap kirim walau gagal reverse geocoding
+                    sendFilterRequest({
+                      age: document.getElementById("ageRange").value,
+                      distance: document.getElementById("distanceRange").value,
+                      hometown: document.getElementById("hometown").value,
+                      currentCity: document.getElementById("currentCity").value,
+                      maritalStatus: document.querySelector("input[name='maritalStatus']:checked")?.id || null,
+                      current_position: {
+                        latitude,
+                        longitude
+                      }
+                    });
+                  });
+              },
+              function (error) {
+                console.error("Geolocation error:", error.message);
+
+                // Kirim tanpa current_position
+                sendFilterRequest({
+                  age: document.getElementById("ageRange").value,
+                  distance: document.getElementById("distanceRange").value,
+                  hometown: document.getElementById("hometown").value,
+                  currentCity: document.getElementById("currentCity").value,
+                  maritalStatus: document.querySelector("input[name='maritalStatus']:checked")?.id || null
+                });
+              }
+            );
+          } else {
+            alert("Browser kamu tidak mendukung fitur lokasi otomatis.");
+            sendFilterRequest({
+              age: document.getElementById("ageRange").value,
+              distance: document.getElementById("distanceRange").value,
+              hometown: document.getElementById("hometown").value,
+              currentCity: document.getElementById("currentCity").value,
+              maritalStatus: document.querySelector("input[name='maritalStatus']:checked")?.id || null
+            });
+          }
+        } else {
+          sendFilterRequest({
+              age: document.getElementById("ageRange").value,
+              distance: document.getElementById("distanceRange").value,
+              hometown: document.getElementById("hometown").value,
+              currentCity: document.getElementById("currentCity").value,
+              maritalStatus: document.querySelector("input[name='maritalStatus']:checked")?.id || null
+            });
+        }
+      }
+
+      function sendFilterRequest(filterData) {
+        console.log("Filter yang dikirim:", filterData); // Debug
+
+        // Gabungkan CSRF token ke dalam filterData
+        filterData.csrf_token = "{{ csrf_token() }}";
+
+        $('#loading-card').show(); // Show loader
+
+        $.post(apiUrl, filterData)
+          .done(function (resp) {
+            frame.innerHTML = '';
+
+            // Reset swipe state
+            swipedCount = 0;
+            skipCount = 0;
+            current = null;
+            likeText = null;
+
+            const data = resp.map(item => ({
+              img: item.img,
+              name: item.name,
+              age: item.age,
+              distance: item.distance,
+              future_wife_id: item.user_id
+            }));
+            
+            data.forEach(item => appendcard_swipe(item));     
+
+            // ✅ Reattach swipe listener
+            current = frame.querySelector('.card_swipe:last-child');
+            if (current) {
+              likeText = current.children[0];
+              initcard_swipe(current);
+            }       
+
+            setTimeout(() => {
+              $('#loading-card').hide();
+            }, 100);
+          })
+          .fail(function (err) {
+            console.error("Gagal fetch data filter:", err);
+            $('#loading-card').hide();
+          });
+      }
 
    </script>
 

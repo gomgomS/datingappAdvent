@@ -241,11 +241,7 @@ class auth_proc:
                 self.mgdDB.db_users.update_one(
                     {"pkey": user_rec["pkey"]},
                     {"$set": {
-                        "login_status": "TRUE",
-                        "location": {  # Store coordinates
-                            "latitude": params.get("latitude"),
-                            "longitude": params.get("longitude")
-                        }
+                        "login_status": "TRUE"                      
                     }}
                 )
 
