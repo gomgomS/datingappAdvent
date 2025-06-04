@@ -354,57 +354,114 @@
           border-top-right-radius: 15px;
         }
 
+        /* MODAL DETAIL SOULMATE */
+        .bumble-profile {
+          border-radius: 20px;
+          overflow: hidden;
+          box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .profile-header {
+          padding: 20px;
+          background: #fffbe6;
+        }
+
         .profile-photo {
           width: 120px;
           height: 120px;
           object-fit: cover;
-          border-radius: 50%;
           border: 4px solid white;
-          margin-bottom: 15px;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
 
-        .info-icons p {
-          margin-bottom: 10px;
-          font-size: 15px;
-        }
-
-        .info-icons strong {
-          color: #ff6f91;
-        }
-
-        .modal-footer {
-          border-top: none;
-        }
-
-        #album h6 {
+        .section-title {
           font-weight: 600;
-          margin-bottom: 15px;
-          color: #ff6f91;
+          border-bottom: 2px solid #ffc107;
+          display: inline-block;
+          padding-bottom: 4px;
+          margin-bottom: 12px;
+          font-size: 16px;
+          color: #333;
         }
 
-        @media (min-width: 768px) {
-        #fullImageModal .modal-dialog {
-          max-width: 100%;
-          margin: 0;
-          height: 100%;
+        .profile-info-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
         }
-        #fullImageModal .modal-content {
-          height: 100%;
-          border-radius: 0;
-        }
-        #fullImageModal .modal-body {
-          height: 100%;
+
+        .info-item {
+          background: #fff8dc;
+          padding: 12px;
+          border-radius: 12px;
           display: flex;
           align-items: center;
-          justify-content: center;
-          padding: 0;
+          gap: 10px;
+          font-size: 14px;
         }
-        #fullImageModal img {
-          max-height: 90vh;
-          max-width: 100%;
-          object-fit: contain;
+
+        .info-item.wide {
+          grid-column: span 2;
         }
-      }
+
+        .info-item i {
+          color: #f5a623;
+          font-size: 18px;
+        }
+
+        /* Hide email and username */
+        #email,
+        #username,
+        .d-none {
+          display: none !important;
+        }
+
+        /* Album photo styles */
+        #album-photos img {
+          width: 100%;
+          height: 160px;
+          object-fit: cover;
+          border-radius: 10px;
+          box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Footer styling */
+        .modal-footer {
+          border-top: none;
+          padding-top: 0;
+        }
+
+        .modal-footer .btn {
+          border-radius: 20px;
+          padding: 6px 20px;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+          .modal-dialog {
+            margin: 1rem;
+          }
+
+          .profile-photo {
+            width: 100px;
+            height: 100px;
+          }
+
+          .profile-info-grid {
+            grid-template-columns: 1fr; /* stack vertically on small screens */
+          }
+
+          .info-item.wide {
+            grid-column: span 1;
+          }
+
+          #album-photos img {
+            height: 140px;
+          }
+        }
+
+
+      /* MODAL DETAIL SOULMATE */
      
 
       .custom-range {
@@ -414,7 +471,6 @@
       .custom-control-label {
         cursor: pointer;
       }
-
 
     </style>
 </head>
@@ -430,6 +486,10 @@
     
       <div style="display: flex; align-items: center; gap: 15px;">
         <!-- Premium Icon -->
+        <a id="undo-btn" class="undo-button" href="javascript:void(0);">
+          <i class="fas fa-undo"></i>
+        </a>
+        
         <a href="/premium" class="menu-icon" style="text-decoration: none; color: black;">
           <i class="fas fa-crown"></i> 
         </a>
@@ -445,6 +505,11 @@
 
     <!-- Bottom Menu -->
     <div class="menu-bottom">
+       <!-- Detail (Trigger Function) -->
+      <a class="menu-item" id="btn-show-detail" onclick="showFutureWifeId()">
+        <i class="fas fa-id-badge"></i>
+        <span>Detail</span>
+      </a>
       <!-- Swipe (Aktif) -->
       <div class="menu-item active">
           <i class="fas fa-fire"></i>
@@ -463,11 +528,6 @@
           <span>Chat</span>
       </a>
 
-      <!-- Detail (Trigger Function) -->
-      <a class="menu-item" id="btn-show-detail" onclick="showFutureWifeId()">
-          <i class="fas fa-id-badge"></i>
-          <span>Detail</span>
-      </a>
 
       <!-- Profile -->
       <a href="/profile_intro" class="menu-item">
@@ -489,50 +549,72 @@
     </div>
 
     <!-- Redesigned Dating App Modal -->
-      <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-
-            <!-- Profile Hero Section -->
-            <div class="profile-header">
-              <img id="profile-photo" class="profile-photo" src="" alt="Profile Photo">
-              <h3 id="name">Name</h3>
-              <p id="job">Job Title</p>
-              <p id="city">City</p>
-            </div>
-
-            <!-- Profile Body -->
-            <div class="modal-body">
-              <!-- Photo Album -->
-              <div id="album" class="mb-4">
-                <h6>Photo Album</h6>
-                <div class="row row-cols-2 row-cols-md-3 g-3" id="album-photos">
-                  <!-- JS will populate images here -->
-                </div>
-              </div>
-
-              <!-- Details Section -->
-              <div class="info-icons">
-                <p><strong>Username:</strong> <span id="username"></span></p>
-                <p><strong>Email:</strong> <span id="email"></span></p>
-                <p><strong>Hobbies:</strong> <span id="hobbies"></span></p>
-                <p><strong>Tribe:</strong> <span id="tribe"></span></p>
-                <p><strong>Marital Status:</strong> <span id="marital-status"></span></p>
-                <p><strong>About:</strong> <span id="about"></span></p>
-              </div>
-            </div>
-
-            <!-- Footer -->
-            <div class="modal-footer justify-content-center">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-              
-            </div>
-
+    <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content bumble-profile">
+    
+          <!-- Profile Header -->
+          <div class="profile-header text-center">
+            <img id="profile-photo" class="profile-photo rounded-circle" src="" alt="Profile Photo">
+            <h3 id="name" class="mt-2 mb-0">Name</h3>
+            <p id="age" class="text-muted mb-1">25</p> <!-- AGE added under name -->
+            <p id="job" class="text-muted mb-0">Job Title</p>
+            <p id="city" class="text-muted">City</p>
           </div>
+    
+          <!-- Profile Body -->
+          <div class="modal-body">
+    
+            <!-- Photo Album -->
+            <div id="album" class="mb-4">
+              <h6 class="section-title">Photo Album</h6>
+              <div class="row row-cols-2 row-cols-md-3 g-3" id="album-photos">
+                <!-- JS populates images here -->
+              </div>
+            </div>
+    
+            <!-- Info Grid -->
+            <div class="profile-info-grid">
+              <div class="info-item d-none">
+                <i class="fas fa-user-circle"></i>
+                <span id="username">Username</span>
+              </div>
+              <div class="info-item d-none">
+                <i class="fas fa-envelope"></i>
+                <span id="email">Email</span>
+              </div>
+              <div class="info-item">
+                <i class="fas fa-heartbeat"></i>
+                <span id="hobbies">Hobbies</span>
+              </div>
+              <div class="info-item">
+                <i class="fas fa-people-arrows"></i>
+                <span id="tribe">Tribe</span>
+              </div>
+              <div class="info-item">
+                <i class="fas fa-ring"></i>
+                <span id="marital-status">Marital Status</span>
+              </div>
+              <div class="info-item wide">
+                <i class="fas fa-comment-dots"></i>
+                <span id="about">About</span>
+              </div>
+            </div>
+    
+          </div>
+    
+          <!-- Modal Footer -->
+          <div class="modal-footer justify-content-center">
+            <button type="button" class="btn btn-light rounded-pill px-4" data-dismiss="modal">
+              Close
+            </button>
+          </div>
+    
         </div>
       </div>
+    </div>
+    
+    
 
       <!-- Full Image Modal (Bootstrap 4) -->
       <div class="modal fade" id="fullImageModal" tabindex="-1" role="dialog" aria-labelledby="fullImageModalLabel" aria-hidden="true">
@@ -650,6 +732,27 @@
       </div>
     </div>
 
+    <!-- limit swipe modal -->
+    <div class="modal fade" id="modal-swipe-limit" tabindex="-1" role="dialog" aria-labelledby="swipeLimitLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header bg-warning text-white">
+            <h5 class="modal-title" id="swipeLimitLabel">Swipe Limit Reached</h5>
+            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            You have reached your daily swipe limit. Upgrade to premium to continue swiping today.
+          </div>
+          <div class="modal-footer">
+            <a href="/upgrade-premium" class="btn btn-primary">Upgrade to Premium</a>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Okay</button>
+          </div>
+        </div>
+      </div>
+    </div>    
+
     <input type="hidden" id="latitude">
     <input type="hidden" id="longitude">
     
@@ -684,6 +787,88 @@
       let current = null; // ✅ Declare `current` globally
       let likeText = null;
       let startX = 0, startY = 0, moveX = 0, moveY = 0;
+
+      // UNDO FEATURE 3 june works good still need improvement
+      // now alredy append but still not show
+      let lastSwipedCardData = null; // global variable to track last swipe
+
+      document.querySelector('#undo-btn').onclick = () => {
+        console.log("Stored:", lastSwipedCardData);
+
+        undoSwipe();
+      };
+
+      function storeLastSwipedCard() {
+
+        console.log("yeah")
+        if (!current) return;
+        console.log("oi")
+        lastSwipedCardData = {
+          img: current.style.backgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, ''),
+          name: current.querySelector('.title span')?.innerText || '',
+          age: current.querySelector('.title p')?.innerText.replace(' thn', '') || '',
+          future_wife_id: current.dataset.futureWifeId,
+          distance: '' // Optional, kalau kamu mau tambahkan
+        };
+      }      
+
+      function undoSwipe() {
+        if (!lastSwipedCardData) return;
+
+        // ✅ Only restore the last swiped card
+        appendSingleCard(lastSwipedCardData);
+
+        current = frame.querySelector('.card_swipe:last-child');
+        if (current) {
+          likeText = current.children[0];
+
+          // Animate card entrance from left
+          current.style.transition = 'none';
+          current.style.transform = 'translateX(-100vw) rotate(-30deg)';
+
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              current.style.transition = 'transform 300ms ease';
+              current.style.transform = 'translateX(0) rotate(0deg)';
+            });
+          });
+
+          initcard_swipe(current);
+        }
+        
+        current.dataset.futureWifeId = lastSwipedCardData.future_wife_id;
+
+        lastSwipedCardData = null;
+      }
+
+      function appendSingleCard(data) {        
+        const card = document.createElement('div');
+        card.classList.add('card_swipe');
+
+        // Set image as background if available
+        if (data.img) {
+          card.style.backgroundImage = `url(${data.img})`;
+        }
+
+        card.innerHTML = `
+          <div class="is-like">LIKE</div>
+          <div class="bottom">
+            <div class="title">
+              <span>${data.name}</span>
+              <p>${data.age} thn</p>
+            </div>
+            <div class="info">
+              ${data.bio || ''}
+            </div>
+          </div>
+        `;
+
+        frame.appendChild(card);
+      }
+
+
+
+      // END UNDO FEATURE
 
       var apiUrl = "{{main_app_url}}/api/find/match";
 
@@ -802,9 +987,14 @@
         current.removeEventListener('pointerleave', onPointerUp);
         if (Math.abs(moveX) > frame.clientWidth / 2) {
           current.removeEventListener('pointerdown', onPointerDown);
-          sendDecision(current.dataset.futureWifeId, moveX > 0 ? "acc" : "reject"); // ✅ Send decision
-          complete();
-        } else cancel();
+          
+          storeLastSwipedCard(); // ✅ FIRST: Save data BEFORE DOM update
+          sendDecision(current.dataset.futureWifeId, moveX > 0 ? "acc" : "reject"); // ✅ THEN send
+          
+          complete(); // Animate + remove
+        } else {
+          cancel(); // Snap back
+        }
       }
 
       function complete() {
@@ -843,14 +1033,24 @@
 
       function sendDecision(futureWifeId, status) {
         const apiUrl = "{{main_app_url}}/api/decision/match";
-
+        console.log(futureWifeId)
+        console.log("boom")
         $.post(apiUrl, {
-          csrf_token: "{{ csrf_token() }}", // Include CSRF token
+          csrf_token: "{{ csrf_token() }}", // CSRF token
           future_wife_id: futureWifeId,
           status: status
         })
         .done(function(response) {
           console.log(`Match decision sent: ${status}`, response);
+
+          if (response.status === "limit_exceeded") {
+            // Tampilkan modal
+            $('#modal-swipe-limit').modal('show');
+
+            // Panggil ulang fetchMatches agar kartu tetap muncul
+            fetchMatches(0);
+          }
+
         })
         .fail(function(error) {
           console.error("Error sending match decision:", error);

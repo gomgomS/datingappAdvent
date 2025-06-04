@@ -124,6 +124,9 @@ from view               import view_chat
 ##########################################################
 
 from view               import view_admin_panel_customer
+from view               import view_admin_panel_premium_control
+
+from admin              import admin_proc
 
 ##########################################################
 # DATINGAPP
@@ -342,7 +345,8 @@ def auth_login():
         session["user_id"       ] = m_data["user_id"       ]        
         session["username"      ] = m_data["username"      ]    
         session["email"         ] = m_data["email"         ]
-        session["role"         ] = m_data["role"           ]
+        session["role"          ] = m_data["role"          ]
+        session["is_premium"    ] = m_data["is_premium"    ]
         
         security_login.security_login(app).add_cookie({})
         
@@ -523,15 +527,14 @@ def api_find_match():
 
         
         # Oper ke controller/view layer
-        response = view_swipe.view_swipe(app)._find_potential_match_filter(params)
-        print("response here")
-        print(response)
+        response = view_swipe.view_swipe(app)._find_potential_match_filter(params)    
         return jsonify(response)
 
 @app.route('/api/decision/match', methods=["POST"])
 def api_decision_match():
     params  = sanitize.clean_html_dic(request.form.to_dict())
     params['user_id']  = session.get("user_id")    
+    params['is_premium']  = session.get("is_premium")    
 
     response    = swipe_proc.swipe_proc(app)._decision_match(params )
     return jsonify(response)
@@ -561,6 +564,24 @@ def match():
     params['user_id']  = session.get("user_id")
 
     html   = view_match.view_match(app).html( params )
+    return html
+
+#
+# PREMIUM PAGE
+# 
+
+@app.route("/upgrade-premium")
+def upgrade_premium():    
+    redirect_return = login_precheck({})
+    if redirect_return:
+        return redirect_return
+    # end if
+
+    params = request.form.to_dict()   
+    params['user_id']  = session.get("user_id")
+    params['is_premium']  = session.get("is_premium")
+
+    html   = view_premium.view_premium().html( params )
     return html
 
 #
@@ -599,20 +620,27 @@ def admin_panel_customer():
     html   = view_admin_panel_customer.view_admin_panel_customer(app).html( params )
     return html
 
-
-#
-# PREMIUM PAGE
-# 
-
-@app.route("/premium")
-def premium():    
-    redirect_return = login_precheck({})
+@app.route("/admin/panel/premiumcontrol")
+def admin_panel_premium_control():    
+    redirect_return = login_admin_precheck({})
     if redirect_return:
         return redirect_return
     # end if
+   
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    params['per_page'   ] = request.args.get('per_page', 10)
+    params['page'       ] = request.args.get('page', 1)
+    params['keyword'    ] = request.args.get('keyword', '')
 
-    params = request.form.to_dict()   
-    params['user_id']  = session.get("user_id")
-
-    html   = view_premium.view_premium().html( params )
+    html   = view_admin_panel_premium_control.view_admin_panel_premium_control(app).html( params )
     return html
+
+
+@app.route('/admin/process/premium/apply', methods=["POST"])
+def premium_apply():
+    params               = sanitize.clean_html_dic(request.form.to_dict())
+    params['user_id'] = session.get("user_id")
+
+    response = admin_proc.admin_proc(app)._apply_premium(params)
+    flash("premium success!!", "success")
+    return redirect(url_for("admin_panel_premium_control"))

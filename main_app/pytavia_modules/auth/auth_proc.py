@@ -238,11 +238,28 @@ class auth_proc:
                     user_rec["role"] = "customer"
 
                     
+                # Premium expiry check
+                premium_expiry_str = user_rec.get("premium_expiry", "")
+                is_premium = user_rec.get("is_premium", "FALSE")
+
+                update_fields = {
+                    "login_status": "TRUE"
+                }
+
+                if is_premium == "TRUE" and premium_expiry_str:
+                    try:
+                        expiry_date = datetime.strptime(premium_expiry_str, '%Y-%m-%d %H:%M:%S')
+                        if datetime.now() > expiry_date:
+                            update_fields["is_premium"] = "FALSE"
+                            update_fields["subscription_type"] = "expired"
+                                                        
+                    except Exception as e:
+                        self.webapp.logger.debug(f"[Premium Check] Error: {e}")
+
+                # Final update
                 self.mgdDB.db_users.update_one(
                     {"pkey": user_rec["pkey"]},
-                    {"$set": {
-                        "login_status": "TRUE"                      
-                    }}
+                    {"$set": update_fields}
                 )
 
 
@@ -257,7 +274,8 @@ class auth_proc:
                     "email"           : user_rec["email"                ],
                     "verify_email"    : user_rec["verify_email"         ],
                     "profile_intro"   : user_rec["profile_intro"        ],
-                    "role"            : user_rec["role"        ],
+                    "is_premium"      : user_rec["is_premium"           ],
+                    "role"            : user_rec["role"                 ],
                 }
                 return response
 

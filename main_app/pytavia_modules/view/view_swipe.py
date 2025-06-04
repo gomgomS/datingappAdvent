@@ -107,7 +107,7 @@ class view_swipe:
         blocked_ids = set(current_user.get("fk_user_id_like", []) + current_user.get("fk_user_id_dislike", []))
         blocked_ids.add(user_id)
 
-        # Tambahkan pasangan yang sudah match
+        # Tambahkan pasangan yang sudah match biar tidak muncul lagi pada filter
         matched_users = self.mgdDB.db_matches.find(
             {"$or": [{"user_id_1": user_id}, {"user_id_2": user_id}]}
         )

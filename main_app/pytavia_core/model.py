@@ -309,6 +309,7 @@ db = {
         "password"                    : "",
         "is_premium"                  : "FALSE",
         "subscription_type"           : "", # "free" or "premium"
+        "premium_expiry"              : "",
         "name"                        : "",
         "username"                    : "",
         "verify_email"                : "",
@@ -333,6 +334,7 @@ db = {
             "age_range"               : { "min": 18, "max": 50 },
             "distance_range_km"       : 50,
         },
+        "total_swipe_daily"           : "",
         "created_at"                  : "",
         "updated_at"                  : ""
     },
@@ -416,6 +418,16 @@ db = {
         "status"                      : "", # "pending", "resolved"
         "created_at"                  : "",
         "resolved_at"                 : ""
+    },
+
+    "db_premium_logs": {
+        "log_premium_id"              : "",  # unique ID
+        "user_id"                     : "",  # FK ke db_users
+        "type"                        : "",  # "1_month" atau "3_month"
+        "start_at"                    : "",  # datetime mulai premium
+        "end_at"                      : "",  # datetime akhir premium (auto dihitung)
+        "created_at"                  : ""   # kapan log ini dicatat (biasanya == start_at)
     }
+
 
 }

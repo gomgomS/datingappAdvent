@@ -56,3 +56,30 @@ MAIL_PASSWORD  = "mxfk ezha kgjh sixk"
 MAIL_USE_TLS  = False
 MAIL_USE_SSL  = True
 
+
+MIN_USER_SWIPE_ACCESSABLE = 200
+########################### PREMIUM CONFIGURATION ###########################
+SUBSCRIPTION_CONFIG = {
+    "premium": {
+        "DAILY_SWIPE": 8,
+        "CAN_UNDO_LAST_DISLIKE": True,
+        "CAN_SEE_WHO_LIKE_USER": True,
+        "CAN_UPLOAD_ALBUM": True,
+        "MORE_OFTEN_SEEN": True,
+        "GET_INFO_TOTAL_NEW_USER": True,
+        "CAN_FILTER": True
+    },
+    "free": {
+        "DAILY_SWIPE": 70,
+        "CAN_UNDO_LAST_DISLIKE": False,
+        "CAN_SEE_WHO_LIKE_USER": False,
+        "CAN_UPLOAD_ALBUM": False,
+        "MORE_OFTEN_SEEN": False,
+        "GET_INFO_TOTAL_NEW_USER": False,
+        "CAN_FILTER": False
+    }
+}
+
+
+superadmin_username = "gomgom" 
+password = 1

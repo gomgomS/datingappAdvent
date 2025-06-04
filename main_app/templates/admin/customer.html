@@ -84,6 +84,51 @@
         </div>
       </div>
     </div>
+    {% if total_page > 1 %}
+    <nav aria-label="Page navigation" class="d-flex justify-content-end mt-3">
+      <ul class="pagination">
+        {% set keyword = request.args.get('keyword', '') %}
+        {% set per_page = per_page|string %}
+        {% set prev_page = page - 1 %}
+        {% set next_page = page + 1 %}
+
+        <!-- Previous -->
+        <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+          <a class="page-link" href="?page={{ prev_page }}&per_page={{ per_page }}&keyword={{ keyword }}">«</a>
+        </li>
+
+        <!-- First page -->
+        {% if page > 3 %}
+          <li class="page-item">
+            <a class="page-link" href="?page=1&per_page={{ per_page }}&keyword={{ keyword }}">1</a>
+          </li>
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+
+        <!-- Middle pages -->
+        {% for p in range(page-1, page+2) %}
+          {% if 1 <= p <= total_page %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+              <a class="page-link" href="?page={{ p }}&per_page={{ per_page }}&keyword={{ keyword }}">{{ p }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+
+        <!-- Last page -->
+        {% if page < total_page - 2 %}
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ total_page }}&per_page={{ per_page }}&keyword={{ keyword }}">{{ total_page }}</a>
+          </li>
+        {% endif %}
+
+        <!-- Next -->
+        <li class="page-item {% if page >= total_page %}disabled{% endif %}">
+          <a class="page-link" href="?page={{ next_page }}&per_page={{ per_page }}&keyword={{ keyword }}">»</a>
+        </li>
+      </ul>
+    </nav>
+    {% endif %}
     <div class="modal fade" id="deleteUserModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">

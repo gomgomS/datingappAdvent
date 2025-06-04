@@ -36,14 +36,75 @@ class swipe_proc:
         else :
             return True
 
-
     # end def
 
-    def _decision_match(self, params):        
+    def get_user_config(self, params):
+        user_type = "premium" if params.get("is_premium") == "TRUE" else "free"
+        return config.SUBSCRIPTION_CONFIG[user_type]
+    # end def
+
+
+    def _decision_match(self, params):   
         # Get the user_id of the current session
         user_id = params.get("user_id", "")
         future_wife_id = params.get("future_wife_id", "")
         status = params.get("status", "")
+
+        today_str = datetime.now().strftime('%Y-%m-%d')
+
+        # UNDO SECTION - if future wife id its found remove first 
+         # Find the user document by user_id
+        user_doc = self.mgdDB.db_users.find_one({"user_id": user_id}, {
+            "fk_user_id_like": 1,
+            "fk_user_id_dislike": 1
+        })
+
+        if user_doc:
+            pull_fields = {}
+
+            # Check and prepare $pull if future_wife_id exists in like/dislike
+            if future_wife_id in user_doc.get("fk_user_id_like", []):
+                pull_fields["fk_user_id_like"] = future_wife_id
+
+            if future_wife_id in user_doc.get("fk_user_id_dislike", []):
+                pull_fields["fk_user_id_dislike"] = future_wife_id
+
+            # Perform the pull operation if necessary
+            if pull_fields:
+                self.mgdDB.db_users.update_one(
+                    {"user_id": user_id},
+                    {"$pull": pull_fields}
+                )
+        # END REMOVE IF UNDO
+
+        # Cek log swipe hari ini
+        log_today = self.mgdDB.db_swipe_logs_daily.find_one({
+            "user_id": user_id,
+            "date": today_str
+        })
+
+        if log_today:            
+            user_config = self.get_user_config(params)
+            daily_limit = user_config["DAILY_SWIPE"]
+          
+
+            if log_today["swipe_count"] >= daily_limit:
+                return {"status": "limit_exceeded", "message": "Daily swipe limit reached."}
+            
+            # Update swipe count
+            self.mgdDB.db_swipe_logs_daily.update_one(
+                {"user_id": user_id, "date": today_str},
+                {"$inc": {"swipe_count": 1}, "$set": {"updated_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S')}}
+            )
+        else:
+            # Insert log baru
+            self.mgdDB.db_swipe_logs_daily.insert_one({
+                "user_id": user_id,
+                "date": today_str,
+                "swipe_count": 1,
+                "updated_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            })
+                        
 
         # Determine which field to update
         if status == "acc":

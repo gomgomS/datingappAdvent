@@ -1,0 +1,225 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="content-body">
+  <div class="container pd-x-0 pd-b-100">
+    <div class="">
+      <h1 class="font-weight-bold mg-b-10">Customer Premium Control</h1>      
+
+      <div class="">
+        <div class="row mg-b-20">
+          <div class="col-md-4 mg-t-10">
+            <label for="">Show</label>
+            <select autocomplete="off" class="custom-select" id="custom_select" style="max-width: 100px;">
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+          <div class="col-md-4 mg-t-10 ">
+          </div>
+          <div class="col-md-4 mg-t-10 d-flex justify-content-end">
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+              </div>
+              <input type="text" id="custom_search" class="form-control" placeholder="Search" aria-label="Search">
+              <div class="input-group-append">
+                <button class="btn btn-success text-white" type="button" id="button_search">Search</button>
+              </div>
+            </div>
+          </div>
+        </div>        
+        <div class="table-responsive" style="overflow-y: hidden;">
+          <table id="user_list" class="table lynk-table">
+            <thead>
+              <tr>
+                
+                <th width="20%">Username</th>
+                <th width="20%">Email</th>                
+                <th width="20%">Premium Status</th>                                
+                <th width="15%">Action</th>
+
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in data %}
+              <tr>             
+                <td>{{ user.username }}</td>
+                <td>
+                  {{ user.email }} 
+                  {% if user.verify_email %}
+                    <span class="badge badge-success">Verified</span>
+                  {% else %}
+                    <span class="badge badge-warning">Unverified</span>
+                  {% endif %}
+                </td>              
+                <td>
+                  {% if user.is_premium == "TRUE" and user.premium_expiry %}
+                    <span class="badge badge-primary">Premium</span><br>
+                    <span>{{ user.premium_expiry }}</span><br>
+                    <small class="text-muted">{{ user.premium_countdown }}</small>
+                  {% elif user.is_premium == "TRUE" %}
+                    <span class="badge badge-primary">Premium</span><br>
+                    <small class="text-muted">No expiry</small>
+                  {% else %}
+                    <span class="badge badge-secondary">Free </span><br>
+                    <small class="text-muted">{{user.subscription_type}}</small>
+                  {% endif %}
+                </td>                
+                <td class="text-center">
+                  <div class="dropdown">
+                    <button class="btn btn-success dropdown-toggle" type="button" data-toggle="dropdown">
+                      Actions
+                    </button>
+                    <div class="dropdown-menu">                      
+                      <form action="/admin/process/premium/apply" method="POST" class="px-3 py-2">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="customer_id" value="{{ user.user_id }}">
+                        <input type="hidden" name="duration" value="1">
+                        <button type="submit" class="dropdown-item text-primary">Apply Premium (1 Month)</button>
+                      </form>
+                      <form action="/admin/process/premium/apply" method="POST" class="px-3 py-2">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="customer_id" value="{{ user.user_id }}">
+                        <input type="hidden" name="duration" value="3">
+                        <button type="submit" class="dropdown-item text-primary">Apply Premium (3 Months)</button>
+                      </form>
+                      {% if user.is_premium == "TRUE" %}
+                      <form action="/admin/process/premium/revoke" method="POST" class="px-3 py-2">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="customer_id" value="{{ user.user_id }}">
+                        <button type="submit" class="dropdown-item text-danger">Remove Premium</button>
+                      </form>
+                      {% endif %}
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          
+        </div>
+      </div>
+    </div>
+    {% if total_page > 1 %}
+    <nav aria-label="Page navigation" class="d-flex justify-content-end mt-3">
+      <ul class="pagination">
+        {% set keyword = request.args.get('keyword', '') %}
+        {% set per_page = per_page|string %}
+        {% set prev_page = page - 1 %}
+        {% set next_page = page + 1 %}
+
+        <!-- Previous -->
+        <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+          <a class="page-link" href="?page={{ prev_page }}&per_page={{ per_page }}&keyword={{ keyword }}">«</a>
+        </li>
+
+        <!-- First page -->
+        {% if page > 3 %}
+          <li class="page-item">
+            <a class="page-link" href="?page=1&per_page={{ per_page }}&keyword={{ keyword }}">1</a>
+          </li>
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+
+        <!-- Middle pages -->
+        {% for p in range(page-1, page+2) %}
+          {% if 1 <= p <= total_page %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+              <a class="page-link" href="?page={{ p }}&per_page={{ per_page }}&keyword={{ keyword }}">{{ p }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+
+        <!-- Last page -->
+        {% if page < total_page - 2 %}
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ total_page }}&per_page={{ per_page }}&keyword={{ keyword }}">{{ total_page }}</a>
+          </li>
+        {% endif %}
+
+        <!-- Next -->
+        <li class="page-item {% if page >= total_page %}disabled{% endif %}">
+          <a class="page-link" href="?page={{ next_page }}&per_page={{ per_page }}&keyword={{ keyword }}">»</a>
+        </li>
+      </ul>
+    </nav>
+    {% endif %}
+
+    
+    <!-- Delete User Modal -->
+    <div class="modal fade" id="deleteUserModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Confirm delete</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form id="delete_user" action="/admin/process/user/delete" method="POST">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" class="form-control" name="delete_username" id="username">   
+          </form>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-danger" id="btn_save" form="delete_user">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const getUrlVars = () => {
+    const vars = {};
+    const hashes = window.location.search.substring(1).split("&");
+    hashes.forEach(hash => {
+      const [key, value] = hash.split("=");
+      vars[key] = decodeURIComponent(value || "");
+    });
+    return vars;
+  };
+
+  const queries = getUrlVars();
+  document.getElementById("custom_select").value = queries.per_page || "10";
+  document.getElementById("custom_search").value = queries.keyword || "";
+
+  document.getElementById("button_search").addEventListener("click", function () {
+    const keyword = document.getElementById("custom_search").value;
+    window.location.href = `/admin/panel/premiumcontrol?keyword=${encodeURIComponent(keyword)}`;
+  });
+
+  document.getElementById("custom_select").addEventListener("change", function () {
+    let page = parseInt(queries.page) || 1;
+    const perPage = this.value;
+
+    if (perPage === "10") {
+      page = (page - 1) * 2 + 1;
+    } else {
+      page = Math.ceil(page / 2);
+    }
+
+    const keyword = queries.keyword || "";
+    window.location.href = `/admin/panel/premium?per_page=${perPage}&page=${page}&keyword=${encodeURIComponent(keyword)}`;
+  });
+
+  $('#deleteUserModal').on('show.bs.modal', function (event) {
+    const button = $(event.relatedTarget);
+    const username = button.data("username");
+
+    const modal = $(this);
+    modal.find(".modal-title").html(`Are you sure you want to delete <span class="text-danger">${username}</span>?`);
+    modal.find("#username").val(username);
+  });
+});
+</script>
+{% endblock scripts %}
