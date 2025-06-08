@@ -48,6 +48,7 @@ class view_match:
         core_dialog_message     = view_core_dialog_message.view_core_dialog_message().html(params)                    
 
         _find_match             = self._find_match(params)
+        _find_likes_for_me      = self._find_likes_for_me(params)
 
         return render_template(
             "users/match.html",
@@ -59,11 +60,13 @@ class view_match:
             core_css            = core_css                , 
             core_dialog_message = core_dialog_message     ,    
             find_match          = _find_match             ,
+            find_likes_for_me   = _find_likes_for_me      ,
             img_dispatch_url    = config.G_IMAGE_URL_DISPATCH,
             socketio_chat_server= config.G_CHAT_URL_DISPATCH,
             sender_id           = params['user_id']
         )                
     # end def   
+
 
 
     def _find_match(self, params):        
@@ -139,4 +142,34 @@ class view_match:
         
         return response
     # end def
+
+    def _find_likes_for_me(self, params):
+        user_id = params['user_id']
+
+        pipeline = [
+            {
+                '$match': {
+                    'fk_user_id_like': user_id
+                }
+            },                  
+            {
+                '$project': {
+                    '_id': 0,
+                    'user_id': 1,
+                    'name': 1,
+                    'email': 1,
+                    'profile_photo': 1,
+                    'job': 1,
+                    'city': 1,
+                    'tribe': 1,
+                    'marital_status': 1,
+                    'hobbies': 1,
+                    'about': 1                   
+                }
+            }
+        ]
+
+        response = list(self.mgdDB.db_users.aggregate(pipeline))
+        return response
+
 # end class

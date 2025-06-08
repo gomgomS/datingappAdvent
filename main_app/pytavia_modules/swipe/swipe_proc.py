@@ -132,6 +132,14 @@ class swipe_proc:
                 {"$pull": {"fk_user_id_like": future_wife_id}}  # Remove matched ID
             )
 
+            # Step 3: Remove `user_id` from the match too
+            self.mgdDB.db_users.update_one(
+                {"user_id": future_wife_id},
+                {"$pull": {"fk_user_id_like":user_id }}  # Remove matched ID
+            )
+
+            match_data.pop("_id", None)
+
             return {"status": "match_found", "message": "Mutual match created!", "match_data": match_data}
 
         # Step 4: If no match, just update the like/dislike list

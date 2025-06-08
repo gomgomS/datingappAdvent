@@ -98,7 +98,7 @@
       width: 40px;
       height: 40px;
       font-weight: 600;
-      font-size: 16px;
+      font-size: 10px;
       color: #536387;
       transition: background 0.3s, color 0.3s;
   }
@@ -453,17 +453,33 @@
       <form action="/update/profile" method="POST" enctype="multipart/form-data">
         <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">  
         <input name="user_id" type="hidden" value="{{ data_user.user_id }}">  
-        <div class="formbold-steps">            
-            <ul>
-                <li class="formbold-step-menu1 active"><span>1</span> Profile</li>
-                <li class="formbold-step-menu2"><span>2</span> Sex</li>
-                <li class="formbold-step-menu3"><span>3</span> Hobi</li>
-                <li class="formbold-step-menu4"><span>4</span> Asal</li>
-                <li class="formbold-step-menu5"><span>5</span> Status</li>
-                <li class="formbold-step-menu6"><span>6</span> Advent Status</li>
-                <li class="formbold-step-menu7"><span>7</span> Submit</li>
-            </ul>
+        <div class="formbold-steps">
+          <ul style="display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; list-style: none; justify-content: center;">
+            <li class="formbold-step-menu1 active" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #536387;">
+              <span style="display: flex; align-items: center; justify-content: center; background: #DDE3EC; border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #536387;">1</span> Profil
+            </li>
+            <li class="formbold-step-menu2" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #536387;">
+              <span style="display: flex; align-items: center; justify-content: center; background: #DDE3EC; border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #536387;">2</span> Gender
+            </li>
+            <li class="formbold-step-menu3" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #536387;">
+              <span style="display: flex; align-items: center; justify-content: center; background: #DDE3EC; border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #536387;">3</span> Hobi
+            </li>
+            <li class="formbold-step-menu4" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #536387;">
+              <span style="display: flex; align-items: center; justify-content: center; background: #DDE3EC; border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #536387;">4</span> Asal
+            </li>
+            <li class="formbold-step-menu5" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #536387;">
+              <span style="display: flex; align-items: center; justify-content: center; background: #DDE3EC; border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #536387;">5</span> Status
+            </li>
+            <li class="formbold-step-menu6" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #536387;">
+              <span style="display: flex; align-items: center; justify-content: center; background: #DDE3EC; border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #536387;">6</span> Advent
+            </li>
+            <li class="formbold-step-menu7" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #536387;">
+              <span style="display: flex; align-items: center; justify-content: center; background: #DDE3EC; border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #536387;">7</span> Kirim
+            </li>
+          </ul>
         </div>
+        
+      
     
         <div class="formbold-form-step-1 active">
           <!-- Step 1: Sign Up Fields -->

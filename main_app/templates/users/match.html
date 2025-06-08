@@ -18,123 +18,219 @@
     <link rel="stylesheet" href="../../static/css/custom.css">
     
     <style>
+        /* Bumble Colors & Base */
+        :root {
+            --bumble-yellow: #FFDE59;
+            --bumble-dark: #2f2f2f;
+            --bumble-light: #f8f8f8;
+            --text-muted: #777;
+            --card-radius: 20px;
+        }
+    
+        body {
+            font-family: 'Helvetica Neue', sans-serif;
+            background: var(--bumble-light);
+            color: var(--bumble-dark);
+            margin: 0;
+        }
+    
         /* Top Menu */
         .menu-top {
             display: flex;
             justify-content: space-between;
-            padding: 15px;
+            align-items: center;
+            padding: 16px;
             background: #fff;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
-
+    
         .menu-icon {
-            font-size: 24px;
+            font-size: 26px;
             cursor: pointer;
         }
-
-        /* Middle Image Placeholder */
+    
+        /* Frame Banner Image */
         .frame {
             width: 100%;
-            height: 150px;
+            height: 180px;
             background: url('../../static/assets/img/placeholder.jpg') center/cover no-repeat;
             margin-bottom: 20px;
+            border-radius: var(--card-radius);
         }
-
-        /* Bottom Menu */
+    
+        /* Bottom Navigation */
         .menu-bottom {
             display: flex;
             justify-content: space-around;
-            padding: 10px;
+            padding: 12px 0;
             background: #fff;
-            border-top: 1px solid #ddd;
+            border-top: 1px solid #eee;
             position: fixed;
             bottom: 0;
             width: 100%;
+            z-index: 10;
         }
-
+    
         .menu-item {
             text-align: center;
-            font-size: 14px;
+            font-size: 13px;
             text-decoration: none;
-            color: black;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
         }
-
+    
         .menu-item.active {
+            color: var(--bumble-yellow);
             font-weight: bold;
-            color: red;
         }
-
+    
         .menu-item .menu-icon {
-            font-size: 20px;
+            font-size: 22px;
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
-
+    
+        /* Tab Buttons */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin: 16px 0;
+        }
+    
+        .tab-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 30px;
+            margin: 0 6px;
+            background: #eee;
+            color: #555;
+            font-weight: 500;
+            cursor: pointer;
+        }
+    
+        .tab-button.active {
+            background: var(--bumble-yellow);
+            color: #000;
+        }
+    
         /* Card Layout */
         .card-container {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
             justify-content: center;
-            padding-bottom: 60px; /* Prevent overlap with bottom menu */
+            padding: 80px 10px 100px; /* space for top and bottom menus */
         }
-
+    
         .card {
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            width: 300px;
+            background: #fff;
+            border-radius: var(--card-radius);
+            width: 320px;
             padding: 16px;
             text-align: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
         }
-
+    
+        .card:hover {
+            transform: translateY(-5px);
+        }
+    
         .profile-photo {
             width: 100%;
-            aspect-ratio: 1 / 1; /* Ensures 9:16 ratio */
-            object-fit: cover; /* Prevents distortion */
-            border-radius: 8px;
-            background-color: #f0f0f0; /* Placeholder in case of missing image */
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: var(--card-radius);
+            background-color: #f0f0f0;
+            margin-bottom: 12px;
         }
-
-
+    
         .email {
-            font-size: 14px;
-            color: #555;
-            word-wrap: break-word;
-            margin-top: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 4px;
         }
-
+    
         .created-at {
-            font-size: 12px;
-            color: #888;
-            margin-top: 4px;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
         }
-
+    
         .button-group {
             display: flex;
-            justify-content: space-between;
-            margin-top: 12px;
+            gap: 10px;
+            justify-content: center;
         }
-
+    
         button {
             flex: 1;
             padding: 10px;
-            margin: 0 5px;
             border: none;
-            border-radius: 4px;
+            border-radius: 25px;
             cursor: pointer;
-            color: #fff;
+            font-weight: 600;
             font-size: 14px;
+            transition: background 0.2s;
         }
-
+    
         .unmatch-button {
             background-color: #e74c3c;
+            color: white;
         }
-
+    
         .chat-button {
-            background-color: #3498db;
+            background-color: var(--bumble-yellow);
+            color: #000;
+        }
+    
+        /* Modal album photo styles */
+        #album-photos img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+        }
+    
+        .modal-footer {
+            border-top: none;
+            padding-top: 0;
+        }
+    
+        .modal-footer .btn {
+            border-radius: 30px;
+            padding: 6px 20px;
+        }
+    
+        /* Responsive */
+        @media (max-width: 768px) {
+            .profile-photo {
+                width: 100%;
+                height: auto;
+            }
+    
+            .card {
+                width: 90%;
+            }
+    
+            .modal-dialog {
+                margin: 1rem;
+            }
+    
+            .profile-info-grid {
+                grid-template-columns: 1fr;
+            }
+    
+            #album-photos img {
+                height: 140px;
+            }
         }
     </style>
+    
 </head>
 
 <body>
@@ -142,29 +238,62 @@
     <!-- Top Menu -->
     <div class="menu-top">
         <div class=""></div>  <!-- Top Left -->
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <i class="fas fa-crown"></i> 
+        <div style="display: flex; align-items: center; gap: 15px;">            
+            <a href="/upgrade-premium" class="menu-icon" style="text-decoration: none; color: black;">
+                <i class="fas fa-crown"></i> 
+              </a>
             <a href="/auth/logout" class="menu-icon" style="text-decoration: none; color: black;">
                 <i class="fas fa-sign-out-alt"></i> <!-- Logout Icon -->
             </a>
         </div>
     </div>   
 
-    <!-- Card List -->
-    <div class="card-container">
-        {% for match in find_match %}
+    <!-- Tab Buttons -->
+    <div class="tabs">
+        <button class="tab-button active" onclick="showTab('matches')">Matches</button>
+        <button class="tab-button" onclick="showTab('likes')">Likes for Me</button>
+    </div>
+
+    <!-- Matches List -->
+    <div id="matches" class="tab-content active">
+        <div class="card-container">
+            {% for match in find_match %}
+                <div class="card">
+                    <img src="{{ img_dispatch_url }}{{ match.matched_user.profile_photo }}" alt="Profile Photo" class="profile-photo">
+                    <div class="email">{{ match.matched_user.name }}</div>
+                    <div class="created-at">Matched on: {{ match.created_at }}</div>
+                    <div class="button-group">
+                        <button class="detail-button" onclick="showFutureWifeId('{{ match.matched_user.user_id }}')">Detail</button>
+                        <button class="chat-button" onclick="openChat('{{ match.match_id }}', '{{ sender_id }}')">Chat</button>
+
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <!-- Hidden form for secure POST submission -->
+    <form id="chatForm" method="POST" action="{{ socketio_chat_server }}/chat" style="display: none;">
+        <input type="hidden" name="match_id" id="match_id_input">
+        <input type="hidden" name="sender" id="sender_id_input">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> <!-- If CSRF is required -->
+    </form>
+
+
+    <!-- Likes For Me List -->
+    <div id="likes" class="tab-content" style="display: none;">
+        <div class="card-container">
+            {% for like in find_likes_for_me %}
             <div class="card">
-                <img src="{{ img_dispatch_url }}{{ match.matched_user.profile_photo }}" alt="Profile Photo" class="profile-photo">
-                <div class="email">{{ match.matched_user.name }}</div>
-                <div class="created-at">Matched on: {{ match.created_at }}</div>
+                <img src="{{ img_dispatch_url }}{{ like.profile_photo }}" alt="Profile Photo" class="profile-photo">
+                <div class="email">{{ like.name }}</div>                
                 <div class="button-group">
-                    <button class="unmatch-button">Unmatch</button>
-                    <a href="{{ socketio_chat_server }}/chat?match_id={{ match.match_id }}&sender={{ sender_id }}">
-                        <button class="chat-button">Chat</button>
-                    </a>
+                <button class="detail-button" onclick="showFutureWifeId('{{ like.user_id }}')">Detail</button>
+                <button class="chat-button" onclick="sendDecision('{{ like.user_id }}')">Match</button>
                 </div>
             </div>
-        {% endfor %}
+            {% endfor %}
+
+        </div>
     </div>
 
     <!-- Bottom Menu -->
@@ -194,6 +323,100 @@
         </a>
     </div>
 
+    <!-- Redesigned Dating App Modal -->
+    <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content bumble-profile">
+      
+            <!-- Profile Header -->
+            <div class="profile-header text-center">
+              <img id="profile-photo" class="profile-photo rounded-circle" src="" alt="Profile Photo">
+              <h3 id="name" class="mt-2 mb-0">Name</h3>
+              <p id="age" class="text-muted mb-1">25</p> <!-- AGE added under name -->
+              <p id="job" class="text-muted mb-0">Job Title</p>
+              <p id="city" class="text-muted">City</p>
+            </div>
+      
+            <!-- Profile Body -->
+            <div class="modal-body">
+      
+              <!-- Photo Album -->
+              <div id="album" class="mb-4">
+                <h6 class="section-title">Photo Album</h6>
+                <div class="row row-cols-2 row-cols-md-3 g-3" id="album-photos">
+                  <!-- JS populates images here -->
+                </div>
+              </div>
+      
+              <!-- Info Grid -->
+              <div class="profile-info-grid">
+                <div class="info-item d-none">
+                  <i class="fas fa-user-circle"></i>
+                  <span id="username">Username</span>
+                </div>
+                <div class="info-item d-none">
+                  <i class="fas fa-envelope"></i>
+                  <span id="email">Email</span>
+                </div>
+                <div class="info-item">
+                  <i class="fas fa-heartbeat"></i>
+                  <span id="hobbies">Hobbies</span>
+                </div>
+                <div class="info-item">
+                  <i class="fas fa-people-arrows"></i>
+                  <span id="tribe">Tribe</span>
+                </div>
+                <div class="info-item">
+                  <i class="fas fa-ring"></i>
+                  <span id="marital-status">Marital Status</span>
+                </div>
+                <div class="info-item wide">
+                  <i class="fas fa-comment-dots"></i>
+                  <span id="about">About</span>
+                </div>
+              </div>
+      
+            </div>
+      
+            <!-- Modal Footer -->
+            <div class="modal-footer justify-content-center">
+              <button type="button" class="btn btn-light rounded-pill px-4" data-dismiss="modal">
+                Close
+              </button>
+            </div>
+      
+          </div>
+        </div>
+      </div>
+      
+    <div class="modal fade" id="modal-match-found" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content text-center p-4">
+        <div class="modal-body">
+            <h5 class="modal-title mb-3">🎉 Selamat, kamu menemukan pasangan yang cocok!</h5>
+            <button type="button" class="btn btn-primary" data-dismiss="modal">Tutup</button>
+        </div>
+        </div>
+    </div>
+    </div>
+       
+  
+    <!-- Full Image Modal (Bootstrap 4) -->
+    <div class="modal fade" id="fullImageModal" tabindex="-1" role="dialog" aria-labelledby="fullImageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content bg-dark text-white border-0">
+            <div class="modal-header border-0">
+            <button type="button" class="close text-white ml-auto" data-dismiss="modal" aria-label="Close" style="background-color: black;">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body p-0">
+            <img id="full-image" class="img-fluid w-100" src="" alt="Full Image">
+            </div>
+        </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://kit.fontawesome.com/41e808b0fd.js" crossorigin="anonymous"></script>
     <script src="../../static/lib/jquery/jquery.min.js"></script>
@@ -204,6 +427,122 @@
     <script src="../../static/assets/js/dashforge.js"></script>
     <script src="../../static/assets/js/dashforge.aside.js"></script>
     <script src="../../static/lib/select2/js/select2.min.js"></script>
+    <script>
+
+        // Delegate click to any image inside #album-photos
+            document.addEventListener("click", function (e) {
+                if (e.target.closest("#album-photos img")) {
+                const img = e.target.closest("img");
+                const fullImage = document.getElementById("full-image");
+                fullImage.src = img.src;
+
+                // Show the full image modal (Bootstrap 4/5 compatible)
+                $('#fullImageModal').modal('show');
+                }
+            });
+        async function showFutureWifeId(match_id) {
+        if (!match_id) {
+          alert('No profile selected.');
+          return;
+        }
+        
+        const futureId = match_id;
+
+        try {
+          const res = await fetch(`/api/detail/match?future_soulmate_id=${encodeURIComponent(futureId)}`, {
+            method: 'GET'
+          });
+
+          const json = await res.json();
+          if (json.status === 'success') {
+            const data = json.data;
+
+            // Set Profile Information
+            document.getElementById('profile-photo').src = data.profile_photo ? `{{img_dispatch_url}}${data.profile_photo}` : 'default-profile.jpg';
+            document.getElementById('name').textContent = data.name;
+            document.getElementById('job').textContent = data.job;
+            document.getElementById('city').textContent = data.city;
+            document.getElementById('username').textContent = data.username;
+            document.getElementById('email').textContent = data.email;
+            document.getElementById('hobbies').textContent = data.hobbies;
+            document.getElementById('tribe').textContent = data.tribe;
+            document.getElementById('marital-status').textContent = data.marital_status;
+            document.getElementById('about').textContent = data.about;
+            
+
+            // Set Album Photos
+            const albumContainer = document.getElementById('album-photos');
+            albumContainer.innerHTML = ''; // Clear previous content
+            if (data.image && data.image.length > 0) {
+              data.image.forEach(photo => {
+                const img = document.createElement('img');
+                img.src = `{{img_dispatch_url}}${photo}`;
+                img.alt = 'Album Photo';
+                img.classList.add('col-4', 'mb-2', 'img-fluid', 'rounded');
+                img.style.cursor = 'pointer';
+                
+                img.onclick = function () {
+                  openFullImageModal(img.src);
+                };
+                
+                albumContainer.appendChild(img);
+              });
+            }
+
+            // Open the modal using Bootstrap's modal methods
+            const modal = new bootstrap.Modal(document.getElementById('profileModal'));
+            modal.show();
+          } else {
+            alert('Failed to fetch profile detail.');
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Something went wrong.');
+        }
+      }
+
+    //tab match and like him/her
+    function showTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(div => div.style.display = 'none');
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(tabName).style.display = 'block';
+        event.target.classList.add('active');
+    }
+
+    // acc match
+    function sendDecision(futureWifeId) {
+        const apiUrl = "{{main_app_url}}/api/decision/match";
+
+        $.post(apiUrl, {
+            csrf_token: "{{ csrf_token() }}",
+            future_wife_id: futureWifeId,
+            status: "acc"
+        })
+        .done(function(response) {
+            console.log("Match decision sent", response);
+           
+
+            if (response.status === "match_found") {
+                $('#modal-match-found').modal('show');
+                setTimeout(function() {
+                    location.reload();
+                }, 3000); // 3000 milliseconds = 3 seconds
+            }
+
+        })
+        .fail(function(error) {
+            console.error("Error sending match decision:", error);
+        });
+    }
+
+    //chat open chat
+    function openChat(matchId, senderId) {
+        document.getElementById("match_id_input").value = matchId;
+        document.getElementById("sender_id_input").value = senderId;
+        document.getElementById("chatForm").submit();
+    }
+
+    </script>
 
 </body>
 </html>
