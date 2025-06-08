@@ -472,6 +472,77 @@
         cursor: pointer;
       }
 
+      /* MODAL FILTER */
+      /* Bumble-style modal content */
+      .modal-content {
+        background-color: #fffbe6; /* Soft yellow background */
+        border-radius: 1rem;
+        border: none;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Header title */
+      .modal-title {
+        font-size: 1.3rem;
+        color: #333;
+      }
+
+      /* Section headings */
+      .modal-body h6 {
+        color: #666;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      /* Form labels */
+      .form-group label {
+        font-weight: 500;
+        color: #333;
+      }
+
+      /* Range slider */
+      input[type=range] {
+        accent-color: #f9b233; /* Bumble yellow */
+      }
+
+      /* Radio buttons */
+      .custom-control-label::before {
+        border-color: #f9b233;
+      }
+
+      .custom-control-input:checked ~ .custom-control-label::before {
+        background-color: #f9b233;
+        border-color: #f9b233;
+      }
+
+      /* Buttons */
+      .btn-primary {
+        background-color: #f9b233;
+        border-color: #f9b233;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: #e6a420;
+        border-color: #e6a420;
+      }
+
+      .btn-outline-secondary {
+        border-color: #ccc;
+        color: #666;
+      }
+
+      .btn-outline-secondary:hover {
+        background-color: #eee;
+        color: #333;
+      }
+
+
+      
+
+      /* END MODAL FILTER */
+
     </style>
 </head>
 
@@ -490,7 +561,7 @@
           <i class="fas fa-undo"></i>
         </a>
         
-        <a href="/premium" class="menu-icon" style="text-decoration: none; color: black;">
+        <a href="/upgrade-premium" class="menu-icon" style="text-decoration: none; color: black;">
           <i class="fas fa-crown"></i> 
         </a>
     
@@ -632,38 +703,108 @@
         </div>
       </div>
 
-      <!-- 🎯 Modal for Filters -->
+      <!-- 🎯 Redesigned Modal for Filters (Bumble Style) -->
     <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="filterModalLabel">Filter Your Matches</h5>
+      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content rounded-3 border-0 shadow-lg">
+
+          <div class="modal-header border-0">
+            <h5 class="modal-title font-weight-bold" id="filterModalLabel">✨ Atur Kriteria Pasangan {{is_premium}}
+              {% if is_premium == 'TRUE' %} 
+              <span class="badge badge-warning ml-2" data-toggle="tooltip" title="Fitur lengkap tersedia untuk member premium!">You Are Premium Member</span>
+              {% endif %}
+            </h5> 
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
 
-          <div class="modal-body">
-            
-            <!-- 🔵 Jarak Slider -->
-            <div class="form-group">
-              <label for="distanceRange">📍 Distance (km)</label>
-              <input type="range" id="distanceRange" min="1" max="100" value="50" class="custom-range" oninput="updateDistanceValue()">
-              <p>Selected Distance: <span id="distanceValue">50 km</span></p>
+          <div class="modal-body px-4 py-3">
+            <!-- Section: Basic Filters -->
+            <div class="mb-4">
+              <h6 class="font-weight-bold text-muted mb-3">Filter Dasar</h6>
+
+              <div class="form-group d-flex align-items-center justify-content-between">
+                <label class="mb-0" for="useAge">🎂 Rentang Usia</label>
+                <input type="checkbox" class="form-check-input" id="useAge" checked onchange="toggleAge(this.checked)">
+              </div>
+
+              <div class="form-group" id="ageFilter">
+                <label>Usia</label>
+              
+                <div class="d-flex align-items-center">
+                  <input type="range" id="minAgeRange" min="18" max="60" value="18" class="custom-range mr-2" oninput="updateAgeRangeValue()">
+                  <input type="range" id="maxAgeRange" min="18" max="60" value="35" class="custom-range ml-2" oninput="updateAgeRangeValue()">
+                </div>
+              
+                <p class="small">Dipilih: <span id="ageRangeValue">18 - 35</span> tahun</p>
+              </div>
+
+              <div class="form-group d-flex align-items-center justify-content-between">
+                <label class="mb-0" for="useHometown">🏡 Kota Asal</label>
+                <input type="checkbox" class="form-check-input" id="useHometown" checked onchange="toggleHometown(this.checked)">
+              </div>
+
+              <select class="form-control" id="hometown" name="hometown"
+                {% if is_premium != 'TRUE' %} onchange="handleCityChange(this)" {% endif %}>
+                <option value="">Pilih Kota Asal</option>
+                {% for city in city_list %}
+                  {% if city not in ['Jakarta', 'Semarang', 'Bandung', 'Surabaya'] and is_premium != 'TRUE' %}
+                    <option value="{{ city }}">{{ city }} ✨✨✨ </option>
+                  {% else %}
+                    <option value="{{ city }}">{{ city }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+
+            </div>        
+           <!-- Section: Advanced Filters -->
+          <div class="mb-4">
+            <h6 class="font-weight-bold text-muted mb-3">Filter Lanjutan</h6>
+
+            <!-- 📍 Radius Pencarian -->
+            <div class="form-group d-flex align-items-center justify-content-between">
+              <label class="mb-0" for="useDistance">📍 Radius Pencarian</label>
+              <input type="checkbox" class="form-check-input" id="useDistance"
+                {% if is_premium != 'TRUE' %}
+                  onclick="$('#premiumModal').modal('show'); return false;"
+                {% else %}
+                  onchange="toggleDistance(this.checked)"
+                {% endif %}>
             </div>
 
-            <!-- 🔵 Umur Slider -->
-            <div class="form-group">
-              <label for="ageRange">🎂 Age Range</label>
-              <input type="range" id="ageRange" min="18" max="60" value="25" class="custom-range" oninput="updateAgeValue()">
-              <p>Selected Age: <span id="ageValue">25</span></p>
+            <div class="form-group" id="distanceFilter">
+              <label for="distanceRange">Radius (km)</label>
+              <input
+                type="range"
+                id="distanceRange"
+                min="0"
+                max="100"
+                value="0"
+                class="custom-range"
+                oninput="handleDistanceChange()"
+              >
+              <p class="small">Dipilih: <span id="distanceValue">0</span> km</p>
             </div>
 
-            <!-- 🌎 Filter Kota Asal & Kota Sekarang -->
-            <div class="form-group">
-              <label for="hometown">🏡 Hometown</label>
-              <select class="form-control" id="hometown">
-                <option value="">Select Hometown</option>
+            <!-- 🌎 Kota Pasangan -->
+            <div class="form-group form-check" style="display: none;">
+              <input type="checkbox" class="form-check-input" id="useCurrentCity" checked
+                {% if is_premium != 'TRUE' %}
+                  onclick="$('#premiumModal').modal('show'); return false;"
+                {% else %}
+                  onchange="toggleCurrentCity(this.checked)"
+                {% endif %}>
+              <label class="form-check-label" for="useCurrentCity">📍Pakai Lokasi Calon Pasangan</label>
+            </div>
+
+            <div class="form-group" id="currentCityFilter" style="display: none;">
+              <label for="currentCity">Kota</label>
+              <select class="form-control" id="currentCity"
+                {% if is_premium != 'TRUE' %}
+                  onclick="$('#premiumModal').modal('show'); return false;"
+                {% endif %}>
+                <option value="">Pilih Kota</option>
                 <option value="Jakarta">Jakarta</option>
                 <option value="Surabaya">Surabaya</option>
                 <option value="Bandung">Bandung</option>
@@ -671,66 +812,53 @@
               </select>
             </div>
 
-            <div class="form-group">
-              <label for="currentCity">📍 Current City</label>
-              <select class="form-control" id="currentCity">
-                <option value="">Select Current City</option>
-                <option value="Jakarta">Jakarta</option>
-                <option value="Surabaya">Surabaya</option>
-                <option value="Bandung">Bandung</option>
-                <option value="Bali">Bali</option>
-              </select>
+            <!-- 💍 Status Hubungan -->
+            <div class="form-group d-flex align-items-center justify-content-between">
+              <label class="mb-0" for="useMaritalStatus">💍 Status Hubungan</label>
+              <input type="checkbox" class="form-check-input" id="useMaritalStatus" checked
+                {% if is_premium != 'TRUE' %}
+                  onclick="$('#premiumModal').modal('show'); return false;"
+                {% else %}
+                  onchange="toggleMaritalStatus(this.checked)"
+                {% endif %}>
             </div>
 
-            <!-- ℹ️ Perbedaan Kota -->
-            <p class="text-muted">
-              🏡 <strong>Hometown</strong>: Where you were born or grew up.<br>
-              📍 <strong>Current City</strong>: Where you currently live.
-            </p>
-
-            <!-- ❤️ Marital Status -->
-            <div class="form-group">
-              <label>💍 Marital Status</label>
+            <div class="form-group" id="maritalStatusFilter">
+              <label>Status Pernikahan</label>
+              {% for status in [
+                ('never-married', 'Lajang - Belum Pernah Menikah (never-married) '),
+                ('abandoned', 'Lajang - Ditinggalkan Pasangan (abandoned)'),
+                ('separated', 'Lajang - Pisah Tempat Tinggal (separated)'),
+                ('divorced', 'Lajang - Cerai (divorced)'),
+                ('widowed', 'Lajang - Duda/Janda (widowed)'),
+                ('complicated', 'Rumit (complicated)'),
+                ('other', 'Lainnya' 'other')
+              ] %}
               <div class="custom-control custom-radio">
-                <input type="radio" id="never-married" name="maritalStatus" class="custom-control-input">
-                <label class="custom-control-label" for="never-married">Single - Never Married</label>
+                <input type="radio" id="{{ status.0 }}" name="maritalStatus" class="custom-control-input"
+                  {% if is_premium != 'TRUE' %}
+                    onclick="$('#premiumModal').modal('show'); return false;"
+                  {% endif %}>
+                <label class="custom-control-label" for="{{ status.0 }}">{{ status.1 }}</label>
               </div>
-              <div class="custom-control custom-radio">
-                <input type="radio" id="abandoned" name="maritalStatus" class="custom-control-input">
-                <label class="custom-control-label" for="abandoned">Single - Abandoned</label>
-              </div>
-              <div class="custom-control custom-radio">
-                <input type="radio" id="separated" name="maritalStatus" class="custom-control-input">
-                <label class="custom-control-label" for="separated">Single - Separated</label>
-              </div>
-              <div class="custom-control custom-radio">
-                <input type="radio" id="divorced" name="maritalStatus" class="custom-control-input">
-                <label class="custom-control-label" for="divorced">Single - Divorced</label>
-              </div>
-              <div class="custom-control custom-radio">
-                <input type="radio" id="widowed" name="maritalStatus" class="custom-control-input">
-                <label class="custom-control-label" for="widowed">Single - Widower/Widow</label>
-              </div>
-              <div class="custom-control custom-radio">
-                <input type="radio" id="complicated" name="maritalStatus" class="custom-control-input">
-                <label class="custom-control-label" for="complicated">Complicated</label>
-              </div>
-              <div class="custom-control custom-radio">
-                <input type="radio" id="other" name="maritalStatus" class="custom-control-input">
-                <label class="custom-control-label" for="other">Other</label>
-              </div>
+              {% endfor %}
             </div>
+          </div>
 
           </div>
 
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
-
+          <div class="modal-footer border-0 d-flex justify-content-between">
+            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Tutup</button>
+            <button type="button" class="btn btn-primary" onclick="{% if is_premium == "TRUE" %}applyFilters(){% else %}applyFiltersNonPremium(){% endif %}">
+              Terapkan Filter
+            </button>            
           </div>
+
         </div>
       </div>
     </div>
+
+
 
     <!-- limit swipe modal -->
     <div class="modal fade" id="modal-swipe-limit" tabindex="-1" role="dialog" aria-labelledby="swipeLimitLabel" aria-hidden="true">
@@ -751,7 +879,28 @@
           </div>
         </div>
       </div>
-    </div>    
+    </div> 
+
+    <!-- Modal Premium Only -->
+        <!-- Modal untuk Premium Only -->
+    <div class="modal fade" id="premiumModal" tabindex="-1" role="dialog" aria-labelledby="premiumModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header bg-warning text-white">
+            <h5 class="modal-title" id="premiumModalLabel">Fitur Khusus Pengguna Premium</h5>
+            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body text-center">
+            <p>Filter lanjutan ini hanya tersedia untuk pengguna <strong>Premium</strong>.</p>
+            <button class="btn btn-primary mt-2" onclick="window.location.href='/upgrade-premium'">Daftar Premium Sekarang</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+   
 
     <input type="hidden" id="latitude">
     <input type="hidden" id="longitude">
@@ -888,6 +1037,7 @@
             img: item.img,
             name: item.name,
             age: item.age,
+            city: item.city,
             distance: item.distance,
             future_wife_id: item.user_id
           }));
@@ -940,7 +1090,7 @@
                 <div class="bottom">
                   <div class="title">
                     <span>${data.name}</span>
-                    <p>${data.age} thn</p>
+                    <p>${data.age} thn - ${data.city}</p>
                   </div>
                   <div class="info">                   
                   </div>
@@ -1033,8 +1183,6 @@
 
       function sendDecision(futureWifeId, status) {
         const apiUrl = "{{main_app_url}}/api/decision/match";
-        console.log(futureWifeId)
-        console.log("boom")
         $.post(apiUrl, {
           csrf_token: "{{ csrf_token() }}", // CSRF token
           future_wife_id: futureWifeId,
@@ -1145,17 +1293,93 @@
         }
       }
 
+      // FILTER SECTION
+      
       function updateDistanceValue() {
-        document.getElementById('distanceValue').textContent = document.getElementById('distanceRange').value + ' km';
+        document.getElementById("distanceValue").textContent = document.getElementById("distanceRange").value + " km";
+      }
+      // USIA
+      function updateAgeRangeValue() {
+          const minSlider = document.getElementById("minAgeRange");
+          const maxSlider = document.getElementById("maxAgeRange");
+
+          let min = parseInt(minSlider.value);
+          let max = parseInt(maxSlider.value);
+
+          // Jika min >= max, otomatis geser max ke min + 1 (jika masih dalam batas)
+          if (min >= max) {
+            max = Math.min(min + 1, parseInt(maxSlider.max));
+            maxSlider.value = max;
+          }
+
+          // Jika max <= min, otomatis geser min ke max - 1 (jika masih dalam batas)
+          if (max <= min) {
+            min = Math.max(max - 1, parseInt(minSlider.min));
+            minSlider.value = min;
+          }
+
+          document.getElementById("ageRangeValue").innerText = `${min} - ${max}`;
+        }
+
+      // END USIA
+
+      // CITY
+      function handleCityChange(select) {
+        const freeCities = ['Jakarta', 'Semarang', 'Bandung', 'Surabaya'];
+        const selectedCity = select.value;
+
+        if (!freeCities.includes(selectedCity)) {
+          // Reset kembali ke default option
+          select.value = '';
+          // Tampilkan modal
+          $('#premiumModal').modal('show');
+        }
+      }
+      // END CITY
+      
+      function toggleDistance(checked) {
+        const distanceFilter = document.getElementById("distanceFilter");
+        const distanceRange = document.getElementById("distanceRange");
+        const distanceValue = document.getElementById("distanceValue");
+
+        distanceFilter.style.display = checked ? 'block' : 'none';
+
+        if (checked) {
+          distanceRange.value = 50;
+          distanceValue.innerText = "50";
+        } else {
+          distanceRange.value = 0;
+          distanceValue.innerText = "0";
+        }
       }
 
-      function updateAgeValue() {
-        document.getElementById('ageValue').textContent = document.getElementById('ageRange').value;
+
+
+      function toggleAge(show) {
+        document.getElementById("ageFilter").style.display = show ? 'block' : 'none';
+      }
+
+      function toggleHometown(show) {
+        document.getElementById("hometownFilter").style.display = show ? 'block' : 'none';
+      }
+
+      function toggleCurrentCity(show) {
+        document.getElementById("currentCityFilter").style.display = show ? 'block' : 'none';
+      }
+
+      function toggleMaritalStatus(show) {
+        document.getElementById("maritalStatusFilter").style.display = show ? 'block' : 'none';
       }  
 
-      
-
-      
+      function applyFiltersNonPremium() {
+        sendFilterRequest({
+          min_age: document.getElementById("minAgeRange").value,
+          max_age: document.getElementById("maxAgeRange").value,
+          distance: document.getElementById("distanceRange").value,
+          hometown: document.getElementById("hometown").value
+        });
+      }
+   
       function applyFilters() {
         const lastGeoDate = "{{ user_rec.location.lastGeoDate }}"; // Format: "YYYY-MM-DD"
         const today = new Date().toISOString().split('T')[0];
@@ -1185,7 +1409,8 @@
 
                     // 🚀 Kirim semua filter, dengan current_position dalam satu objek
                     sendFilterRequest({
-                      age: document.getElementById("ageRange").value,
+                      min_age: document.getElementById("minAgeRange").value,
+                      max_age: document.getElementById("maxAgeRange").value,
                       distance: document.getElementById("distanceRange").value,
                       hometown: document.getElementById("hometown").value,
                       currentCity: document.getElementById("currentCity").value,
@@ -1204,7 +1429,8 @@
 
                     // Tetap kirim walau gagal reverse geocoding
                     sendFilterRequest({
-                      age: document.getElementById("ageRange").value,
+                      min_age: document.getElementById("minAgeRange").value,
+                      max_age: document.getElementById("maxAgeRange").value,
                       distance: document.getElementById("distanceRange").value,
                       hometown: document.getElementById("hometown").value,
                       currentCity: document.getElementById("currentCity").value,
@@ -1221,7 +1447,8 @@
 
                 // Kirim tanpa current_position
                 sendFilterRequest({
-                  age: document.getElementById("ageRange").value,
+                  min_age: document.getElementById("minAgeRange").value,
+                  max_age: document.getElementById("maxAgeRange").value,
                   distance: document.getElementById("distanceRange").value,
                   hometown: document.getElementById("hometown").value,
                   currentCity: document.getElementById("currentCity").value,
@@ -1232,7 +1459,8 @@
           } else {
             alert("Browser kamu tidak mendukung fitur lokasi otomatis.");
             sendFilterRequest({
-              age: document.getElementById("ageRange").value,
+              min_age: document.getElementById("minAgeRange").value,
+              max_age: document.getElementById("maxAgeRange").value,
               distance: document.getElementById("distanceRange").value,
               hometown: document.getElementById("hometown").value,
               currentCity: document.getElementById("currentCity").value,
@@ -1241,7 +1469,8 @@
           }
         } else {
           sendFilterRequest({
-              age: document.getElementById("ageRange").value,
+              min_age: document.getElementById("minAgeRange").value,
+              max_age: document.getElementById("maxAgeRange").value,
               distance: document.getElementById("distanceRange").value,
               hometown: document.getElementById("hometown").value,
               currentCity: document.getElementById("currentCity").value,
@@ -1272,6 +1501,7 @@
               img: item.img,
               name: item.name,
               age: item.age,
+              city: item.city,
               distance: item.distance,
               future_wife_id: item.user_id
             }));
@@ -1294,7 +1524,26 @@
             $('#loading-card').hide();
           });
       }
+      // END FILTER SECTION
 
+      // START PREMIUM MODAL BEHAVIOR
+      
+      
+      
+      function handleDistanceChange() {
+        const isPremium = {{is_premium | tojson}};
+        const rangeInput = document.getElementById('distanceRange');
+        const distanceValue = document.getElementById('distanceValue');
+        if (isPremium == "FALSE") {
+          // Reset to 0
+          rangeInput.value = 0;
+          distanceValue.textContent = 0;
+          $('#premiumModal').modal('show');
+        } else {
+          distanceValue.textContent = rangeInput.value;
+        }
+      }
+      // END PREMIUM MODAL BEHAVIOR
    </script>
 
 </body>

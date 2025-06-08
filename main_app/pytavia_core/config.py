@@ -16,8 +16,9 @@ G_UPLOAD_URL_PATH           = G_STATIC_URL_PATH + "/upload"
 ############################################################################################################################################################
 
 # DEVELOPMENT
-
-MAIN_APP_URL                = "http://0.0.0.0:50011"
+# IF RESPON 400 AND CSRF MISSING MAKESURE FIRST YOUR RUN USING http://localhost:50011 it will works 
+# why using http://localhost:50011 IDONT FKING KNOW 
+MAIN_APP_URL                = "http://localhost:50011"
                         
 # DATABASE
 mainDB                      = "datingapp"
@@ -56,6 +57,26 @@ MAIL_PASSWORD  = "mxfk ezha kgjh sixk"
 MAIL_USE_TLS  = False
 MAIL_USE_SSL  = True
 
+CITY_LIST = [
+          "Jakarta", "Surabaya", "Bandung", "Medan", "Semarang",
+          "Palembang", "Makassar", "Bogor", "Depok", "Bekasi",
+          "Yogyakarta", "Malang", "Padang", "Pekanbaru", "Banjarmasin",
+          "Samarinda", "Pontianak", "Manado", "Denpasar", "Batam",
+          "Tangerang", "South Tangerang", "Bandar Lampung", "Cimahi", "Tasikmalaya",
+          "Serang", "Balikpapan", "Jambi", "Cirebon", "Surakarta",
+          "Kupang", "Mataram", "Jayapura", "Bengkulu", "Palu",
+          "Ambon", "Kendari", "Dumai", "Pekalongan", "Palangka Raya",
+          "Binjai", "Kediri", "Sorong", "Tegal", "Banda Aceh",
+          "Tarakan", "Probolinggo", "Singkawang", "Lubuklinggau", "Tanjungpinang",
+          "Bitung", "Pangkalpinang", "Batu", "Pasuruan", "Banjar",
+          "Gorontalo", "Ternate", "Madiun", "Salatiga", "Prabumulih",
+          "Lhokseumawe", "Langsa", "Bontang", "Tanjungbalai", "Tebing Tinggi",
+          "Metro", "Palopo", "Bima", "Baubau", "Parepare",
+          "Blitar", "Pagar Alam", "Payakumbuh", "Gunungsitoli", "Mojokerto",
+          "Bukittinggi", "Kotamobagu", "Magelang", "Tidore", "Tomohon",
+          "Sungai Penuh", "Subulussalam", "Pariaman", "Sibolga", "Tual",
+          "Solok", "Sawahlunto", "Padang Panjang", "Sabang","Timika"
+        ]
 
 MIN_USER_SWIPE_ACCESSABLE = 200
 ########################### PREMIUM CONFIGURATION ###########################

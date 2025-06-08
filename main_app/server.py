@@ -500,6 +500,7 @@ def swipe():
 
     params = request.form.to_dict()   
     params['user_id']  = session.get("user_id")
+    params['is_premium']  = session.get("is_premium")
 
     html   = view_swipe.view_swipe(app).html( params )
     return html
@@ -519,20 +520,25 @@ def api_find_match():
     # Untuk POST request
     elif request.method == "POST":                
         params  = sanitize.clean_html_dic(request.form.to_dict())
+        params['is_premium']  = session.get("is_premium")
         
         # Tambahkan user_id dari session
         params['user_id'] = session.get("user_id")
         params['skip'] = 0
         params['limit'] = 15
-
         
-        # Oper ke controller/view layer
-        response = view_swipe.view_swipe(app)._find_potential_match_filter(params)    
+        # Oper ke controller/view layers
+        print(params['is_premium'])
+        if params['is_premium'] == "TRUE":            
+            response = view_swipe.view_swipe(app)._find_potential_match_filter(params)    
+        else:
+            response = view_swipe.view_swipe(app)._find_potential_match_filter_non_premium(params)
         return jsonify(response)
 
 @app.route('/api/decision/match', methods=["POST"])
 def api_decision_match():
     params  = sanitize.clean_html_dic(request.form.to_dict())
+    print(params)
     params['user_id']  = session.get("user_id")    
     params['is_premium']  = session.get("is_premium")    
 

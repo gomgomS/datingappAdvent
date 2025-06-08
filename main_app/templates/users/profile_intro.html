@@ -1458,26 +1458,8 @@
           }
         });   
 
-        const cityList = [
-          "Jakarta", "Surabaya", "Bandung", "Medan", "Semarang",
-          "Palembang", "Makassar", "Bogor", "Depok", "Bekasi",
-          "Yogyakarta", "Malang", "Padang", "Pekanbaru", "Banjarmasin",
-          "Samarinda", "Pontianak", "Manado", "Denpasar", "Batam",
-          "Tangerang", "South Tangerang", "Bandar Lampung", "Cimahi", "Tasikmalaya",
-          "Serang", "Balikpapan", "Jambi", "Cirebon", "Surakarta",
-          "Kupang", "Mataram", "Jayapura", "Bengkulu", "Palu",
-          "Ambon", "Kendari", "Dumai", "Pekalongan", "Palangka Raya",
-          "Binjai", "Kediri", "Sorong", "Tegal", "Banda Aceh",
-          "Tarakan", "Probolinggo", "Singkawang", "Lubuklinggau", "Tanjungpinang",
-          "Bitung", "Pangkalpinang", "Batu", "Pasuruan", "Banjar",
-          "Gorontalo", "Ternate", "Madiun", "Salatiga", "Prabumulih",
-          "Lhokseumawe", "Langsa", "Bontang", "Tanjungbalai", "Tebing Tinggi",
-          "Metro", "Palopo", "Bima", "Baubau", "Parepare",
-          "Blitar", "Pagar Alam", "Payakumbuh", "Gunungsitoli", "Mojokerto",
-          "Bukittinggi", "Kotamobagu", "Magelang", "Tidore", "Tomohon",
-          "Sungai Penuh", "Subulussalam", "Pariaman", "Sibolga", "Tual",
-          "Solok", "Sawahlunto", "Padang Panjang", "Sabang","Timika"
-        ];
+        const cityList_str = '{{city_list | tojson }}'
+        const cityList = JSON.parse(cityList_str);                
 
         let validCity = ""; // menyimpan pilihan kota valid
 
