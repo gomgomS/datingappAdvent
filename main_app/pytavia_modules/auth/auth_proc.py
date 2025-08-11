@@ -208,70 +208,72 @@ class auth_proc:
         }
 
         try:
-            username        = params["txt_l_username"]
-            password        = params["txt_l_password"]
+            login_identifier = params.get("txt_l_username", "").strip()
+            password         = params.get("txt_l_password", "")
 
             browser         = request.user_agent.browser
             xff             = request.remote_addr
 
-            hashed_password = utils._get_passwd_hash({
-                "id"       : username,
-                "password" : password
+            # Find user by username or email first
+            user_rec = self.mgdDB.db_users.find_one({
+                "$or": [
+                    {"username": login_identifier},
+                    {"email": login_identifier}
+                ]
             })
 
-            user_rec = self.mgdDB.db_users.find_one({
-                "username" : username,
-                "password" : hashed_password
-            })         
-                     
-            if user_rec == None :    
-                # NO RECORD FOUND
-                error_msg_rec = self.mgdDB.db_config_general.find_one({                            
-                            "value" : "ERROR_LOGIN_TYPE_001"                            
-                        })
-
-            else :
-                # super admin validation
-                if user_rec['sex'] == "superadmin":
-                    user_rec["role"] = "superadmin"
+            error_msg_rec = None
+            if user_rec is None:
+                # User not found
+                error_msg_rec = self.mgdDB.db_config_general.find_one({"value": "ERROR_LOGIN_TYPE_001"})
+            else:
+                # Hash using the actual username stored for the user
+                hashed_password = utils._get_passwd_hash({
+                    "id": user_rec["username"],
+                    "password": password
+                })
+                if user_rec.get("password") != hashed_password:
+                    # Wrong password
+                    error_msg_rec = self.mgdDB.db_config_general.find_one({"value": "ERROR_LOGIN_TYPE_001"})
                 else:
-                    user_rec["role"] = "customer"
+                    # super admin validation
+                    if user_rec['sex'] == "superadmin":
+                        user_rec["role"] = "superadmin"
+                    else:
+                        user_rec["role"] = "customer"
 
-                    
-                # Premium expiry check
-                premium_expiry_str = user_rec.get("premium_expiry", "")
-                is_premium = user_rec.get("is_premium", "FALSE")
+                    # Premium expiry check
+                    premium_expiry_str = user_rec.get("premium_expiry", "")
+                    is_premium = user_rec.get("is_premium", "FALSE")
 
-                update_fields = {
-                    "login_status": "TRUE"
-                }
+                    update_fields = {
+                        "login_status": "TRUE"
+                    }
 
-                if is_premium == "TRUE" and premium_expiry_str:
-                    try:
-                        expiry_date = datetime.strptime(premium_expiry_str, '%Y-%m-%d %H:%M:%S')
-                        if datetime.now() > expiry_date:
-                            update_fields["is_premium"] = "FALSE"
-                            update_fields["subscription_type"] = "expired"
-                                                        
-                    except Exception as e:
-                        self.webapp.logger.debug(f"[Premium Check] Error: {e}")
+                    if is_premium == "TRUE" and premium_expiry_str:
+                        try:
+                            expiry_date = datetime.strptime(premium_expiry_str, '%Y-%m-%d %H:%M:%S')
+                            if datetime.now() > expiry_date:
+                                update_fields["is_premium"] = "FALSE"
+                                update_fields["subscription_type"] = "expired"
+                        except Exception as e:
+                            self.webapp.logger.debug(f"[Premium Check] Error: {e}")
 
-                # Final update
-                self.mgdDB.db_users.update_one(
-                    {"pkey": user_rec["pkey"]},
-                    {"$set": update_fields}
-                )
+                    # Final update
+                    self.mgdDB.db_users.update_one(
+                        {"pkey": user_rec["pkey"]},
+                        {"$set": update_fields}
+                    )
 
-
-                response["message_action"] = "LOGIN_SUCCESS"
-                response["message_code"  ] = ""
-                response["message_title" ] = ""
-                response["message_desc"  ] = ""
-                response["message_data"  ] = {
-                    "fk_user_id"      : user_rec["pkey"                 ],
-                    "user_id"         : user_rec["user_id"              ],
-                    "username"        : user_rec["username"             ],                                        
-                    "email"           : user_rec["email"                ],
+                    response["message_action"] = "LOGIN_SUCCESS"
+                    response["message_code"  ] = ""
+                    response["message_title" ] = ""
+                    response["message_desc"  ] = ""
+                    response["message_data"  ] = {
+                        "fk_user_id"      : user_rec["pkey"                 ],
+                        "user_id"         : user_rec["user_id"              ],
+                        "username"        : user_rec["username"             ],                                        
+                        "email"           : user_rec["email"                ],
                     "verify_email"    : user_rec["verify_email"         ],
                     "profile_intro"   : user_rec["profile_intro"        ],
                     "is_premium"      : user_rec["is_premium"           ],

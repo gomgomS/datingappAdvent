@@ -320,8 +320,8 @@ h6 span{
 		<div class="container">
 			<div class="row full-height justify-content-center">
 				<div class="col-12 text-center align-self-center py-5">
-					<div class="section pb-5 pt-5 pt-sm-2 text-center">
-						<h6 class="mb-0 pb-3"><span>Log In </span><span>Sign Up</span></h6>
+                    <div class="section pb-5 pt-5 pt-sm-2 text-center">
+                        <h6 class="mb-0 pb-3"><span id="tab-login" style="cursor:pointer">Log In </span><span id="tab-signup" style="cursor:pointer">Sign Up</span></h6>
 			          	<input class="checkbox" type="checkbox" id="reg-log" name="reg-log"/>
 			          	<label for="reg-log"></label>
 						<div class="card-3d-wrap mx-auto">
@@ -348,8 +348,8 @@ h6 span{
                        <!-- Hidden fields for coordinates -->
                       <input type="hidden" id="latitude" name="latitude">
                       <input type="hidden" id="longitude" name="longitude">
-											<div class="form-group">
-												<input type="text" name="txt_l_username" class="form-style" placeholder="Your Username" id="username" autocomplete="off">
+                                            <div class="form-group">
+                                                <input type="text" name="txt_l_username" class="form-style" placeholder="Your Username or Email" id="username" autocomplete="off">
 												<i class="input-icon uil uil-at"></i>
 											</div>	
 											<div class="form-group mt-2">
@@ -412,25 +412,22 @@ h6 span{
   <script src="../../static/lib/jquery/jquery.min.js"></script>
   <script src="../../static/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script>
-
     document.addEventListener("DOMContentLoaded", function () {
-      // Sign Up & Sign In Toggle
-      const signUpButton = document.getElementById("signUp");
-      const signInButton = document.getElementById("signIn");
-      const container = document.getElementById("container");
+      const loginTab = document.getElementById("tab-login");
+      const signupTab = document.getElementById("tab-signup");
+      const toggleCheckbox = document.getElementById("reg-log");
 
-      if (signUpButton && signInButton && container) {
-          signUpButton.addEventListener("click", () => {
-              container.classList.add("right-panel-active");
-          });
-
-          signInButton.addEventListener("click", () => {
-              container.classList.remove("right-panel-active");
-          });
+      if (loginTab && signupTab && toggleCheckbox) {
+        loginTab.addEventListener("click", function () {
+          toggleCheckbox.checked = false;
+          toggleCheckbox.dispatchEvent(new Event("change"));
+        });
+        signupTab.addEventListener("click", function () {
+          toggleCheckbox.checked = true;
+          toggleCheckbox.dispatchEvent(new Event("change"));
+        });
       }
-
-  });
-
+    });
   </script>
 </body>
 

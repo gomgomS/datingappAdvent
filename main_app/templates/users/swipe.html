@@ -1182,7 +1182,7 @@
 
       // END UNDO FEATURE
 
-      var apiUrl = "{{main_app_url}}/api/find/match";
+      var apiUrl = "/api/find/match";
 
      
       function fetchMatches(skip) {
@@ -1383,7 +1383,7 @@
       }
 
       function sendDecision(futureWifeId, status) {
-        const apiUrl = "{{main_app_url}}/api/decision/match";
+        const apiUrl = "/api/decision/match";
         $.post(apiUrl, {
           csrf_token: "{{ csrf_token() }}", // CSRF token
           future_wife_id: futureWifeId,
