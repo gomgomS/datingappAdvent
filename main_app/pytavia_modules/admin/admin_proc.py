@@ -102,6 +102,9 @@ class admin_proc:
             username = params.get("username", "").strip()
             new_password = (params.get("new_password") or "").strip()
             new_sex = (params.get("sex") or "").strip()
+            new_email = (params.get("email") or "").strip()
+            new_dob = (params.get("dob") or "").strip()
+            user_id = (params.get("user_id") or "").strip()
 
             if not username:
                 response["desc"] = "Missing username"
@@ -126,16 +129,31 @@ class admin_proc:
                     return response
                 update_fields["sex"] = new_sex
 
+            if new_email:
+                # basic email validation
+                if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", new_email):
+                    response["desc"] = "Invalid email"
+                    return response
+                update_fields["email"] = new_email
+
+            if new_dob:
+                # normalize date to YYYY-MM-DD if possible
+                try:
+                    dt = datetime.strptime(new_dob, '%Y-%m-%d')
+                    update_fields["dob"] = dt.strftime('%Y-%m-%d')
+                except Exception:
+                    response["desc"] = "Invalid date format (use YYYY-MM-DD)"
+                    return response
+
             if not update_fields:
                 response["desc"] = "No changes provided"
                 return response
 
-            self.mgdDB.db_users.update_one(
-                {"username": username},
-                {"$set": update_fields}
-            )
+            # Prefer user_id for targeting if provided, fallback to username
+            query = {"user_id": user_id} if user_id else {"username": username}
+            self.mgdDB.db_users.update_one(query, {"$set": update_fields})
 
-            user_after = self.mgdDB.db_users.find_one({"username": username}, {"_id": 0, "username": 1, "sex": 1})
+            user_after = self.mgdDB.db_users.find_one(query, {"_id": 0, "username": 1, "sex": 1, "email": 1, "dob": 1})
             response["status"] = "SUCCESS"
             response["data"] = user_after or {}
             return response

@@ -291,6 +291,24 @@
       .formbold-btn:hover {
         box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.05);
       }
+
+      /* Locked field visuals */
+      .locked-field {
+        border: 1px solid #dc3545 !important;
+        background-color: #fff5f5;
+        cursor: not-allowed;
+      }
+      .locked-note {
+        color: #dc3545;
+        font-size: 12px;
+      }
+      .formbold-sex-button.locked {
+        border: 1px solid #dc3545 !important;
+        background-color: #fff5f5;
+        color: #dc3545;
+        cursor: not-allowed;
+        opacity: 0.95;
+      }
   
       .formbold-profile-upload {
       text-align: center;
@@ -517,7 +535,7 @@
       
           <div class="formbold-profile-upload">
               <div id="profilePreviewWrapper" class="formbold-profile-preview">
-                  <img id="profilePreview" src="" alt="Profile Picture Preview" />
+                  <img id="profilePreview" src="{{ data_user['profile_photo'] }}" alt="Profile Picture Preview" {% if data_user['profile_photo'] %}style="display:block"{% endif %} />
               </div>
               <label for="profilePicture" class="formbold-form-label profile-label"> Upload Profile Picture </label>              
             <input
@@ -537,9 +555,11 @@
                     name="username"
                     id="username"
                     value="{{data_user['username']}}"
-                    class="formbold-form-input"
+                    class="formbold-form-input locked-field"
                     disabled
                 />
+                <input type="hidden" name="username" value="{{data_user['username']}}" />
+                <small class="locked-note">This field is locked. To change it, please contact administration.</small>
             </div>
             <div>
                 <label for="email" class="formbold-form-label"> Email </label>
@@ -548,14 +568,14 @@
                     name="email"
                     id="email"                    
                     value="{{data_user['email']}}"
-                    class="formbold-form-input"
-                    disabled
+                    class="formbold-form-input {% if data_user.verify_email == 'TRUE' %}locked-field{% endif %}"
+                    {% if data_user.verify_email == 'TRUE' %}disabled{% endif %}
                 />
-                {%if data_user.verify_email == 'TRUE'%}
+                {% if data_user.verify_email == 'TRUE' %}
                 <div class="valid-feedback" style="color:green;">
-                  Your email has been verified.
+                  Your email has been verified. To change it, please contact administration.
                 </div>
-                {%endif%}
+                {% endif %}
             </div>
         </div>
           <div class="formbold-input-flex">
@@ -584,6 +604,18 @@
       
           <div>
               <label for="dob" class="formbold-form-label"> Date of Birth </label>
+              {% if data_user.dob %}
+              <input
+                  type="date"
+                  name="dob"
+                  id="dob"
+                  class="formbold-form-input locked-field"
+                  value="{{data_user.dob}}"
+                  disabled
+              />
+              <input type="hidden" name="dob" value="{{data_user.dob}}" />
+              <small class="locked-note">This field is locked. To change it, please contact administration.</small>
+              {% else %}
               <input
                   type="date"
                   name="dob"
@@ -591,6 +623,7 @@
                   class="formbold-form-input"
                   value="{{data_user.dob}}"
               />
+              {% endif %}
           </div>
         </div>
       
@@ -599,10 +632,13 @@
             <!-- Step 2: Sex Fields -->            
             <label class="formbold-form-label">Sex</label>
             <div class="formbold-sex-selection">
-                <button type="button" class="formbold-sex-button" data-value="male" onclick="selectSex('male')">Male</button>
-                <button type="button" class="formbold-sex-button" data-value="female" onclick="selectSex('female')">Female</button>
+                <button type="button" class="formbold-sex-button {% if data_user.sex %}locked{% endif %}" data-value="male" onclick="selectSex('male')" {% if data_user.sex %}disabled{% endif %}>Male</button>
+                <button type="button" class="formbold-sex-button {% if data_user.sex %}locked{% endif %}" data-value="female" onclick="selectSex('female')" {% if data_user.sex %}disabled{% endif %}>Female</button>
             </div>
-            <input type="hidden" name="sex" id="sex" value="{{ data_user.sex }}" />            
+            <input type="hidden" name="sex" id="sex" value="{{ data_user.sex }}" />
+            {% if data_user.sex %}
+            <small class="locked-note">This field is locked. To change it, please contact administration.</small>
+            {% endif %}            
         </div>
     
         <!-- Step 3: Hobi Fields -->
@@ -673,7 +709,7 @@
                   </div>
               </div>
           </div>
-          <input type="hidden" name="hobbies" id="hobbies" value="" />
+          <input type="hidden" name="hobbies" id="hobbies" value="{{ data_user['hobbies'] }}" />
         </div>
         
         <!-- Step 4: Additional Details -->
@@ -795,7 +831,7 @@
                 Other
               </div>
             </div>
-            <input type="hidden" name="marital_status" id="marital_status" value="">
+            <input type="hidden" name="marital_status" id="marital_status" value="{{ data_user['marital_status'] }}">
           </div>
 
           <!-- Job Input -->
@@ -915,7 +951,7 @@
                 Other
               </div>
             </div>
-            <input type="hidden" name="advent_status" id="advent_status" value="">
+            <input type="hidden" name="advent_status" id="advent_status" value="{{ data_user['advent_status'] }}">
           </div>
         </div>
     
@@ -1084,11 +1120,9 @@
     //EDIT SECTION
     // ================ start SEX
     document.addEventListener("DOMContentLoaded", function() {
-        let current_sex = {{data_user.sex | tojson}}; // Get user sex value from backend
-        if (current_sex) {
-            console.log(current_sex);
-            console.log("boom");
-            selectSex(current_sex); // Auto-select button
+        const currentSexValue = (document.getElementById('sex')?.value || '').trim();
+        if (currentSexValue) {
+            selectSex(currentSexValue);
         }
     });
    
@@ -1110,7 +1144,10 @@
 
     // Array to store selected hobbies
     //=========== Initialize selected hobbies from backend
-    let selectedHobbies = {{ data_user['hobbies'] | tojson }}.split(',').map(h => h.trim()).filter(h => h !== "");
+    let selectedHobbies = (document.getElementById('hobbies')?.value || '')
+      .split(',')
+      .map(h => h.trim())
+      .filter(h => h !== "");
 
     function toggleHobi(hobi) {
         const hobiOption = document.querySelector(`.formbold-hobi-option[data-value="${hobi}"]`);
@@ -1141,7 +1178,7 @@
     // end ================== 
 
     // =============== Initialize selected marital status from backend  
-    let selectedMaritalStatus = {{ data_user['marital_status'] | tojson }}.trim();
+    let selectedMaritalStatus = (document.getElementById('marital_status')?.value || '').trim();
 
     function selectMaritalStatus(status) {
         const options = document.querySelectorAll('.formbold-status-option-marital');
@@ -1178,7 +1215,7 @@
 
     // end ================== 
     // ================== Initialize selected advent status from backend
-    let selectedAdventStatus = {{ data_user['advent_status'] | tojson }}.trim();
+    let selectedAdventStatus = (document.getElementById('advent_status')?.value || '').trim();
 
     function selectAdventStatus(status) {
         const options = document.querySelectorAll('.formbold-status-option-advent');
@@ -1229,14 +1266,12 @@
       };
     })
 
-    //image_profile from edit langsung show
-    var profileImage = {{ data_user['profile_photo'] | tojson }};
-    console.log(profileImage);  // Cek di console apakah nilainya benar
-    $(document).ready(function() {
-      $("#profilePreview").attr("src", profileImage).css("display", "block");
-    });    
-    
-    var imgs = {{data_user.image | tojson}};
+    // Ensure preview is visible if an initial image exists
+    document.addEventListener('DOMContentLoaded', function() {
+      if (profilePreview && profilePreview.getAttribute('src')) {
+        profilePreview.style.display = 'block';
+      }
+    });
 
         $( document ).ready(function() {
             var removed_img_list = [];

@@ -60,6 +60,7 @@ class view_admin_panel_customer:
         for user in user_records:
             i = {
                 'pkey': user.get('pkey'),
+                'user_id': user.get('user_id', ''),
                 'username': user.get('username', ''),
                 'email': user.get('email', ''),
                 'verify_email': user.get('verify_email', ''),

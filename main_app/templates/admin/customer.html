@@ -82,7 +82,7 @@
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                       <button class="dropdown-item" data-toggle="modal" data-target="#deleteUserModal" data-username="{{ user.username }}">Delete {{ user.username }}</button>
-                      <button class="dropdown-item" data-toggle="modal" data-target="#editUserModal" data-username="{{ user.username }}" data-sex="{{ user.sex }}">Edit {{ user.username }}</button>
+                      <button class="dropdown-item" data-toggle="modal" data-target="#editUserModal" data-username="{{ user.username }}" data-sex="{{ user.sex }}" data-email="{{ user.email }}" data-dob="{{ user.dob }}" data-userid="{{ user.user_id }}">Edit {{ user.username }}</button>
                     </div>
                   </div>
                 </td>
@@ -168,16 +168,21 @@
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <form id="edit_user" action="/admin/process/user/update" method="POST">
+           <form id="edit_user" action="/admin/process/user/update" method="POST">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+             <input type="hidden" name="user_id" id="edit_user_id" />
             <div class="modal-body">
               <div class="form-group">
                 <label>Username</label>
-                <input type="text" class="form-control" name="username" id="edit_username" readonly>
+                <input type="text" class="form-control" name="username" id="edit_username">
               </div>
               <div class="form-group">
                 <label>New password</label>
                 <input type="password" class="form-control" name="new_password" id="edit_new_password" minlength="8" placeholder="Leave blank to keep current">
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" class="form-control" name="email" id="edit_email" placeholder="user@example.com">
               </div>
               <div class="form-group">
                 <label>Sex/Role</label>
@@ -186,6 +191,10 @@
                   <option value="female">female</option>
                   <option value="superadmin">superadmin</option>
                 </select>
+              </div>
+              <div class="form-group">
+                <label>Date of Birth</label>
+                <input type="date" class="form-control" name="dob" id="edit_dob">
               </div>
             </div>
             <div class="modal-footer">
@@ -248,6 +257,9 @@
         const button = $(event.relatedTarget);
         const username = button.data('username');
         const sex = (button.data('sex') || '').toLowerCase();
+        const email = button.data('email') || '';
+        const dob = button.data('dob') || '';
+        const userId = button.data('userid') || '';
 
         const modal = $(this);
         modal.find('#edit_username').val(username);
@@ -257,6 +269,9 @@
         } else {
           modal.find('#edit_sex').val('male');
         }
+        modal.find('#edit_email').val(email);
+        modal.find('#edit_dob').val(dob);
+        modal.find('#edit_user_id').val(userId);
     });
 });
 </script>
