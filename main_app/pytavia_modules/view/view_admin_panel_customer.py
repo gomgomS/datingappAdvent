@@ -64,6 +64,7 @@ class view_admin_panel_customer:
                 'email': user.get('email', ''),
                 'verify_email': user.get('verify_email', ''),
                 'is_premium': user.get('is_premium', ''),
+                'sex': user.get('sex', ''),
                 'name': user.get('name', ''),
                 'dob': user.get('dob', ''),
                 'city': user.get('city', ''),

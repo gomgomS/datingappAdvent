@@ -39,7 +39,8 @@
               <th width="10%">Avatar</th>
               <th width="20%">Username</th>
               <th width="30%">Email</th>
-              <th width="20%">Subscription</th>
+              <th width="15%">Subscription</th>
+              <th width="15%">Sex/Role</th>
               <th width="20%">Action</th>
             </tr>
             </thead>
@@ -67,6 +68,13 @@
                         <span class="badge badge-secondary">Free</span>
                     {% endif %}
                 </td>
+                <td>
+                    {% if user.sex %}
+                        <span class="badge badge-info text-uppercase">{{ user.sex }}</span>
+                    {% else %}
+                        <span class="badge badge-light">-</span>
+                    {% endif %}
+                </td>
                 <td class="text-center">
                   <div class="dropdown">
                     <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -74,6 +82,7 @@
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                       <button class="dropdown-item" data-toggle="modal" data-target="#deleteUserModal" data-username="{{ user.username }}">Delete {{ user.username }}</button>
+                      <button class="dropdown-item" data-toggle="modal" data-target="#editUserModal" data-username="{{ user.username }}" data-sex="{{ user.sex }}">Edit {{ user.username }}</button>
                     </div>
                   </div>
                 </td>
@@ -149,6 +158,44 @@
         </div>
       </div>
     </div>
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editUserLabel">Edit user</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form id="edit_user" action="/admin/process/user/update" method="POST">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+            <div class="modal-body">
+              <div class="form-group">
+                <label>Username</label>
+                <input type="text" class="form-control" name="username" id="edit_username" readonly>
+              </div>
+              <div class="form-group">
+                <label>New password</label>
+                <input type="password" class="form-control" name="new_password" id="edit_new_password" minlength="8" placeholder="Leave blank to keep current">
+              </div>
+              <div class="form-group">
+                <label>Sex/Role</label>
+                <select class="custom-select" name="sex" id="edit_sex">
+                  <option value="male">male</option>
+                  <option value="female">female</option>
+                  <option value="superadmin">superadmin</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock content %}
@@ -195,6 +242,21 @@
         const modal = $(this);
         modal.find(".modal-title").html(`Are you sure you want to delete <span class="text-danger">${username}</span>?`);
         modal.find("#username").val(username);
+    });
+
+    $('#editUserModal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget);
+        const username = button.data('username');
+        const sex = (button.data('sex') || '').toLowerCase();
+
+        const modal = $(this);
+        modal.find('#edit_username').val(username);
+        modal.find('#edit_new_password').val('');
+        if (sex) {
+          modal.find('#edit_sex').val(sex);
+        } else {
+          modal.find('#edit_sex').val('male');
+        }
     });
 });
 </script>

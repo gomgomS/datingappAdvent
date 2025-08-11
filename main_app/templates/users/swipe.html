@@ -38,7 +38,7 @@
           height: 84vh;
           max-width: 400px;
           max-height: 600px;
-          z-index: 1;
+          z-index: 1; /* stays below detail-trigger which is z-index:21 */
         }
 
         .icons {
@@ -222,6 +222,32 @@
             z-index: 20;
             transition: all 0.3s ease;
         }
+        /* Floating Detail Button (above bottom menu) */
+        .detail-trigger {
+            position: absolute;
+            bottom: 85px; /* sit just above .menu-bottom (bottom:15px) */
+            width: 90%;
+            max-width: 420px;
+            display: flex;
+            justify-content: center;
+            z-index: 21; /* above .frame and menus */
+            pointer-events: auto;
+        }
+
+        .detail-trigger .btn {
+            border-radius: 9999px;
+            padding: 8px 20px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+            background-color: #f7c948;
+            border: none;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .detail-trigger .btn:hover {
+            background-color: #e6a420;
+            color: #fff;
+        }
 
         .menu-top {
             top: 15px;
@@ -374,14 +400,26 @@
         }
 
         /* Profile Image */
+        /* Large responsive profile image that never crops (keeps aspect ratio) */
+        .profile-cover {
+          width: 100%;
+          max-height: 50vh;
+          border-radius: 14px;
+          overflow: hidden;
+          background: #f5f5f5;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .profile-cover .profile-photo,
         .profile-photo {
-          width: 120px;
-          height: 120px;
-          object-fit: cover;
-          border: 4px solid #ffffff;
-          border-radius: 50%;
-          box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-          margin-bottom: 12px;
+          max-width: 100%;
+          max-height: 50vh;
+          width: auto;
+          height: auto;
+          object-fit: contain;
+          border-radius: 0;
+          display: block;
         }
 
         /* Section Titles */
@@ -475,10 +513,7 @@
             margin: 1rem;
           }
 
-          .profile-photo {
-            width: 100px;
-            height: 100px;
-          }
+        .profile-cover { max-height: 40vh; }
 
           .profile-info-grid {
             grid-template-columns: 1fr;
@@ -600,12 +635,14 @@
 </head>
 
 {% autoescape false %}
-<body>
+<body data-is-premium="{{ is_premium }}" data-user-id="{{ user_rec.user_id }}">
     <!-- Top Menu -->
     <div class="menu-top">
-      <!-- Filter Icon -->
-      <div class="menu-icon" data-toggle="modal" data-target="#filterModal">
-        <i class="fas fa-search"></i> 
+      <!-- Left controls: Filter + My Profile -->
+      <div style="display:flex; align-items:center; gap:14px; z-index:22; position:relative;">
+        <button type="button" class="menu-icon" data-toggle="modal" data-target="#filterModal" style="background:none;border:0;cursor:pointer;">
+          <i class="fas fa-search"></i> 
+        </button>
       </div>
     
       <div style="display: flex; align-items: center; gap: 15px;">
@@ -634,13 +671,22 @@
     <!-- Middle Image -->
     <div class="frame"></div>
 
+    <!-- Floating Detail Button (above bottom menu) -->
+    <div class="detail-trigger">
+      <div class="btn-group w-100" role="group" style="gap:8px; justify-content:center;">
+        <button type="button" class="btn" id="btn-show-detail" onclick="showFutureWifeId()">
+          <i class="fas fa-id-badge mr-1"></i>
+          Detail
+        </button>
+        <button type="button" class="btn" id="btn-floating-my-profile" onclick="showFutureWifeId(document.body.getAttribute('data-user-id'))">
+          <i class="fas fa-user mr-1"></i>
+          My Profile
+        </button>
+      </div>
+    </div>
+
     <!-- Bottom Menu -->
     <div class="menu-bottom">
-       <!-- Detail (Trigger Function) -->
-      <a class="menu-item" id="btn-show-detail" onclick="showFutureWifeId()">
-        <i class="fas fa-id-badge"></i>
-        <span>Detail</span>
-      </a>
       <!-- Swipe (Aktif) -->
       <div class="menu-item active">
           <i class="fas fa-fire"></i>
@@ -683,29 +729,26 @@
     <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content bumble-profile">
-    
-          <!-- Profile Header -->
-          <div class="profile-header text-center">
-            <img id="profile-photo" class="profile-photo rounded-circle" src="" alt="Profile Photo">
-            <h3 id="name" class="mt-2 mb-0">Name</h3>
-            <p id="age" class="text-muted mb-1">25</p> <!-- AGE added under name -->
-            <p id="job" class="text-muted mb-0">Job Title</p>
-            <p id="city" class="text-muted">City</p>
-          </div>
-    
-          <!-- Profile Body -->
           <div class="modal-body">
-    
-            <!-- Photo Album -->
-            <div id="album" class="mb-4">
-              <h6 class="section-title">Photo Album</h6>
-              <div class="row row-cols-2 row-cols-md-3 g-3" id="album-photos">
-                <!-- JS populates images here -->
+            <!-- Cover Image Top -->
+            <div class="profile-cover mb-3">
+              <img id="profile-photo" class="profile-photo" src="" alt="Profile Photo">
+            </div>
+            
+            <!-- Basic Info neatly arranged -->
+            <div class="basic-info mb-3">
+              <h3 id="name" class="mb-1">Name</h3>
+              <div class="text-muted" style="font-size: 14px;">
+                <span id="age">25</span>
+                <span class="mx-1">•</span>
+                <span id="job">Job Title</span>
+                <span class="mx-1">•</span>
+                <span id="city">City</span>
               </div>
             </div>
-    
+
             <!-- Info Grid -->
-            <div class="profile-info-grid">
+            <div class="profile-info-grid mb-4">
               <div class="info-item d-none">
                 <i class="fas fa-user-circle"></i>
                 <span id="username">Username</span>
@@ -731,16 +774,19 @@
                 <span id="about">About</span>
               </div>
             </div>
-    
+
+            <!-- Photo Gallery at Bottom -->
+            <div id="album" class="mb-2">
+              <h6 class="section-title">Photo Gallery</h6>
+              <div class="row row-cols-2 row-cols-md-3 g-3" id="album-photos"></div>
+            </div>
           </div>
-    
-          <!-- Modal Footer -->
+
           <div class="modal-footer justify-content-center">
             <button type="button" class="btn btn-light rounded-pill px-4" data-dismiss="modal">
               Close
             </button>
           </div>
-    
         </div>
       </div>
     </div>
@@ -917,8 +963,7 @@
                 Reset Filter
               </button>
           
-              <button type="button" class="btn btn-primary w-100 w-sm-auto"
-                onclick="{% if is_premium == 'TRUE' %}applyFilters(){% else %}applyFiltersNonPremium(){% endif %}">
+              <button type="button" id="apply-filters-btn" class="btn btn-primary w-100 w-sm-auto">
                 Terapkan Filter
               </button>
             </div>
@@ -1351,20 +1396,28 @@
       }
 
       
-      async function showFutureWifeId() {
-        if (!current || !current.dataset.futureWifeId) {
-          alert('No profile selected.');
-          return;
-        }
-
-        const futureId = current.dataset.futureWifeId;
+       async function showFutureWifeId(futureIdFromBtn) {
+         console.log('[MyProfile] showFutureWifeId called with:', futureIdFromBtn);
+         let futureId = futureIdFromBtn;
+         if (!futureId) {
+           if (!current || !current.dataset.futureWifeId) {
+             alert('No profile selected.');
+             return;
+           }
+           futureId = current.dataset.futureWifeId;
+         }
+         console.log('[MyProfile] resolved futureId:', futureId);
 
         try {
-          const res = await fetch(`/api/detail/match?future_soulmate_id=${encodeURIComponent(futureId)}`, {
+           const reqUrl = `/api/detail/match?future_soulmate_id=${encodeURIComponent(futureId)}`;
+           console.log('[MyProfile] fetching:', reqUrl);
+           const res = await fetch(reqUrl, {
             method: 'GET'
           });
+           console.log('[MyProfile] fetch status:', res.status);
 
           const json = await res.json();
+           console.log('[MyProfile] response json:', json);
           if (json.status === 'success') {
             const data = json.data;
 
@@ -1687,7 +1740,7 @@
       
       
       function handleDistanceChange() {
-        const isPremium = {{is_premium | tojson}};
+        const isPremium = document.body.getAttribute('data-is-premium');
         const rangeInput = document.getElementById('distanceRange');
         const distanceValue = document.getElementById('distanceValue');
         if (isPremium == "FALSE") {
@@ -1700,6 +1753,44 @@
         }
       }
       // END PREMIUM MODAL BEHAVIOR
+
+      // Bind Apply Filters and My Profile buttons; run now or on DOMContentLoaded
+      (function initBindings() {
+        const bind = function() {
+          const isPremium = document.body.getAttribute('data-is-premium');
+          const applyBtn = document.getElementById('apply-filters-btn');
+          if (applyBtn && !applyBtn._bound) {
+            applyBtn.addEventListener('click', function() {
+              if (isPremium === 'TRUE') {
+                applyFilters();
+              } else {
+                applyFiltersNonPremium();
+              }
+            });
+            applyBtn._bound = true;
+          }
+
+          const myUserId = document.body.getAttribute('data-user-id');
+          const hookMyProfile = function(btn) {
+            if (!btn || btn._bound) return;
+            btn.addEventListener('click', function() {
+              if (!myUserId) return;
+              // call detail flow with explicit id
+              console.log('myUserId', myUserId);
+              showFutureWifeId(myUserId);
+            });
+            btn._bound = true;
+          };
+          hookMyProfile(document.getElementById('btn-show-my-profile'));
+          hookMyProfile(document.getElementById('btn-floating-my-profile'));
+        };
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', bind);
+        } else {
+          bind();
+        }
+      })();
    </script>
 
 </body>

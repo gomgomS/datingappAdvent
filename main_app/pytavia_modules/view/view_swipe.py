@@ -46,7 +46,7 @@ class view_swipe:
         core_script             = view_core_script.view_core_script().html(params)
         core_css                = view_core_css.view_core_css().html(params)
         core_dialog_message     = view_core_dialog_message.view_core_dialog_message().html(params)   
-        user_rec                = self.mgdDB.db_users.find_one({"user_id": params["user_id"]},{"location":1,"profile_photo":1,"name":1,"_id":0})                 
+        user_rec                = self.mgdDB.db_users.find_one({"user_id": params["user_id"]},{"location":1,"profile_photo":1,"name":1,"_id":0,"user_id":1})                 
 
         return render_template(
             "users/swipe.html",

@@ -92,5 +92,58 @@ class admin_proc:
         
         return response
 
+    def _update_user_admin(self, params):
+        response = {
+            "status": "FAILED",
+            "desc": "",
+            "data": {}
+        }
+        try:
+            username = params.get("username", "").strip()
+            new_password = (params.get("new_password") or "").strip()
+            new_sex = (params.get("sex") or "").strip()
+
+            if not username:
+                response["desc"] = "Missing username"
+                return response
+
+            update_fields = {}
+
+            if new_password:
+                if len(new_password) < 8:
+                    response["desc"] = "Password must be at least 8 characters"
+                    return response
+                hashed_password = utils._get_passwd_hash({
+                    "id": username,
+                    "password": new_password
+                })
+                update_fields["password"] = hashed_password
+            
+            if new_sex:
+                # Only allow specific values
+                if new_sex not in ["male", "female", "superadmin"]:
+                    response["desc"] = "Invalid sex value"
+                    return response
+                update_fields["sex"] = new_sex
+
+            if not update_fields:
+                response["desc"] = "No changes provided"
+                return response
+
+            self.mgdDB.db_users.update_one(
+                {"username": username},
+                {"$set": update_fields}
+            )
+
+            user_after = self.mgdDB.db_users.find_one({"username": username}, {"_id": 0, "username": 1, "sex": 1})
+            response["status"] = "SUCCESS"
+            response["data"] = user_after or {}
+            return response
+        except Exception:
+            trace_back_msg = traceback.format_exc()
+            self.webapp.logger.debug(trace_back_msg)
+            response["desc"] = "Internal error"
+            return response
+
 
 

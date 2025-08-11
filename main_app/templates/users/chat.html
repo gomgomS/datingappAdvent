@@ -144,6 +144,19 @@
         margin-bottom: 4px;
     }
 
+    /* Empty state */
+    .empty-state {
+        width: 100%;
+        text-align: center;
+        color: var(--text-muted);
+        padding: 40px 20px;
+    }
+    .empty-state .icon {
+        font-size: 40px;
+        margin-bottom: 10px;
+        color: #f5a623;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
         .chat-info p {
@@ -188,11 +201,12 @@
                     </div>
                 </div>
             {% endfor %}
-        {% else %}
-            
-                <p>You don't have any messages yet.</p>
-            
-        {% endif %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="icon"><i class="fas fa-inbox"></i></div>
+                    <div>Belum ada pesan.</div>
+                </div>
+            {% endif %}
         
         </div>
     </div>

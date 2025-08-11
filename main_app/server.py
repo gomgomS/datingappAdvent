@@ -626,6 +626,20 @@ def admin_panel_customer():
     html   = view_admin_panel_customer.view_admin_panel_customer(app).html( params )
     return html
 
+@app.route('/admin/process/user/update', methods=["POST"])
+def admin_user_update():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    params['admin_username'] = session.get('username')
+    response = admin_proc.admin_proc(app)._update_user_admin(params)
+    if response.get('status') == 'SUCCESS':
+        flash('User updated', 'success')
+    else:
+        flash(response.get('desc', 'Failed to update user'), 'danger')
+    return redirect(url_for('admin_panel_customer'))
 @app.route("/admin/panel/premiumcontrol")
 def admin_panel_premium_control():    
     redirect_return = login_admin_precheck({})

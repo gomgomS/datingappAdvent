@@ -175,12 +175,12 @@
       }
       .formbold-form-input {
         width: 100%;
-        padding: 13px 22px;
+        padding: 12px 16px;
         border-radius: 5px;
         border: 1px solid #DDE3EC;
         background: #FFFFFF;
         font-weight: 500;
-        font-size: 16px;
+        font-size: 14px;
         color: #536387;
         outline: none;
         resize: none;
@@ -369,8 +369,8 @@
       }
   
       .formbold-hobi-option img {
-          width: 30px;
-          height: 30px;
+          width: 28px;
+          height: 28px;
           margin-right: 10px;
       }
   
@@ -440,6 +440,37 @@
         cursor: pointer;
     }
 
+    /* Mobile adjustments: Keep steps in one row with horizontal scroll */
+    @media (max-width: 576px) {
+      .formbold-steps ul {
+        justify-content: flex-start !important;
+        gap: 8px;
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+      }
+      .formbold-steps ul::before {
+        display: none;
+      }
+      .formbold-steps li {
+        flex: 0 0 auto;
+      }
+      .formbold-steps li span { width: 28px; height: 28px; font-size: 10px; }
+      .formbold-form-input { padding: 10px 14px; font-size: 14px; }
+      .formbold-btn, .formbold-back-btn { padding: 10px 14px; font-size: 14px; }
+      .formbold-sex-selection { gap: 8px; }
+      .formbold-sex-button { padding: 10px 12px; font-size: 14px; flex: 1; }
+      .formbold-hobi-option { padding: 8px; }
+      .formbold-hobi-option img { width: 24px; height: 24px; }
+      .formbold-status-option-maritals { gap: 8px; }
+      .formbold-status-option-marital { padding: 10px; font-size: 14px; }
+      .formbold-status-option-advents { gap: 8px; }
+      .formbold-status-option-advent { padding: 10px; font-size: 14px; }
+    }
+
     </style>
 </head>
 
@@ -489,11 +520,11 @@
                   <img id="profilePreview" src="" alt="Profile Picture Preview" />
               </div>
               <label for="profilePicture" class="formbold-form-label profile-label"> Upload Profile Picture </label>              
-              <input
+            <input
                   type="file"
                   name="image_profile"
                   id="profilePicture"
-                  accept="image_profile/*"
+                accept="image/*"
                   class="formbold-form-input"
                   value="{{data_user['profile_photo']}}"
               />
