@@ -36,7 +36,8 @@ class view_premium:
             core_script         = core_script         , 
             core_css            = core_css            , 
             core_dialog_message = core_dialog_message , 
-            core_display        = core_display
+            core_display        = core_display,
+            request_success     = params.get("request_success", "")
         )                
     # end def
 

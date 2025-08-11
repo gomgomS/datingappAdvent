@@ -80,6 +80,7 @@ class view_admin_panel_premium_control:
                 'email': user.get('email', ''),                
                 'is_premium': user.get('is_premium', ''),
                 'name': user.get('name', ''),
+                'phone': user.get('phone', ''),
                 'premium_expiry': formatted_expiry,
                 'premium_countdown': countdown_days,
                 'subscription_type': user.get('subscription_type', ''),
@@ -89,9 +90,28 @@ class view_admin_panel_premium_control:
 
         total_page = (numb_recs // per_page) + (1 if numb_recs % per_page != 0 else 0)
 
+        # Fetch latest premium requests (pending and recent others)
+        req_cursor = self.mgdDB.db_premium_requests.find({}).sort('created_at', -1).limit(100)
+        requests = []
+        for r in req_cursor:
+            requests.append({
+                'request_id': r.get('request_id'),
+                'user_id': r.get('user_id'),
+                'username': r.get('username', ''),
+                'name': r.get('name', ''),
+                'email': r.get('email', ''),
+                'phone': r.get('phone', ''),
+                'plan': r.get('plan', ''),
+                'status': r.get('status', ''),
+                'duration_months': r.get('duration_months', ''),
+                'created_at': r.get('created_at', ''),
+                'approved_at': r.get('approved_at', ''),
+            })
+
         return render_template(
             "admin/premium_control.html",
             data=result,
+            requests=requests,
             page=page,
             per_page=per_page,
             total_page=total_page,

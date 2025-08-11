@@ -334,6 +334,7 @@ db = {
             "age_range"               : { "min": 18, "max": 50 },
             "distance_range_km"       : 50,
         },
+        "phone"                      : "",
         "total_swipe_daily"           : "",
         "created_at"                  : "",
         "updated_at"                  : ""
@@ -426,7 +427,29 @@ db = {
         "type"                        : "",  # "1_month" atau "3_month"
         "start_at"                    : "",  # datetime mulai premium
         "end_at"                      : "",  # datetime akhir premium (auto dihitung)
-        "created_at"                  : ""   # kapan log ini dicatat (biasanya == start_at)
+        "created_at"                  : "",  # kapan log ini dicatat (biasanya == start_at)
+        # additional for admin approval linkage
+        "request_id"                  : "",
+        "approved_by"                 : "",
+        "duration_months"             : 0
+    },
+
+    "db_premium_requests": {
+        "request_id"                  : "",  # unique ID
+        "user_id"                     : "",
+        "username"                    : "",
+        "name"                        : "",
+        "email"                       : "",
+        "phone"                       : "",
+        "plan"                        : "",  # e.g., 1_month, 3_months
+        "status"                      : "pending",  # pending | approved | rejected
+        "duration_months"             : 0,
+        "approved_by"                 : "",
+        "approved_at"                 : "",
+        "rejected_by"                 : "",
+        "rejected_at"                 : "",
+        "created_at"                  : "",
+        "updated_at"                  : ""
     }
 
 

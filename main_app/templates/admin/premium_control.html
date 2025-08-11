@@ -5,7 +5,86 @@
     <div class="">
       <h1 class="font-weight-bold mg-b-10">Customer Premium Control</h1>      
 
-      <div class="">
+      <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link active" id="requests-tab" data-toggle="tab" href="#requestsTab" role="tab" aria-controls="requestsTab" aria-selected="true">Requests</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="manual-tab" data-toggle="tab" href="#manualTab" role="tab" aria-controls="manualTab" aria-selected="false">Manual</a>
+        </li>
+      </ul>
+
+      <div class="tab-content pt-3">
+        <div class="tab-pane fade show active" id="requestsTab" role="tabpanel" aria-labelledby="requests-tab">
+          <div class="card mb-4">
+          <div class="card-header bg-light"><strong>Premium Requests</strong></div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table mb-0">
+                <thead>
+                  <tr>
+                    <th>Created</th>
+                    <th>Name</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Plan</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for r in requests %}
+                  <tr>
+                    <td>{{ r.created_at }}</td>
+                    <td>{{ r.name }}</td>
+                    <td>{{ r.username }}</td>
+                    <td>{{ r.email }}</td>
+                    <td>{{ r.phone }}</td>
+                    <td>{{ r.plan }}</td>
+                    <td>
+                      {% if r.status == 'pending' %}
+                        <span class="badge badge-warning">Pending</span>
+                      {% elif r.status == 'approved' %}
+                        <span class="badge badge-success">Approved</span>
+                      {% elif r.status == 'rejected' %}
+                        <span class="badge badge-danger">Rejected</span>
+                      {% else %}
+                        <span class="badge badge-secondary">{{ r.status }}</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if r.status == 'pending' %}
+                        <form action="/admin/process/premium/request/approve" method="POST" class="form-inline mb-1">
+                          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                          <input type="hidden" name="request_id" value="{{ r.request_id }}">
+                          <select name="duration" class="custom-select custom-select-sm mr-2" required>
+                            <option value="1">1 bulan</option>
+                            <option value="3">3 bulan</option>
+                            <option value="6">6 bulan</option>
+                            <option value="12">12 bulan</option>
+                          </select>
+                          <button type="submit" class="btn btn-sm btn-primary">Approve</button>
+                        </form>
+                        <form action="/admin/process/premium/request/reject" method="POST" class="d-inline">
+                          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                          <input type="hidden" name="request_id" value="{{ r.request_id }}">
+                          <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
+                        </form>
+                      {% else %}
+                        {% if r.status == 'approved' %}
+                          <small class="text-muted">Approved {{ r.approved_at }}</small>
+                        {% endif %}
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="manualTab" role="tabpanel" aria-labelledby="manual-tab">
         <div class="row mg-b-20">
           <div class="col-md-4 mg-t-10">
             <label for="">Show</label>
@@ -30,7 +109,7 @@
               </div>
             </div>
           </div>
-        </div>        
+        </div>
         <div class="table-responsive" style="overflow-y: hidden;">
           <table id="user_list" class="table lynk-table">
             <thead>
@@ -38,6 +117,7 @@
                 
                 <th width="20%">Username</th>
                 <th width="20%">Email</th>                
+                <th width="15%">Phone</th>
                 <th width="20%">Premium Status</th>                                
                 <th width="15%">Action</th>
 
@@ -55,6 +135,7 @@
                     <span class="badge badge-warning">Unverified</span>
                   {% endif %}
                 </td>              
+                <td>{{ user.phone }}</td>
                 <td>
                   {% if user.is_premium == "TRUE" and user.premium_expiry %}
                     <span class="badge badge-primary">Premium</span><br>
@@ -101,6 +182,7 @@
             </tbody>
           </table>
           
+        </div>
         </div>
       </div>
     </div>

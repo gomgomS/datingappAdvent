@@ -49,6 +49,8 @@ class admin_proc:
             user_id = params.get("customer_id", "")
             subscription_type = params.get("subscription_type", "1_month")
             duration_months = int(params.get("duration", ""))
+            request_id = params.get("request_id", "")
+            approved_by = params.get("approved_by", "")
 
             now = datetime.now()
             expiry_date = now + timedelta(days=30 * duration_months)
@@ -75,6 +77,11 @@ class admin_proc:
             mdl_log.put("start_at", now.strftime('%Y-%m-%d %H:%M:%S'))
             mdl_log.put("end_at", expiry_date.strftime('%Y-%m-%d %H:%M:%S'))
             mdl_log.put("created_at", now.strftime('%Y-%m-%d %H:%M:%S'))
+            if request_id:
+                mdl_log.put("request_id", request_id)
+            if approved_by:
+                mdl_log.put("approved_by", approved_by)
+            mdl_log.put("duration_months", duration_months)
             mdl_log.insert()
 
             # Ambil ulang data user
@@ -156,6 +163,113 @@ class admin_proc:
             user_after = self.mgdDB.db_users.find_one(query, {"_id": 0, "username": 1, "sex": 1, "email": 1, "dob": 1})
             response["status"] = "SUCCESS"
             response["data"] = user_after or {}
+            return response
+        except Exception:
+            trace_back_msg = traceback.format_exc()
+            self.webapp.logger.debug(trace_back_msg)
+            response["desc"] = "Internal error"
+            return response
+
+    def _create_premium_request(self, params):
+        response = {
+            "status": "FAILED",
+            "desc": "",
+            "data": {}
+        }
+        try:
+            user_id = params.get("user_id", "").strip()
+            username = params.get("username", "").strip()
+            name = params.get("name", "").strip()
+            email = params.get("email", "").strip()
+            phone = params.get("phone", "").strip()
+            plan = params.get("plan", "").strip()  # e.g., 1_month, 3_months
+
+            if not (user_id and email):
+                response["desc"] = "Missing required fields"
+                return response
+
+            now = datetime.now()
+            mdl = database.new(self.mgdDB, "db_premium_requests")
+            request_id = mdl.get()["pkey"]
+            mdl.put("request_id", request_id)
+            mdl.put("user_id", user_id)
+            mdl.put("username", username)
+            mdl.put("name", name)
+            mdl.put("email", email)
+            mdl.put("phone", phone)
+            mdl.put("plan", plan)
+            mdl.put("status", "pending")
+            mdl.put("created_at", now.strftime('%Y-%m-%d %H:%M:%S'))
+            mdl.put("updated_at", now.strftime('%Y-%m-%d %H:%M:%S'))
+            mdl.insert()
+
+            response["status"] = "SUCCESS"
+            response["data"] = {"request_id": request_id}
+            return response
+        except Exception:
+            trace_back_msg = traceback.format_exc()
+            self.webapp.logger.debug(trace_back_msg)
+            response["desc"] = "Internal error"
+            return response
+
+    def _approve_premium_request(self, params):
+        response = {
+            "status": "FAILED",
+            "desc": "",
+            "data": {}
+        }
+        try:
+            request_id = params.get("request_id", "").strip()
+            duration = int(params.get("duration", "1"))
+            approved_by = params.get("approved_by", "")
+            if not request_id:
+                response["desc"] = "Missing request_id"
+                return response
+
+            req = self.mgdDB.db_premium_requests.find_one({"request_id": request_id})
+            if not req:
+                response["desc"] = "Request not found"
+                return response
+
+            # apply premium
+            _ = self._apply_premium({
+                "customer_id": req.get("user_id"),
+                "subscription_type": req.get("plan", "1_month"),
+                "duration": str(duration),
+                "request_id": request_id,
+                "approved_by": approved_by
+            })
+
+            now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            self.mgdDB.db_premium_requests.update_one(
+                {"request_id": request_id},
+                {"$set": {"status": "approved", "duration_months": duration, "approved_by": approved_by, "approved_at": now, "updated_at": now}}
+            )
+
+            response["status"] = "SUCCESS"
+            response["data"] = {"request_id": request_id}
+            return response
+        except Exception:
+            trace_back_msg = traceback.format_exc()
+            self.webapp.logger.debug(trace_back_msg)
+            response["desc"] = "Internal error"
+            return response
+
+    def _reject_premium_request(self, params):
+        response = {"status": "FAILED", "desc": "", "data": {}}
+        try:
+            request_id = params.get("request_id", "").strip()
+            rejected_by = params.get("rejected_by", "")
+            if not request_id:
+                response["desc"] = "Missing request_id"
+                return response
+            now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            self.mgdDB.db_premium_requests.update_one(
+                {"request_id": request_id},
+                {"$set": {"status": "rejected", "rejected_by": rejected_by, "rejected_at": now, "updated_at": now}}
+            )
+            response["status"] = "SUCCESS"
+            response["data"] = {"request_id": request_id}
             return response
         except Exception:
             trace_back_msg = traceback.format_exc()

@@ -1,220 +1,54 @@
 <style>
-    * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    min-height: 100vh;
-    background: url("https://images.unsplash.com/photo-1598125443421-779f98323fe4?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80");
-    background-repeat: no-repeat;
-    background-size: cover;
-    color: white;
-    font-family: Roboto;
-    font-size: 16px;
-}
-
-.container {
-    max-width: 1320px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    height: 100%;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 4%;
-    padding: 12% 0;
-}
-
-.card {
-    padding: 50px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    border-radius: 25px;
-}
-
-.card_title {
-    font-weight: normal;
-    font-size: 36px;
-    margin-bottom: 20px;
-}
-
-.pricing {
-    font-weight: normal;
-    font-size: 96px;
-}
-
-.pricing .small {
-    font-size: 16px;
-}
-
-hr {
-    margin-top: 70px;
-}
-
-.features {
-    margin: 40px 0;
-    list-style-position: inside;
-}
-
-.features li {
-    padding-bottom: 10px;
-}
-
-a.cta_btn {
-    width: 100%;
-    display: inline-block;
-    text-align: center;
-    background: rgba(21, 23, 24, 0.7);
-    border-radius: 29px;
-    padding: 20px 0;
-    color: white;
-    text-decoration: none;
-    letter-spacing: 2px;
-    transition: background .3s ease;
-}
-
-a.cta_btn:hover {
-    background: #000;
-}
-.link {
-    position: fixed;
-    background-color: #D12322;
-    padding: 23px 40px;
-    right: -99px;
-    border-radius: 5px;
-    top: 50%;
-    transform: translateY(-50%);
-    transform: rotate(-90deg);
-    font-size: 18px;
-    font-weight: 500;
-    color: #FFF;
-    text-decoration: none;
-    text-transform: capitalize;
-    transition: all .1s ease-in-out;
-}
-
-.link i {
-    padding-left: 7px;
-}
-
-.link:hover {
-    text-decoration: underline;
-    background-color: black;
-}
-@media only screen and (max-width: 1024px) {
-    .grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 2%;
-
-    }
-}
-
-@media only screen and (max-width: 425px) {
-    .grid {
-        grid-template-columns: 1fr;
-        gap: 2%;
-        padding-bottom: 25%;
-    }
-
-    .container {
-        padding: 0 1rem;
-    }
-
-    body {
-        font-size: 14px;
-    }
-
-    .card {
-        padding: 30px;
-    }
-
-    .card_title {
-        font-size: 24px;
-        margin-bottom: 12px;
-    }
-
-    .pricing {
-        font-size: 52px;
-    }
-
-    hr {
-        margin-top: 50px;
-    }
-
-    a.cta_btn {
-        font-size: 11px;
-    }
-}
-
-.features li s {
-    color: #aaa;
-    text-decoration: line-through;
-    font-style: italic;
-}
-
+  .premium-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: clamp(20px, 6vw, 48px); text-align: center; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial; background:#fff; }
+  .premium-card { max-width: 1100px; width: min(100%, 98vw); background: #fff; border-radius: 20px; box-shadow: 0 18px 40px rgba(0,0,0,0.12); padding: clamp(28px, 6vw, 56px); }
+  .premium-card h2 { font-size: clamp(32px, 9vw, 56px); }
+  .premium-card p { font-size: clamp(20px, 6vw, 28px); }
+  .btn-primary{ padding: clamp(18px, 5.8vw, 24px) clamp(26px, 7.5vw, 36px); font-size: clamp(20px, 6vw, 24px); }
+  .premium-card small { display:block; font-size: clamp(16px, 4.8vw, 20px); }
+  .premium-page { width: 100vw; }
+  #premiumCard .d-flex { gap: clamp(8px, 3.5vw, 16px) !important; }
+  @media (max-width: 768px){
+    .premium-card { border-radius: 14px; }
+    #premiumCard .d-flex{ flex-direction: column !important; }
+    #premiumCard .d-flex form{ width:100%; }
+    .btn-primary{ width:100%; }
+  }
+  .premium-card h2 { margin-bottom: 8px; font-weight: 700; }
+  .premium-card p { color: #555; margin-bottom: 20px; }
+  .btn-primary { background: #f7c948; border: none; color: #000; font-weight: 600; border-radius: 999px; padding: 10px 18px; }
+  .success-note { color: #28a745; font-weight: 600; }
 </style>
-<div class="container">
-    <div class="grid">
-        <!-- Paket Gratis -->
-        <div class="card">
-            <h2 class="card_title">Gratis</h2>
-            <p class="pricing">0<span class="small">/per bulan</span></p>
-            <p>Rupiah</p>
-            <hr>
-            <ul class="features">
-                <li><s>20 Swipe per Hari</s> (hanya 5)</li>
-                <li><s>Undo Dislike Terakhir</s></li>
-                <li><s>Lihat Siapa yang Menyukai Anda</s></li>
-                <li><s>Upload Album Foto</s></li>
-                <li><s>Lebih Sering Dilihat Pengguna Lain</s></li>
-                <li><s>Lihat Info Total Pengguna Baru</s></li>
-                <li><s>Filter Pencarian Lanjutan</s></li>
-            </ul>
-            <a href="#" class="cta_btn">Tetap Gratis</a>
-        </div>
 
-        <!-- Paket Premium -->
-        <div class="card">
-            <h2 class="card_title"><i class="fas fa-crown"></i> Premium</h2>
-            <p class="pricing">25K<span class="small">/per bulan</span></p>
-            <p>Rupiah</p>
-            <hr>
-            <ul class="features">
-                <li>20 Swipe per Hari</li>
-                <li>Undo Dislike Terakhir</li>
-                <li>Lihat Siapa yang Menyukai Anda</li>
-                <li>Upload Album Foto</li>
-                <li>Lebih Sering Dilihat Pengguna Lain</li>
-                <li>Lihat Info Total Pengguna Baru</li>
-                <li>Filter Pencarian Lanjutan</li>
-            </ul>
-            <a href="#" class="cta_btn">Beli Sekarang</a>
-        </div>
-
-        <!-- Paket Premium 3 Bulan -->
-        <div class="card">
-            <h2 class="card_title"><i class="fas fa-gem"></i> Premium 3 Bulan</h2>
-            <p class="pricing">20K<span class="small">/per bulan</span></p>
-            <p>Rupiah</p>
-            <hr>
-            <ul class="features">
-                <li>20 Swipe per Hari</li>
-                <li>Undo Dislike Terakhir</li>
-                <li>Lihat Siapa yang Menyukai Anda</li>
-                <li>Upload Album Foto</li>
-                <li>Lebih Sering Dilihat Pengguna Lain</li>
-                <li>Lihat Info Total Pengguna Baru</li>
-                <li>Filter Pencarian Lanjutan</li>
-            </ul>
-            <a href="#" class="cta_btn">Beli Sekarang</a>
-        </div>
+<div class="premium-page">
+  <div class="premium-card" id="premiumCard">
+    {% if request_success == 'TRUE' %}
+      <h2 class="success-note">Permintaan terkirim</h2>
+      <p>Mohon tunggu tim kami menghubungi Anda.</p>
+      <div class="mt-3"><a href="/swipe" class="btn btn-primary">Kembali ke Swipe</a></div>
+    {% else %}
+    <h2>Upgrade ke Premium</h2>
+    <p>Dapatkan fitur lengkap seperti filter lanjutan, undo swipe, dan banyak lagi.</p>
+    <div class="d-flex justify-content-center mb-3 flex-column flex-sm-row" style="gap:8px;">
+      <form method="POST" action="/premium/request">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="plan" value="1_month">
+        <input type="hidden" name="email" value="{{ session.get('email') }}">
+        <input type="hidden" name="name" value="{{ session.get('username') }}">
+        <button type="submit" class="btn btn-primary">Beli 1 Bulan</button>
+      </form>
+      <form method="POST" action="/premium/request">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="plan" value="3_months">
+        <input type="hidden" name="email" value="{{ session.get('email') }}">
+        <input type="hidden" name="name" value="{{ session.get('username') }}">
+        <button type="submit" class="btn btn-primary">Beli 3 Bulan</button>
+      </form>
     </div>
+    {% if request_error %}
+      <div class="alert alert-danger" role="alert">{{ request_error }}</div>
+    {% endif %}
+    <small class="text-muted">Kami akan menghubungi Anda melalui email yang terdaftar.</small>
+    {% endif %}
+  </div>
+  
 </div>
-
-</div>
-<a href="/swipe" target="_blank" class="link">Return to Swipe <i class="fab fa-youtube"></i></a>

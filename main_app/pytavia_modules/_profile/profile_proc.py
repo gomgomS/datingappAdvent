@@ -55,6 +55,7 @@ class profile_proc:
                 "city"                    : params.get("city", ""),
                 "tribe"                   : params.get("tribe", ""),
                 "congregation"            : params.get("congregation", ""),
+                "phone"                   : params.get("phone", ""),
                 # "marital_status"          : params.get("marital_status", ""),
                 "job"                     : params.get("job", ""),
                 "about"                   : params.get("about", ""),

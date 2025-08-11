@@ -548,6 +548,55 @@
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
       }
 
+      /* Redesigned Filter Modal */
+      .filter-header-subtitle {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 6px;
+      }
+      .filter-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .filter-chip {
+        background: #fff;
+        border: 1px solid #f7c948;
+        color: #333;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+      }
+      .filter-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 768px) {
+        .filter-grid { grid-template-columns: 1fr; }
+      }
+      .filter-card {
+        background: #fff;
+        border: 1px solid #ffe7a3;
+        border-radius: 12px;
+        padding: 14px;
+      }
+      .filter-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+      .filter-card-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        color: #333;
+      }
+      .filter-card-title i { color: #f5a623; }
+
       /* Header title */
       .modal-title {
         font-size: 1.3rem;
@@ -812,145 +861,122 @@
       <!-- 🎯 Redesigned Modal for Filters (Bumble Style) -->
     <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content rounded-3 border-0 shadow-lg">
+      <div class="modal-content rounded-3 border-0 shadow-lg">
 
           <div class="modal-header border-0">
-            <h5 class="modal-title font-weight-bold" id="filterModalLabel">✨ Atur Kriteria Pasangan
-              {% if is_premium == 'TRUE' %} 
-              <span class="badge badge-warning ml-2" data-toggle="tooltip" title="Fitur lengkap tersedia untuk member premium!">You Are Premium Member</span>
-              {% endif %}
-            </h5> 
+            <div>
+              <h5 class="modal-title font-weight-bold mb-1" id="filterModalLabel">✨ Atur Kriteria Pasangan
+                {% if is_premium == 'TRUE' %} 
+                <span class="badge badge-warning ml-2" data-toggle="tooltip" title="Fitur lengkap tersedia untuk member premium!">You Are Premium Member</span>
+                {% endif %}
+              </h5>
+              <div class="filter-header-subtitle">Sesuaikan preferensi Anda untuk menemukan pasangan yang cocok.</div>
+              <div id="filter-chips" class="filter-chips"></div>
+            </div>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
 
           <div class="modal-body px-4 py-3">
-            <!-- Section: Basic Filters -->
-            <div class="mb-4">
-              <h6 class="font-weight-bold text-muted mb-3">Filter Dasar</h6>
-
-              <div class="form-group d-flex align-items-center justify-content-between">
-                <label class="mb-0" for="useAge">🎂 Rentang Usia</label>
-                <input type="checkbox" class="form-check-input" id="useAge" checked onchange="toggleAge(this.checked)">
-              </div>
-
-              <div class="form-group" id="ageFilter">
-                <label>Usia</label>
-              
-                <div class="d-flex align-items-center">
-                  <input type="range" id="minAgeRange" min="18" max="60" value="18" class="custom-range mr-2" oninput="updateAgeRangeValue()">
-                  <input type="range" id="maxAgeRange" min="18" max="60" value="35" class="custom-range ml-2" oninput="updateAgeRangeValue()">
+            <div class="filter-grid">
+              <!-- Age -->
+              <div class="filter-card">
+                <div class="filter-card-header">
+                  <div class="filter-card-title"><i class="fas fa-birthday-cake"></i> Rentang Usia</div>
+                  <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="useAge" checked onchange="toggleAge(this.checked)">
+                    <label class="custom-control-label" for="useAge"></label>
+                  </div>
                 </div>
-              
-                <p class="small">Dipilih: <span id="ageRangeValue">18 - 35</span> tahun</p>
+                <div id="ageFilter">
+                  <div class="d-flex align-items-center">
+                    <input type="range" id="minAgeRange" min="18" max="60" value="18" class="custom-range mr-2" oninput="updateAgeRangeValue()">
+                    <input type="range" id="maxAgeRange" min="18" max="60" value="35" class="custom-range ml-2" oninput="updateAgeRangeValue()">
+                  </div>
+                  <p class="small mb-0">Dipilih: <span id="ageRangeValue">18 - 35</span> tahun</p>
+                </div>
               </div>
 
-              <div class="form-group d-flex align-items-center justify-content-between">
-                <label class="mb-0" for="useHometown">🏡 Kota Asal</label>
-                <input type="checkbox" class="form-check-input" id="useHometown" checked onchange="toggleHometown(this.checked)">
+              <!-- Hometown -->
+              <div class="filter-card">
+                <div class="filter-card-header">
+                  <div class="filter-card-title"><i class="fas fa-home"></i> Kota Asal</div>
+                  <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="useHometown" checked onchange="toggleHometown(this.checked)">
+                    <label class="custom-control-label" for="useHometown"></label>
+                  </div>
+                </div>
+                <div id="hometownFilter">
+                  <select class="form-control" id="hometown" name="hometown"
+                    {% if is_premium != 'TRUE' %} onchange="handleCityChange(this)" {% endif %}>
+                    <option value="">Pilih Kota Asal</option>
+                    {% for city in city_list %}
+                      {% if city not in ['Jakarta', 'Semarang', 'Bandung', 'Surabaya'] and is_premium != 'TRUE' %}
+                        <option value="{{ city }}">{{ city }} ✨✨✨ </option>
+                      {% else %}
+                        <option value="{{ city }}">{{ city }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                </div>
               </div>
 
-              <select class="form-control" id="hometown" name="hometown"
-                {% if is_premium != 'TRUE' %} onchange="handleCityChange(this)" {% endif %}>
-                <option value="">Pilih Kota Asal</option>
-                {% for city in city_list %}
-                  {% if city not in ['Jakarta', 'Semarang', 'Bandung', 'Surabaya'] and is_premium != 'TRUE' %}
-                    <option value="{{ city }}">{{ city }} ✨✨✨ </option>
-                  {% else %}
-                    <option value="{{ city }}">{{ city }}</option>
-                  {% endif %}
-                {% endfor %}
-              </select>
-
-            </div>        
-           <!-- Section: Advanced Filters -->
-          <div class="mb-4">
-            <h6 class="font-weight-bold text-muted mb-3">Filter Lanjutan</h6>
-
-            <!-- 📍 Radius Pencarian -->
-            <div class="form-group d-flex align-items-center justify-content-between">
-              <label class="mb-0" for="useDistance">📍 Radius Pencarian</label>
-              <input type="checkbox" class="form-check-input" id="useDistance"
-                {% if is_premium != 'TRUE' %}
-                  onclick="$('#premiumModal').modal('show'); return false;"
-                {% else %}
-                  onchange="toggleDistance(this.checked)"
-                {% endif %}>
-            </div>
-
-            <div class="form-group" id="distanceFilter">
-              <label for="distanceRange">Radius (km)</label>
-              <input
-                type="range"
-                id="distanceRange"
-                min="0"
-                max="100"
-                value="0"
-                class="custom-range"
-                oninput="handleDistanceChange()"
-              >
-              <p class="small">Dipilih: <span id="distanceValue">0</span> km</p>
-            </div>
-
-            <!-- 🌎 Kota Pasangan -->
-            <div class="form-group form-check" style="display: none;">
-              <input type="checkbox" class="form-check-input" id="useCurrentCity" checked
-                {% if is_premium != 'TRUE' %}
-                  onclick="$('#premiumModal').modal('show'); return false;"
-                {% else %}
-                  onchange="toggleCurrentCity(this.checked)"
-                {% endif %}>
-              <label class="form-check-label" for="useCurrentCity">📍Pakai Lokasi Calon Pasangan</label>
-            </div>
-
-            <div class="form-group" id="currentCityFilter" style="display: none;">
-              <label for="currentCity">Kota</label>
-              <select class="form-control" id="currentCity"
-                {% if is_premium != 'TRUE' %}
-                  onclick="$('#premiumModal').modal('show'); return false;"
-                {% endif %}>
-                <option value="">Pilih Kota</option>
-                <option value="Jakarta">Jakarta</option>
-                <option value="Surabaya">Surabaya</option>
-                <option value="Bandung">Bandung</option>
-                <option value="Bali">Bali</option>
-              </select>
-            </div>
-
-            <!-- 💍 Status Hubungan -->
-            <div class="form-group d-flex align-items-center justify-content-between">
-              <label class="mb-0" for="useMaritalStatus">💍 Status Hubungan</label>
-              <input type="checkbox" class="form-check-input" id="useMaritalStatus" checked
-                {% if is_premium != 'TRUE' %}
-                  onclick="$('#premiumModal').modal('show'); return false;"
-                {% else %}
-                  onchange="toggleMaritalStatus(this.checked)"
-                {% endif %}>
-            </div>
-
-            <div class="form-group" id="maritalStatusFilter">
-              <label>Status Pernikahan</label>
-              {% for status in [
-                ('never-married', 'Lajang - Belum Pernah Menikah (never-married) '),
-                ('abandoned', 'Lajang - Ditinggalkan Pasangan (abandoned)'),
-                ('separated', 'Lajang - Pisah Tempat Tinggal (separated)'),
-                ('divorced', 'Lajang - Cerai (divorced)'),
-                ('widowed', 'Lajang - Duda/Janda (widowed)'),
-                ('complicated', 'Rumit (complicated)'),
-                ('other', 'Lainnya' 'other')
-              ] %}
-              <div class="custom-control custom-radio">
-                <input type="radio" id="{{ status.0 }}" name="maritalStatus" class="custom-control-input"
-                  {% if is_premium != 'TRUE' %}
-                    onclick="$('#premiumModal').modal('show'); return false;"
-                  {% endif %}>
-                <label class="custom-control-label" for="{{ status.0 }}">{{ status.1 }}</label>
+              <!-- Distance -->
+              <div class="filter-card">
+                <div class="filter-card-header">
+                  <div class="filter-card-title"><i class="fas fa-map-marker-alt"></i> Radius Pencarian</div>
+                  <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="useDistance"
+                      {% if is_premium != 'TRUE' %}
+                        onclick="$('#premiumModal').modal('show'); return false;"
+                      {% else %}
+                        onchange="toggleDistance(this.checked)"
+                      {% endif %}>
+                    <label class="custom-control-label" for="useDistance"></label>
+                  </div>
+                </div>
+                <div id="distanceFilter">
+                  <input type="range" id="distanceRange" min="0" max="100" value="0" class="custom-range" oninput="handleDistanceChange()">
+                  <p class="small mb-0">Dipilih: <span id="distanceValue">0</span> km</p>
+                </div>
               </div>
-              {% endfor %}
-            </div>
-          </div>
 
+              <!-- Marital Status -->
+              <div class="filter-card">
+                <div class="filter-card-header">
+                  <div class="filter-card-title"><i class="fas fa-ring"></i> Status Hubungan</div>
+                  <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="useMaritalStatus" checked
+                      {% if is_premium != 'TRUE' %}
+                        onclick="$('#premiumModal').modal('show'); return false;"
+                      {% else %}
+                        onchange="toggleMaritalStatus(this.checked)"
+                      {% endif %}>
+                    <label class="custom-control-label" for="useMaritalStatus"></label>
+                  </div>
+                </div>
+                <div id="maritalStatusFilter">
+                  {% for status in [
+                    ('never-married', 'Lajang - Belum Pernah Menikah (never-married) '),
+                    ('abandoned', 'Lajang - Ditinggalkan Pasangan (abandoned)'),
+                    ('separated', 'Lajang - Pisah Tempat Tinggal (separated)'),
+                    ('divorced', 'Lajang - Cerai (divorced)'),
+                    ('widowed', 'Lajang - Duda/Janda (widowed)'),
+                    ('complicated', 'Rumit (complicated)'),
+                    ('other', 'Lainnya' 'other')
+                  ] %}
+                  <div class="custom-control custom-radio">
+                    <input type="radio" id="{{ status.0 }}" name="maritalStatus" class="custom-control-input"
+                      {% if is_premium != 'TRUE' %}
+                        onclick="$('#premiumModal').modal('show'); return false;"
+                      {% endif %}>
+                    <label class="custom-control-label" for="{{ status.0 }}">{{ status.1 }}</label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="modal-footer border-0 flex-column flex-sm-row justify-content-between align-items-stretch gap-2">
@@ -1574,7 +1600,7 @@
           min_age: document.getElementById("minAgeRange").value,
           max_age: document.getElementById("maxAgeRange").value,
           distance: document.getElementById("distanceRange").value,
-          hometown: document.getElementById("hometown").value
+           hometown: document.getElementById("hometown").value
         });
       }
    
@@ -1790,6 +1816,42 @@
         } else {
           bind();
         }
+      })();
+
+      // Chips updater for quick visual summary
+      (function initFilterChips(){
+        const chipsEl = document.getElementById('filter-chips');
+        if (!chipsEl) return;
+        function renderChips(){
+          const chips = [];
+          const useAge = document.getElementById('useAge')?.checked;
+          const minAge = document.getElementById('minAgeRange')?.value;
+          const maxAge = document.getElementById('maxAgeRange')?.value;
+          if (useAge && minAge && maxAge) chips.push(`Usia ${minAge}-${maxAge}`);
+
+          const useHometown = document.getElementById('useHometown')?.checked;
+          const hometown = document.getElementById('hometown')?.value;
+          if (useHometown && hometown) chips.push(`Asal ${hometown}`);
+
+          const useDistance = document.getElementById('useDistance')?.checked;
+          const distance = document.getElementById('distanceRange')?.value;
+          if (useDistance && distance && distance !== '0') chips.push(`Radius ${distance} km`);
+
+          const useMarital = document.getElementById('useMaritalStatus')?.checked;
+          const marital = document.querySelector("input[name='maritalStatus']:checked")?.id;
+          if (useMarital && marital) chips.push(`Status ${marital}`);
+
+          chipsEl.innerHTML = chips.map(c => `<span class="filter-chip">${c}</span>`).join('');
+        }
+        const ids = ['useAge','minAgeRange','maxAgeRange','useHometown','hometown','useDistance','distanceRange','useMaritalStatus'];
+        ids.forEach(id => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          const evt = (el.tagName === 'SELECT' || el.type === 'checkbox' || el.type === 'radio') ? 'change' : 'input';
+          el.addEventListener(evt, renderChips);
+        });
+        document.querySelectorAll("input[name='maritalStatus']").forEach(el => el.addEventListener('change', renderChips));
+        renderChips();
       })();
    </script>
 

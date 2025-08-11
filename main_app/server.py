@@ -586,9 +586,29 @@ def upgrade_premium():
     params = request.form.to_dict()   
     params['user_id']  = session.get("user_id")
     params['is_premium']  = session.get("is_premium")
+    if session.pop('premium_request_success', None):
+        params['request_success'] = 'TRUE'
+    err_msg = session.pop('premium_request_error', None)
+    if err_msg:
+        params['request_error'] = err_msg
 
     html   = view_premium.view_premium().html( params )
     return html
+
+@app.route("/premium/request", methods=["POST"])
+def premium_request_create():
+    redirect_return = login_precheck({})
+    if redirect_return:
+        return redirect_return
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    params['user_id'] = session.get('user_id')
+    params['username'] = session.get('username')
+    resp = admin_proc.admin_proc(app)._create_premium_request(params)
+    if resp.get('status') == 'SUCCESS':
+        session['premium_request_success'] = True
+    else:
+        session['premium_request_error'] = resp.get('desc','Gagal mengirim permintaan.')
+    return redirect(url_for('upgrade_premium'))
 
 #
 # CHAT
@@ -664,3 +684,31 @@ def premium_apply():
     response = admin_proc.admin_proc(app)._apply_premium(params)
     flash("premium success!!", "success")
     return redirect(url_for("admin_panel_premium_control"))
+
+@app.route('/admin/process/premium/request/approve', methods=["POST"])
+def premium_request_approve():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    params['approved_by'] = session.get('username')
+    resp = admin_proc.admin_proc(app)._approve_premium_request(params)
+    if resp.get('status') == 'SUCCESS':
+        flash('Request approved and premium applied', 'success')
+    else:
+        flash(resp.get('desc','Approve failed'), 'danger')
+    return redirect(url_for('admin_panel_premium_control'))
+
+@app.route('/admin/process/premium/request/reject', methods=["POST"])
+def premium_request_reject():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    params['rejected_by'] = session.get('username')
+    resp = admin_proc.admin_proc(app)._reject_premium_request(params)
+    if resp.get('status') == 'SUCCESS':
+        flash('Request rejected', 'info')
+    else:
+        flash(resp.get('desc','Reject failed'), 'danger')
+    return redirect(url_for('admin_panel_premium_control'))
