@@ -342,11 +342,21 @@ def auth_login():
         flash("Username and Password Not Match", "danger")
     #end if
     if m_action == "LOGIN_SUCCESS":
-        session["user_id"       ] = m_data["user_id"       ]        
-        session["username"      ] = m_data["username"      ]    
-        session["email"         ] = m_data["email"         ]
-        session["role"          ] = m_data["role"          ]
-        session["is_premium"    ] = m_data["is_premium"    ]
+        # Be tolerant to payload differences; set both IDs if available
+        fk_user_id = m_data.get("fk_user_id")
+        user_id = m_data.get("user_id")
+        # Backward compatibility: if one is missing, reuse the other
+        if fk_user_id is None and user_id is not None:
+            fk_user_id = user_id
+        if user_id is None and fk_user_id is not None:
+            user_id = fk_user_id
+
+        session["fk_user_id"    ] = fk_user_id
+        session["user_id"       ] = user_id
+        session["username"      ] = m_data.get("username")
+        session["email"         ] = m_data.get("email")
+        session["role"          ] = m_data.get("role")
+        session["is_premium"    ] = m_data.get("is_premium")
         
         security_login.security_login(app).add_cookie({})
         

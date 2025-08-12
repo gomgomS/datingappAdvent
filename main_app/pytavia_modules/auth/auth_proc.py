@@ -200,7 +200,7 @@ class auth_proc:
         call_id  = idgen._get_api_call_id()
         response = {
             "message_id"     : call_id,
-            "message_action" : "LOGIN_SUCCESS",
+            "message_action" : "LOGIN_FAILED",
             "message_code"   : "0",
             "message_title"  : "",
             "message_desc"   : "",
@@ -214,6 +214,10 @@ class auth_proc:
             browser         = request.user_agent.browser
             xff             = request.remote_addr
 
+            # --- DEBUG LOGS ---
+            print("AUTH_LOGIN - params received (keys):", list(params.keys()))
+            print("AUTH_LOGIN - login_identifier:", login_identifier)
+
             # Find user by username or email first
             user_rec = self.mgdDB.db_users.find_one({
                 "$or": [
@@ -221,6 +225,7 @@ class auth_proc:
                     {"email": login_identifier}
                 ]
             })
+            print("AUTH_LOGIN - user_rec found:", user_rec is not None)
 
             error_msg_rec = None
             if user_rec is None:
@@ -232,6 +237,7 @@ class auth_proc:
                     "id": user_rec["username"],
                     "password": password
                 })
+                print("AUTH_LOGIN - hash comparison match:", user_rec.get("password") == hashed_password)
                 if user_rec.get("password") != hashed_password:
                     # Wrong password
                     error_msg_rec = self.mgdDB.db_config_general.find_one({"value": "ERROR_LOGIN_TYPE_001"})
@@ -241,6 +247,7 @@ class auth_proc:
                         user_rec["role"] = "superadmin"
                     else:
                         user_rec["role"] = "customer"
+                    print("AUTH_LOGIN - role:", user_rec["role"])
 
                     # Premium expiry check
                     premium_expiry_str = user_rec.get("premium_expiry", "")
@@ -257,29 +264,38 @@ class auth_proc:
                                 update_fields["is_premium"] = "FALSE"
                                 update_fields["subscription_type"] = "expired"
                         except Exception as e:
-                            self.webapp.logger.debug(f"[Premium Check] Error: {e}")
+                            # avoid f-string per debug preference
+                            self.webapp.logger.debug("[Premium Check] Error: " + str(e))
 
                     # Final update
                     self.mgdDB.db_users.update_one(
                         {"pkey": user_rec["pkey"]},
                         {"$set": update_fields}
                     )
+                    print("AUTH_LOGIN - set login_status TRUE for user_id:", user_rec.get("user_id"))
 
                     response["message_action"] = "LOGIN_SUCCESS"
                     response["message_code"  ] = ""
                     response["message_title" ] = ""
                     response["message_desc"  ] = ""
+                    # Ensure both IDs are present for downstream session usage
+                    fk_user_id_val = user_rec.get("pkey") or user_rec.get("user_id")
+                    user_id_val    = user_rec.get("user_id") or user_rec.get("pkey")
+                    print("AUTH_LOGIN - resolved fk_user_id:", fk_user_id_val)
+                    print("AUTH_LOGIN - resolved user_id:", user_id_val)
+
                     response["message_data"  ] = {
-                        "fk_user_id"      : user_rec["pkey"                 ],
-                        "user_id"         : user_rec["user_id"              ],
-                        "username"        : user_rec["username"             ],                                        
-                        "email"           : user_rec["email"                ],
-                    "verify_email"    : user_rec["verify_email"         ],
-                    "profile_intro"   : user_rec["profile_intro"        ],
-                    "is_premium"      : user_rec["is_premium"           ],
-                    "role"            : user_rec["role"                 ],
-                }
-                return response
+                        "fk_user_id"    : fk_user_id_val,
+                        "user_id"       : user_id_val,
+                        "username"      : user_rec.get("username"),
+                        "email"         : user_rec.get("email"),
+                        "verify_email"  : user_rec.get("verify_email"),
+                        "profile_intro" : user_rec.get("profile_intro"),
+                        "is_premium"    : user_rec.get("is_premium"),
+                        "role"          : user_rec.get("role"),
+                    }
+                    print("AUTH_LOGIN - response_action:", response.get("message_action"))
+                    return response
 
                 #end if                 
 
@@ -290,6 +306,7 @@ class auth_proc:
                 response["message_code"  ] = error_msg_rec["misc"]
                 response["message_title" ] = error_msg_rec["name"]
                 response["message_desc"  ] = error_msg_rec["desc"]
+                print("AUTH_LOGIN - failure action set, returning LOGIN_FAILED")
 
                        
         # end try

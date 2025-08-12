@@ -4,6 +4,7 @@ import traceback
 from datetime import datetime, timedelta
 import random
 import time
+import re
 
 sys.path.append("pytavia_core"    )
 sys.path.append("pytavia_modules" )
@@ -106,6 +107,7 @@ class admin_proc:
             "data": {}
         }
         try:
+            # Value provided by admin; could be intended as a new username
             username = params.get("username", "").strip()
             new_password = (params.get("new_password") or "").strip()
             new_sex = (params.get("sex") or "").strip()
@@ -113,18 +115,33 @@ class admin_proc:
             new_dob = (params.get("dob") or "").strip()
             user_id = (params.get("user_id") or "").strip()
 
-            if not username:
-                response["desc"] = "Missing username"
+            if not username and not user_id:
+                response["desc"] = "Missing username or user_id"
                 return response
 
             update_fields = {}
+            
+            # Locate the existing user first to get the current username
+            query = {"user_id": user_id} if user_id else {"username": username}
+            existing_user = self.mgdDB.db_users.find_one(query)
+            if not existing_user:
+                response["desc"] = "User not found"
+                return response
+            existing_username = existing_user.get("username", "").strip()
+
+            # If admin provided a different username, include it in the update
+            if username and existing_username and username != existing_username:
+                update_fields["username"] = username
 
             if new_password:
                 if len(new_password) < 8:
                     response["desc"] = "Password must be at least 8 characters"
                     return response
+                # Use the TARGET username for hashing: the new one if it will be updated,
+                # otherwise the existing username in DB. This avoids login mismatch.
+                username_for_hash = update_fields.get("username", existing_username)
                 hashed_password = utils._get_passwd_hash({
-                    "id": username,
+                    "id": username_for_hash,
                     "password": new_password
                 })
                 update_fields["password"] = hashed_password
@@ -156,11 +173,13 @@ class admin_proc:
                 response["desc"] = "No changes provided"
                 return response
 
-            # Prefer user_id for targeting if provided, fallback to username
-            query = {"user_id": user_id} if user_id else {"username": username}
+            # Prefer user_id for targeting if provided, fallback to (possibly updated) username
+            query = {"user_id": user_id} if user_id else {"username": existing_username or username}
             self.mgdDB.db_users.update_one(query, {"$set": update_fields})
 
-            user_after = self.mgdDB.db_users.find_one(query, {"_id": 0, "username": 1, "sex": 1, "email": 1, "dob": 1})
+            # Re-read using user_id if available, else by final username
+            read_query = {"user_id": user_id} if user_id else {"username": update_fields.get("username", existing_username)}
+            user_after = self.mgdDB.db_users.find_one(read_query, {"_id": 0, "username": 1, "sex": 1, "email": 1, "dob": 1})
             response["status"] = "SUCCESS"
             response["data"] = user_after or {}
             return response
