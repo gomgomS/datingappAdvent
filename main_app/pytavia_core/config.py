@@ -25,7 +25,7 @@ mainDB                      = "datingapp"
 mainDB_string               = "mongodb://127.0.0.1:27017/"  + mainDB
 
 # Local Storage
-G_BASE_S3_URL               = "http://0.0.0.0:50012"
+G_BASE_S3_URL               = "http://127.0.0.1:50012"
 G_IMAGE_URL_DISPATCH        = G_BASE_S3_URL + "/v1/cfs/get-file?"
 
 G_IMAGE_BUCKET              = "ADVENT-MATCH"
@@ -34,7 +34,7 @@ G_IMAGE_DEFAULT_URL         = "key=/placeholder/02-01-2021/placeholder_160955960
 
 
 # IMAGE SERVER
-G_CHAT_URL_DISPATCH         = "http://0.0.0.0:50013"
+G_CHAT_URL_DISPATCH         = "http://127.0.0.1:50013"
 
 
 

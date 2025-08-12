@@ -238,7 +238,7 @@ body {
       <div id="msgs-container">
         <ul id="messages">
           {% for msg in chat_messages %}
-            <li class="message-item {% if msg.sender_user_id == sender %}self-message-item{% else %}peer-message-item{% endif %}">
+            <li id="msg-seq-{{ msg.sequence }}" class="message-item {% if msg.sender_user_id == sender %}self-message-item{% else %}peer-message-item{% endif %}">
               <small class="muted-text">{{ msg.timestamp }}{% if msg.is_read %} ✅ {% endif %}</small>
               <p>{{ msg.message }}</p>
             </li>
@@ -253,19 +253,21 @@ body {
   </div>
 
   <script>
-    // Inisialisasi Socket.IO
-    var socketio = io("{{chat_dispatch_url}}:50013", { transports: ["websocket", "polling"] });
+    // Inisialisasi Socket.IO - connect to same origin, force polling (no eventlet/gevent needed)
+    var socketio = io({ transports: ["polling"] });
 
     const match_id = "{{ match_id }}";
     const sender_id = "{{ sender }}";
 
-    // Pastikan hanya satu kali emit join
-    if (!socketio.connected) {
+    // Emit join and chat_opened when connected
+    socketio.on("connect", function () {
       socketio.emit("join", { room: match_id });
-    }
+      socketio.emit("chat_opened", { match_id: match_id, receiver_id: sender_id });
+    });
 
-    // Beritahu server bahwa chat dibuka
-    socketio.emit("chat_opened", { match_id: match_id, receiver_id: sender_id });
+    socketio.on("connect_error", function (err) {
+      console.error("Socket connect_error:", err);
+    });
 
     // Fungsi untuk scroll ke pesan terakhir
     function scrollToBottom() {

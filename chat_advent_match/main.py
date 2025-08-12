@@ -1,11 +1,13 @@
 from flask import Flask, render_template, request, jsonify
+import os
 from flask_socketio import SocketIO, join_room, send, emit
 from pymongo import MongoClient
 from datetime import datetime
 from bson import ObjectId
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+# Use threading mode to work without eventlet/gevent and match Engine.IO v4
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 # Database connection
 mainDB = "datingapp"
@@ -15,8 +17,41 @@ db = client[mainDB]
 db_matches = db["db_matches"]
 db_users = db["db_users"]
 db_chat = db["db_chat"]
-main_url="http://0.0.0.0:50011/chat"
-chat_dispatch_url="http://0.0.0.0:50013"
+
+# --- Dynamic base URL helpers ---
+def build_main_url() -> str:
+    """Build the main app URL dynamically.
+
+    Defaults to same host as this request, port from MAIN_APP_PORT (default 50011),
+    and path '/chat'. You can override FULL_MAIN_URL to set a complete URL.
+    """
+    full_override = os.environ.get("FULL_MAIN_URL")
+    if full_override:
+        return full_override.rstrip("/")
+
+    scheme = request.headers.get("X-Forwarded-Proto", request.scheme)
+    host_header = request.headers.get("X-Forwarded-Host", request.host)
+
+    # Extract hostname without port
+    host_only = host_header.split(":")[0]
+    main_port = os.environ.get("MAIN_APP_PORT", "50011")
+    path = os.environ.get("MAIN_APP_PATH", "/chat")
+    return f"{scheme}://{host_only}:{main_port}{path}"
+
+def build_chat_dispatch_url() -> str:
+    """Build the chat server base URL dynamically.
+
+    Override fully with FULL_CHAT_URL, otherwise use current host with CHAT_PORT (default 50013).
+    """
+    full_override = os.environ.get("FULL_CHAT_URL")
+    if full_override:
+        return full_override.rstrip("/")
+
+    scheme = request.headers.get("X-Forwarded-Proto", request.scheme)
+    host_header = request.headers.get("X-Forwarded-Host", request.host)
+    host_only = host_header.split(":")[0]
+    chat_port = os.environ.get("CHAT_PORT", "50013")
+    return f"{scheme}://{host_only}:{chat_port}"
 
 # Room dictionary to keep track of messages in memory
 room_messages = {}
@@ -86,7 +121,8 @@ def chat():
         sender_name=sender["name"],
         sender_username=sender["username"],
         receiver_name=receiver["name"],
-        main_url=main_url,
+        main_url=build_main_url(),
+        chat_dispatch_url=build_chat_dispatch_url(),
         chat_messages=chat_messages,
         latest_sequence=latest_sequence
     )
