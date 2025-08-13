@@ -680,6 +680,13 @@
 
 
       /* end left middle part for info use filter */
+
+      /* Disabled (grey) look for filter sections when toggles are OFF */
+      .disabled-section {
+        opacity: 0.5;
+        pointer-events: none;
+        filter: grayscale(60%);
+      }
     </style>
 </head>
 
@@ -881,7 +888,7 @@
           <div class="modal-body px-4 py-3">
             <div class="filter-grid">
               <!-- Age -->
-              <div class="filter-card">
+                <div class="filter-card" id="card-age">
                 <div class="filter-card-header">
                   <div class="filter-card-title"><i class="fas fa-birthday-cake"></i> Rentang Usia</div>
                   <div class="custom-control custom-switch">
@@ -899,7 +906,7 @@
               </div>
 
               <!-- Hometown -->
-              <div class="filter-card">
+                <div class="filter-card" id="card-hometown">
                 <div class="filter-card-header">
                   <div class="filter-card-title"><i class="fas fa-home"></i> Kota Asal</div>
                   <div class="custom-control custom-switch">
@@ -923,7 +930,7 @@
               </div>
 
               <!-- Distance -->
-              <div class="filter-card">
+                <div class="filter-card" id="card-distance">
                 <div class="filter-card-header">
                   <div class="filter-card-title"><i class="fas fa-map-marker-alt"></i> Radius Pencarian</div>
                   <div class="custom-control custom-switch">
@@ -937,13 +944,18 @@
                   </div>
                 </div>
                 <div id="distanceFilter">
-                  <input type="range" id="distanceRange" min="0" max="100" value="0" class="custom-range" oninput="handleDistanceChange()">
+                  <input type="range" id="distanceRange" min="0" max="100" value="0" class="custom-range" oninput="handleDistanceChange()" disabled>
                   <p class="small mb-0">Dipilih: <span id="distanceValue">0</span> km</p>
+                  <div id="searcher-location" class="small text-muted mt-2" style="display:none;">
+                    <i class="fas fa-location-arrow"></i>
+                    Lokasi Anda: <span id="loc-city"></span><span id="loc-prov"></span><span id="loc-country"></span>
+                  </div>
+                  <div id="geo-control" class="small mt-2"></div>
                 </div>
               </div>
 
               <!-- Marital Status -->
-              <div class="filter-card">
+                <div class="filter-card" id="card-marital">
                 <div class="filter-card-header">
                   <div class="filter-card-title"><i class="fas fa-ring"></i> Status Hubungan</div>
                   <div class="custom-control custom-switch">
@@ -989,7 +1001,7 @@
                 Reset Filter
               </button>
           
-              <button type="button" id="apply-filters-btn" class="btn btn-primary w-100 w-sm-auto">
+              <button type="button" id="apply-filters-btn" class="btn btn-primary w-100 w-sm-auto" onclick="openConfirmFilters()">
                 Terapkan Filter
               </button>
             </div>
@@ -1063,7 +1075,28 @@
     </div>
     
 
-   
+    
+    <!-- Modal: Confirm Filters -->
+    <div class="modal fade" id="confirmFilterModal" tabindex="-1" role="dialog" aria-labelledby="confirmFilterModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="confirmFilterModalLabel">Konfirmasi Pencarian</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>Apakah Anda yakin ingin menggunakan kriteria berikut?</p>
+            <div id="confirm-filter-summary" class="filter-chips"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
+            <button type="button" id="confirm-apply-btn" class="btn btn-primary" onclick="onConfirmApplyFilters()">Mulai Pencarian</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <input type="hidden" id="latitude">
     <input type="hidden" id="longitude">
@@ -1274,12 +1307,31 @@
       
       function appendcard_swipe_empty(filterData) {       
 
-        // Ambil filter yang relevan untuk ditampilkan ke user
-        const usiaText = filterData.min_age && filterData.max_age ? `Usia ${filterData.min_age}–${filterData.max_age}` : '';
-        const distanceText = filterData.distance && filterData.distance !== "0" ? `Jarak max ${filterData.distance} km` : '';
-        const hometownText = filterData.hometown ? `Asal ${filterData.hometown}` : '';
-        const currentCityText = filterData.currentCity ? `Tinggal di ${filterData.currentCity}` : '';
-        const maritalStatusText = filterData.maritalStatus ? `Status ${filterData.maritalStatus}` : '';
+        // Render using the latest UI state merged with provided filterData
+        const useAge = document.getElementById('useAge')?.checked;
+        const minAge = document.getElementById('minAgeRange')?.value;
+        const maxAge = document.getElementById('maxAgeRange')?.value;
+        const useDistance = document.getElementById('useDistance')?.checked;
+        const distanceRange = document.getElementById('distanceRange')?.value || '0';
+        const hometown = document.getElementById('hometown')?.value || '';
+        const currentCityEl = document.getElementById('currentCity');
+        const currentCity = currentCityEl ? currentCityEl.value : '';
+        const marital = document.querySelector("input[name='maritalStatus']:checked")?.id || '';
+
+        const fd = Object.assign({
+          min_age: useAge ? minAge : undefined,
+          max_age: useAge ? maxAge : undefined,
+          distance: (useDistance && distanceRange !== '0') ? distanceRange : '0',
+          hometown: hometown || undefined,
+          currentCity: currentCity || undefined,
+          maritalStatus: marital || undefined,
+        }, filterData || {});
+
+        const usiaText = (fd.min_age && fd.max_age) ? `Usia ${fd.min_age}–${fd.max_age}` : '';
+        const distanceText = (fd.distance && fd.distance !== "0") ? `Jarak max ${fd.distance} km` : '';
+        const hometownText = fd.hometown ? `Asal ${fd.hometown}` : '';
+        const currentCityText = fd.currentCity ? `Tinggal di ${fd.currentCity}` : '';
+        const maritalStatusText = fd.maritalStatus ? `Status ${fd.maritalStatus}` : '';
 
         const criteriaList = [usiaText, distanceText, hometownText, currentCityText, maritalStatusText]
           .filter(Boolean)
@@ -1300,16 +1352,24 @@
         `;
 
         frame.appendChild(newcard_swipe);
-        current = newcard_swipe;
       }
 
 
       function initcard_swipe(card_swipe) {
+        if (!card_swipe || card_swipe.classList.contains('no-data')) return;
         card_swipe.addEventListener('pointerdown', onPointerDown);
       }
 
+      function getTopSwipeableCard() {
+        const cards = Array.from(frame.querySelectorAll('.card_swipe'));
+        for (let i = cards.length - 1; i >= 0; i--) {
+          if (!cards[i].classList.contains('no-data')) return cards[i];
+        }
+        return null;
+      }
+
       function setTransform(x, y, deg, duration) {
-        if (!current) return;
+        if (!current || current.classList.contains('no-data')) return;
         current.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${deg}deg)`;
         likeText.style.opacity = Math.abs((x / innerWidth * 2.1));
         likeText.className = `is-like ${x > 0 ? 'like' : 'nope'}`;
@@ -1317,7 +1377,7 @@
       }
 
       function onPointerDown({ clientX, clientY }) {
-        if (!current) return;
+        if (!current || current.classList.contains('no-data')) return;
         startX = clientX;
         startY = clientY;
         current.addEventListener('pointermove', onPointerMove);
@@ -1326,13 +1386,14 @@
       }
 
       function onPointerMove({ clientX, clientY }) {
+        if (!current || current.classList.contains('no-data')) return;
         moveX = clientX - startX;
         moveY = clientY - startY;
         setTransform(moveX, moveY, moveX / innerWidth * 50);
       }
 
       function onPointerUp() {
-        if (!current) return;
+        if (!current || current.classList.contains('no-data')) return;
         current.removeEventListener('pointermove', onPointerMove);
         current.removeEventListener('pointerup', onPointerUp);
         current.removeEventListener('pointerleave', onPointerUp);
@@ -1373,6 +1434,15 @@
           if (swipedCount % limit === 0) {
             skipCount += limit;
             fetchMatches(skipCount); // 👈 Load next batch after transition ends
+          }
+
+          // Ensure current always points to the top swipeable card
+          if (!current || current.classList.contains('no-data')) {
+            current = getTopSwipeableCard();
+            if (current) {
+              likeText = current.children[0];
+              initcard_swipe(current);
+            }
           }
         }, innerWidth); // Wait for animation duration
       }
@@ -1450,6 +1520,24 @@
             // Set Profile Information
             document.getElementById('profile-photo').src = data.profile_photo ? `{{G_IMAGE_URL_DISPATCH}}${data.profile_photo}` : 'default-profile.jpg';
             document.getElementById('name').textContent = data.name;
+            // Compute age from DOB if available
+            (function(){
+              try {
+                const ageEl = document.getElementById('age');
+                const dobStr = data.dob;
+                if (ageEl && dobStr) {
+                  const dob = new Date(dobStr);
+                  if (!isNaN(dob)) {
+                    const diffMs = Date.now() - dob.getTime();
+                    const ageDate = new Date(diffMs);
+                    const ageYears = Math.abs(ageDate.getUTCFullYear() - 1970);
+                    ageEl.textContent = ageYears;
+                  } else {
+                    ageEl.textContent = '';
+                  }
+                }
+              } catch (_) {}
+            })();
             document.getElementById('job').textContent = data.job;
             document.getElementById('city').textContent = data.city;
             document.getElementById('username').textContent = data.username;
@@ -1480,8 +1568,7 @@
             }
 
             // Open the modal using Bootstrap's modal methods
-            const modal = new bootstrap.Modal(document.getElementById('profileModal'));
-            modal.show();
+             $('#profileModal').modal('show');
           } else {
             alert('Failed to fetch profile detail.');
           }
@@ -1493,10 +1580,11 @@
 
       // Open full-screen image modal
       function openFullImageModal(imageUrl) {
-        const fullImageModal = new bootstrap.Modal(document.getElementById('fullImageModal'));
         const fullImageElement = document.getElementById('full-image');
-        fullImageElement.src = imageUrl;
-        fullImageModal.show();
+        if (fullImageElement) {
+          fullImageElement.src = imageUrl;
+        }
+        $('#fullImageModal').modal('show');
       }
 
       function openModal() {
@@ -1565,15 +1653,49 @@
         const distanceFilter = document.getElementById("distanceFilter");
         const distanceRange = document.getElementById("distanceRange");
         const distanceValue = document.getElementById("distanceValue");
+        const locWrap = document.getElementById('searcher-location');
+        const card = document.getElementById('card-distance');
+        const geoCtl = document.getElementById('geo-control');
 
         distanceFilter.style.display = checked ? 'block' : 'none';
+        if (card) card.classList.toggle('disabled-section', !checked);
+        if (distanceRange) distanceRange.disabled = !checked;
 
         if (checked) {
           distanceRange.value = 50;
           distanceValue.innerText = "50";
+          // Prefill from server-side if available
+          try {
+            const srvLoc = JSON.parse(`{{ user_rec.location | default({}) | tojson | safe }}`);
+            const coordsArr = Array.isArray(srvLoc.coordinates) ? srvLoc.coordinates : [];
+            const lng = Number(coordsArr[0]);
+            const lat = Number(coordsArr[1]);
+            const city = srvLoc.current_city || '';
+            const prov = srvLoc.current_province || '';
+            const country = srvLoc.current_country || '';
+            const date = srvLoc.lastGeoDate || '';
+            const cityEl = document.getElementById('loc-city');
+            const provEl = document.getElementById('loc-prov');
+            const countryEl = document.getElementById('loc-country');
+            if (cityEl && provEl && countryEl) {
+              cityEl.textContent = city;
+              provEl.textContent = prov ? (city ? `, ${prov}` : prov) : '';
+              countryEl.textContent = country ? ((city || prov) ? `, ${country}` : country) : '';
+            }
+            if ((city || prov || country) && locWrap) locWrap.style.display = 'inline';
+            if (geoCtl) {
+              if (date) {
+                geoCtl.innerHTML = `<span class="text-muted">Lokasi tersimpan pada ${date}. </span><button class="btn btn-sm btn-outline-primary ml-2" type="button" onclick="refreshLocationNow()">Update lokasi</button>`;
+              } else {
+                geoCtl.innerHTML = `<span class="text-warning">Lokasi Anda belum terdata. </span><button class="btn btn-sm btn-primary ml-2" type="button" onclick="refreshLocationNow()">Set lokasi sekarang</button>`;
+              }
+            }
+          } catch (_) {}
         } else {
           distanceRange.value = 0;
           distanceValue.innerText = "0";
+          if (locWrap) locWrap.style.display = 'none';
+          if (geoCtl) geoCtl.innerHTML = '';
         }
       }
 
@@ -1581,10 +1703,14 @@
 
       function toggleAge(show) {
         document.getElementById("ageFilter").style.display = show ? 'block' : 'none';
+        const card = document.getElementById('card-age');
+        if (card) card.classList.toggle('disabled-section', !show);
       }
 
       function toggleHometown(show) {
         document.getElementById("hometownFilter").style.display = show ? 'block' : 'none';
+        const card = document.getElementById('card-hometown');
+        if (card) card.classList.toggle('disabled-section', !show);
       }
 
       function toggleCurrentCity(show) {
@@ -1593,27 +1719,96 @@
 
       function toggleMaritalStatus(show) {
         document.getElementById("maritalStatusFilter").style.display = show ? 'block' : 'none';
+        const card = document.getElementById('card-marital');
+        if (card) card.classList.toggle('disabled-section', !show);
       }  
 
+      // Helper: update location line under Radius card
+      function updateSearcherLocationDisplay(city, prov, country, longitude, latitude, lastGeoDate) {
+        try {
+          const wrap = document.getElementById('searcher-location');
+          if (!wrap) return;
+          const cityEl = document.getElementById('loc-city');
+          const provEl = document.getElementById('loc-prov');
+          const countryEl = document.getElementById('loc-country');
+
+          const cCity = city || '';
+          const cProv = prov || '';
+          const cCountry = country || '';
+
+          if (cityEl && provEl && countryEl) {
+            cityEl.textContent = cCity ? cCity : '';
+            provEl.textContent = cProv ? (cCity ? `, ${cProv}` : cProv) : '';
+            countryEl.textContent = cCountry ? ((cCity || cProv) ? `, ${cCountry}` : cCountry) : '';
+          }
+          // Show only if any part exists
+          wrap.style.display = (cCity || cProv || cCountry) ? 'inline' : 'none';
+        } catch (e) {
+          console.error('updateSearcherLocationDisplay error:', e);
+        }
+      }
+
+      function buildFilterPayload(extra) {
+        const useAge = document.getElementById('useAge')?.checked;
+        const minAgeEl = document.getElementById('minAgeRange');
+        const maxAgeEl = document.getElementById('maxAgeRange');
+        const minAgeVal = useAge && minAgeEl ? parseInt(minAgeEl.value || '18', 10) : 18;
+        const maxAgeVal = useAge && maxAgeEl ? parseInt(maxAgeEl.value || '60', 10) : 60;
+
+        const useDistance = document.getElementById('useDistance')?.checked;
+        const distanceRangeEl = document.getElementById('distanceRange');
+        const distanceVal = (useDistance && distanceRangeEl) ? parseInt(distanceRangeEl.value || '0', 10) : 0;
+
+        const useHometown = document.getElementById('useHometown')?.checked;
+        const hometownEl = document.getElementById('hometown');
+        const hometownVal = (useHometown && hometownEl) ? (hometownEl.value || '') : '';
+
+        const useMarital = document.getElementById('useMaritalStatus')?.checked;
+        const maritalVal = useMarital ? (document.querySelector("input[name='maritalStatus']:checked")?.id || '') : '';
+
+        const payload = {
+          min_age: isNaN(minAgeVal) ? 18 : minAgeVal,
+          max_age: isNaN(maxAgeVal) ? 60 : maxAgeVal,
+          distance: isNaN(distanceVal) ? 0 : distanceVal,
+          hometown: hometownVal || undefined,
+          maritalStatus: maritalVal || undefined
+        };
+        if (extra && typeof extra === 'object') {
+          Object.assign(payload, extra);
+        }
+        return payload;
+      }
+
       function applyFiltersNonPremium() {
-        sendFilterRequest({
-          min_age: document.getElementById("minAgeRange").value,
-          max_age: document.getElementById("maxAgeRange").value,
-          distance: document.getElementById("distanceRange").value,
-           hometown: document.getElementById("hometown").value
-        });
+        console.log('applyFiltersNonPremium()');
+        const payload = buildFilterPayload();
+        sendFilterRequest(payload);
       }
    
       function applyFilters() {
-        const lastGeoDate = "{{ user_rec.location.lastGeoDate }}"; // Format: "YYYY-MM-DD"
+        console.log('applyFilters()');
+        const useDistance = document.getElementById('useDistance')?.checked;
+        const distanceRangeEl = document.getElementById('distanceRange');
+        const distanceVal = (useDistance && distanceRangeEl) ? parseInt(distanceRangeEl.value || '0', 10) : 0;
+        const distance = isNaN(distanceVal) ? 0 : distanceVal;
+        const geoCtl = document.getElementById('geo-control');
+
+        // Jika radius tidak aktif atau 0, jangan minta geolocation
+        if (!useDistance || distance <= 0) {
+          const payload = buildFilterPayload({ distance: 0 });
+          sendFilterRequest(payload);
+          return;
+        }
+
+        // Radius aktif: minta lokasi jika perlu
+        const lastGeoDate = "{{ user_rec.location.lastGeoDate }}";
         const today = new Date().toISOString().split('T')[0];
 
         if (lastGeoDate !== today) {
           if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
               function (position) {
-                // Geolocation Setup
-                const OPENCAGE_API_KEY = "a1ec8bfdf9524ee09594cbacb5537ae6"; // Ganti dengan API key kamu
+                const OPENCAGE_API_KEY = "a1ec8bfdf9524ee09594cbacb5537ae6";
                 const latitude = position.coords.latitude;
                 const longitude = position.coords.longitude;
 
@@ -1631,76 +1826,110 @@
                       country = components.country || "";
                     }
 
-                    // 🚀 Kirim semua filter, dengan current_position dalam satu objek
-                    sendFilterRequest({
-                      min_age: document.getElementById("minAgeRange").value,
-                      max_age: document.getElementById("maxAgeRange").value,
-                      distance: document.getElementById("distanceRange").value,
-                      hometown: document.getElementById("hometown").value,
-                      currentCity: document.getElementById("currentCity").value,
-                      maritalStatus: document.querySelector("input[name='maritalStatus']:checked")?.id || null,
-                      current_position: {
-                        latitude,
-                        longitude,
-                        city,
-                        prov,
-                        country
+                    const currentCityEl = document.getElementById("currentCity");
+                    // show under radius
+                    try {
+                      const locWrap = document.getElementById('searcher-location');
+                      const cityEl = document.getElementById('loc-city');
+                      const provEl = document.getElementById('loc-prov');
+                      const countryEl = document.getElementById('loc-country');
+                      if (cityEl && provEl && countryEl) {
+                        cityEl.textContent = city;
+                        provEl.textContent = prov ? (city ? `, ${prov}` : prov) : '';
+                        countryEl.textContent = country ? ((city || prov) ? `, ${country}` : country) : '';
                       }
+                      if (locWrap) locWrap.style.display = 'inline';
+                    } catch(_) {}
+                    const payload = buildFilterPayload({
+                      distance: distance,
+                      currentCity: currentCityEl ? currentCityEl.value : undefined,
+                      current_position: { latitude, longitude, city, prov, country }
                     });
+                    sendFilterRequest(payload);
+                    if (geoCtl) geoCtl.innerHTML = `<span class=\"text-muted\">Lokasi diupdate hari ini. </span><button class=\"btn btn-sm btn-outline-primary ml-2\" type=\"button\" onclick=\"refreshLocationNow()\">Update lagi</button>`;
                   })
                   .catch(error => {
                     console.error("Gagal ambil data dari OpenCage:", error);
 
-                    // Tetap kirim walau gagal reverse geocoding
-                    sendFilterRequest({
-                      min_age: document.getElementById("minAgeRange").value,
-                      max_age: document.getElementById("maxAgeRange").value,
-                      distance: document.getElementById("distanceRange").value,
-                      hometown: document.getElementById("hometown").value,
-                      currentCity: document.getElementById("currentCity").value,
-                      maritalStatus: document.querySelector("input[name='maritalStatus']:checked")?.id || null,
-                      current_position: {
-                        latitude,
-                        longitude
-                      }
+                    const currentCityEl2 = document.getElementById("currentCity");
+                    const payload = buildFilterPayload({
+                      distance: distance,
+                      currentCity: currentCityEl2 ? currentCityEl2.value : undefined,
+                      current_position: { latitude, longitude }
                     });
+                    sendFilterRequest(payload);
+                    if (geoCtl) geoCtl.innerHTML = `<span class=\"text-warning\">Gagal reverse geocoding. </span><button class=\"btn btn-sm btn-outline-primary ml-2\" type=\"button\" onclick=\"refreshLocationNow()\">Coba update lagi</button>`;
                   });
               },
               function (error) {
                 console.error("Geolocation error:", error.message);
-
-                // Kirim tanpa current_position
-                sendFilterRequest({
-                  min_age: document.getElementById("minAgeRange").value,
-                  max_age: document.getElementById("maxAgeRange").value,
-                  distance: document.getElementById("distanceRange").value,
-                  hometown: document.getElementById("hometown").value,
-                  currentCity: document.getElementById("currentCity").value,
-                  maritalStatus: document.querySelector("input[name='maritalStatus']:checked")?.id || null
-                });
+                const payload = buildFilterPayload({ distance });
+                sendFilterRequest(payload);
+                if (geoCtl) geoCtl.innerHTML = `<span class=\"text-danger\">Geolocation ditolak/gagal. </span><button class=\"btn btn-sm btn-outline-primary ml-2\" type=\"button\" onclick=\"refreshLocationNow()\">Coba lagi</button>`;
               }
             );
           } else {
             alert("Browser kamu tidak mendukung fitur lokasi otomatis.");
-            sendFilterRequest({
-              min_age: document.getElementById("minAgeRange").value,
-              max_age: document.getElementById("maxAgeRange").value,
-              distance: document.getElementById("distanceRange").value,
-              hometown: document.getElementById("hometown").value,
-              currentCity: document.getElementById("currentCity").value,
-              maritalStatus: document.querySelector("input[name='maritalStatus']:checked")?.id || null
-            });
+            const payload = buildFilterPayload({ distance });
+            sendFilterRequest(payload);
+            if (geoCtl) geoCtl.innerHTML = `<span class=\"text-danger\">Browser tidak mendukung lokasi. </span>`;
           }
         } else {
-          sendFilterRequest({
-              min_age: document.getElementById("minAgeRange").value,
-              max_age: document.getElementById("maxAgeRange").value,
-              distance: document.getElementById("distanceRange").value,
-              hometown: document.getElementById("hometown").value,
-              currentCity: document.getElementById("currentCity").value,
-              maritalStatus: document.querySelector("input[name='maritalStatus']:checked")?.id || null
-            });
+          const currentCityEl5 = document.getElementById("currentCity");
+          // Last location already saved today: reflect it in the UI when radius is active
+          if (useDistance && distance > 0) {
+            try {
+              const srvLoc = JSON.parse(`{{ user_rec.location | default({}) | tojson | safe }}`);
+              if (srvLoc && (srvLoc.current_city || srvLoc.current_province || srvLoc.current_country)) {
+                const coordsArr = Array.isArray(srvLoc.coordinates) ? srvLoc.coordinates : [];
+                const lng = Number(coordsArr[0]);
+                const lat = Number(coordsArr[1]);
+                if (!isNaN(lng) && !isNaN(lat)) {
+                  updateSearcherLocationDisplay(srvLoc.current_city || '', srvLoc.current_province || '', srvLoc.current_country || '', lng, lat, srvLoc.lastGeoDate || '');
+                } else {
+                  updateSearcherLocationDisplay(srvLoc.current_city || '', srvLoc.current_province || '', srvLoc.current_country || '', null, null, srvLoc.lastGeoDate || '');
+                }
+                if (geoCtl) geoCtl.innerHTML = `<span class=\"text-muted\">Lokasi tersimpan pada ${srvLoc.lastGeoDate || ''}. </span><button class=\"btn btn-sm btn-outline-primary ml-2\" type=\"button\" onclick=\"refreshLocationNow()\">Update lokasi</button>`;
+              }
+            } catch (_) {}
+          }
+          const payload = buildFilterPayload({
+            distance: distance,
+            currentCity: currentCityEl5 ? currentCityEl5.value : undefined
+          });
+          sendFilterRequest(payload);
         }
+      }
+
+      // Manual refresh (to avoid hitting reverse geocoding tiap toggle ON)
+      function refreshLocationNow() {
+        const geoCtl = document.getElementById('geo-control');
+        if (!navigator.geolocation) {
+          if (geoCtl) geoCtl.innerHTML = `<span class=\"text-danger\">Browser tidak mendukung lokasi.</span>`;
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(async function (position) {
+          try {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            const OPENCAGE_API_KEY = "a1ec8bfdf9524ee09594cbacb5537ae6";
+            const resp = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${OPENCAGE_API_KEY}`);
+            const json = await resp.json();
+            let city = "", prov = "", country = "";
+            if (json?.results?.length > 0) {
+              const components = json.results[0].components;
+              city = components.city || components.town || components.village || components.county || "";
+              prov = components.state || "";
+              country = components.country || "";
+            }
+            updateSearcherLocationDisplay(city, prov, country, longitude, latitude, new Date().toISOString().slice(0,10));
+            if (geoCtl) geoCtl.innerHTML = `<span class=\"text-muted\">Lokasi diupdate hari ini.</span>`;
+          } catch (e) {
+            if (geoCtl) geoCtl.innerHTML = `<span class=\"text-danger\">Gagal update lokasi.</span>`;
+          }
+        }, function (error) {
+          if (geoCtl) geoCtl.innerHTML = `<span class=\"text-danger\">Geolocation gagal: ${error.message}</span>`;
+        });
       }
 
       function sendFilterRequest(filterData) {
@@ -1731,7 +1960,7 @@
             }));
                     
             if (resp.length === 0 ) {
-              // Jika data kosong, tampilkan card placeholder
+              // Jika data kosong, tampilkan card placeholder dengan state TERBARU dari UI
               appendcard_swipe_empty(filterData);
             } else {
               // Kalau ada data, append semua card
@@ -1769,6 +1998,7 @@
         const isPremium = document.body.getAttribute('data-is-premium');
         const rangeInput = document.getElementById('distanceRange');
         const distanceValue = document.getElementById('distanceValue');
+        if (rangeInput && rangeInput.disabled) return; // ignore when disabled
         if (isPremium == "FALSE") {
           // Reset to 0
           rangeInput.value = 0;
@@ -1780,6 +2010,50 @@
       }
       // END PREMIUM MODAL BEHAVIOR
 
+      // Build confirmation summary and show modal
+      function openConfirmFilters() {
+        const chips = [];
+        const useAge = document.getElementById('useAge')?.checked;
+        const minAge = document.getElementById('minAgeRange')?.value;
+        const maxAge = document.getElementById('maxAgeRange')?.value;
+        if (useAge && minAge && maxAge) chips.push(`Usia ${minAge}-${maxAge}`);
+
+        const useHometown = document.getElementById('useHometown')?.checked;
+        const hometown = document.getElementById('hometown')?.value;
+        if (useHometown && hometown) chips.push(`Asal ${hometown}`);
+
+        const useDistance = document.getElementById('useDistance')?.checked;
+        const distance = document.getElementById('distanceRange')?.value;
+        if (useDistance && distance && distance !== '0') chips.push(`Radius ${distance} km`);
+
+        const useMarital = document.getElementById('useMaritalStatus')?.checked;
+        const marital = document.querySelector("input[name='maritalStatus']:checked")?.id;
+        if (useMarital && marital) chips.push(`Status ${marital}`);
+
+        const summaryEl = document.getElementById('confirm-filter-summary');
+        if (summaryEl) {
+          summaryEl.innerHTML = chips.length ? chips.map(c => `<span class="filter-chip">${c}</span>`).join('') : '<em>Tidak ada filter diterapkan</em>';
+        }
+        try {
+          if (typeof $ !== 'undefined' && $('#confirmFilterModal').modal) {
+            console.log('Opening confirm modal');
+            $('#confirmFilterModal').modal('show');
+          } else {
+            const proceed = window.confirm((chips.length ? chips.join(', ') : 'Tidak ada filter diterapkan') + '\n\nMulai pencarian?');
+            if (proceed) {
+              const isPremium = document.body.getAttribute('data-is-premium');
+              if (isPremium === 'TRUE') {
+                applyFilters();
+              } else {
+                applyFiltersNonPremium();
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Failed to open confirm modal:', e);
+        }
+      }
+
       // Bind Apply Filters and My Profile buttons; run now or on DOMContentLoaded
       (function initBindings() {
         const bind = function() {
@@ -1787,13 +2061,43 @@
           const applyBtn = document.getElementById('apply-filters-btn');
           if (applyBtn && !applyBtn._bound) {
             applyBtn.addEventListener('click', function() {
+              console.log('apply-filters-btn clicked');
+              openConfirmFilters();
+            });
+            applyBtn._bound = true;
+          }
+
+          // Ensure radius default is disabled on load
+          try {
+            const useDistance = document.getElementById('useDistance');
+            const distanceRange = document.getElementById('distanceRange');
+            const distanceValue = document.getElementById('distanceValue');
+            const distanceFilter = document.getElementById('distanceFilter');
+            const card = document.getElementById('card-distance');
+            if (useDistance) {
+              useDistance.checked = false;
+            }
+            if (distanceRange) {
+              distanceRange.value = 0;
+              distanceRange.disabled = true;
+            }
+            if (distanceValue) distanceValue.innerText = '0';
+            if (distanceFilter) distanceFilter.style.display = 'none';
+            if (card) card.classList.add('disabled-section');
+          } catch(_) {}
+
+          const confirmBtn = document.getElementById('confirm-apply-btn');
+          if (confirmBtn && !confirmBtn._bound) {
+            confirmBtn.addEventListener('click', function() {
+              console.log('confirm-apply-btn clicked');
+              try { $('#confirmFilterModal').modal('hide'); } catch (_) {}
               if (isPremium === 'TRUE') {
                 applyFilters();
               } else {
                 applyFiltersNonPremium();
               }
             });
-            applyBtn._bound = true;
+            confirmBtn._bound = true;
           }
 
           const myUserId = document.body.getAttribute('data-user-id');
@@ -1817,6 +2121,38 @@
           bind();
         }
       })();
+
+      function onConfirmApplyFilters() {
+        console.log('onConfirmApplyFilters()');
+        try { $('#confirmFilterModal').modal('hide'); } catch(_) {}
+        const isPremium = document.body.getAttribute('data-is-premium');
+        if (isPremium === 'TRUE') {
+          applyFilters();
+        } else {
+          applyFiltersNonPremium();
+        }
+      }
+
+      // Fallback delegation in case direct binding fails
+      document.addEventListener('click', function(e) {
+        const target = e.target;
+        if (!target) return;
+        if (target.id === 'apply-filters-btn' || (target.closest && target.closest('#apply-filters-btn'))) {
+          console.log('apply-filters-btn delegated click');
+          e.preventDefault();
+          openConfirmFilters();
+        } else if (target.id === 'confirm-apply-btn' || (target.closest && target.closest('#confirm-apply-btn'))) {
+          console.log('confirm-apply-btn delegated click');
+          e.preventDefault();
+          try { $('#confirmFilterModal').modal('hide'); } catch (_) {}
+          const isPremium = document.body.getAttribute('data-is-premium');
+          if (isPremium === 'TRUE') {
+            applyFilters();
+          } else {
+            applyFiltersNonPremium();
+          }
+        }
+      });
 
       // Chips updater for quick visual summary
       (function initFilterChips(){
@@ -1852,6 +2188,14 @@
         });
         document.querySelectorAll("input[name='maritalStatus']").forEach(el => el.addEventListener('change', renderChips));
         renderChips();
+
+        // Update chips when toggles change (for disabled look and live summary)
+        const toggleIds = ['useAge','useHometown','useDistance','useMaritalStatus'];
+        toggleIds.forEach(id => {
+          const t = document.getElementById(id);
+          if (!t) return;
+          t.addEventListener('change', renderChips);
+        });
       })();
    </script>
 

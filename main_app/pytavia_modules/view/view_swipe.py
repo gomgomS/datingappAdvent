@@ -91,6 +91,7 @@ class view_swipe:
         # Filter pencarian dasar
         query = {
             "user_id": {"$nin": list(blocked_ids)},
+            "is_deleted": {"$ne": True}
         }
 
         # Filter umur (default: 0 - 50 tahun)
@@ -149,7 +150,7 @@ class view_swipe:
         return result
 
     def _find_potential_match_filter(self, params):       
-        print(params) 
+        print("[api_find_match][premium] params:", params)
         user_id = params.get("user_id")
         today = datetime.utcnow()
         today_timestamp = int(today.timestamp() * 1000)
@@ -184,7 +185,7 @@ class view_swipe:
 
         # Ambil user sekarang
         current_user = self.mgdDB.db_users.find_one(
-            {"user_id": user_id}, {"sex": 1, "fk_user_id_like": 1, "fk_user_id_dislike": 1, "location.coordinates":1}
+            {"user_id": user_id}, {"sex": 1, "fk_user_id_like": 1, "fk_user_id_dislike": 1, "location":1}
         )
 
         # Inisialisasi blocked_ids
@@ -232,18 +233,36 @@ class view_swipe:
             query['marital_status'] = maritalStatus
 
         
-        # Cek apakah koordinat tersedia, jika tidak, skip geoNear dan return kosong
-        longitude   = current_user["location"]["coordinates"][0]
-        latitude    = current_user["location"]["coordinates"][1]
-        
-        if not longitude or not latitude:
-            return []
+        # Tentukan koordinat untuk geoNear: prioritaskan yang datang dari request, fallback ke DB
+        longitude = None
+        latitude = None
+        try:
+            req_lng = params.get("current_position[longitude]")
+            req_lat = params.get("current_position[latitude]")
+            if req_lng is not None and req_lat is not None and str(req_lng) != '' and str(req_lat) != '':
+                longitude = float(req_lng)
+                latitude = float(req_lat)
+            else:
+                loc = current_user.get("location", {}) if current_user else {}
+                if isinstance(loc, dict):
+                    if "coordinates" in loc and isinstance(loc.get("coordinates"), (list, tuple)) and len(loc["coordinates"]) >= 2:
+                        longitude = float(loc["coordinates"][0])
+                        latitude = float(loc["coordinates"][1])
+                    elif "longitude" in loc and "latitude" in loc:
+                        longitude = float(loc.get("longitude"))
+                        latitude = float(loc.get("latitude"))
+        except Exception as e:
+            print("[api_find_match] failed to parse coordinates:", e)
+            longitude = None
+            latitude = None
 
         # Ambil distance dan limit dari param, fallback ke default
         try:
-            distance = int(params.get("distance", 14)) * 1000  # meter
+            # distance in km from FE; convert to meters
+            distance_km = int(params.get("distance", 14))
         except ValueError:
-            distance = 14000
+            distance_km = 14
+        distance = max(0, distance_km) * 1000
 
         try:
             limit = int(params.get("limit", 15))
@@ -251,7 +270,8 @@ class view_swipe:
             limit = 15
 
         # jika distance 0 gk pake cordinate
-        if distance > 0:
+        if distance > 0 and longitude is not None and latitude is not None:
+            print(f"[api_find_match] geoNear with near=({longitude},{latitude}), maxDistance={distance}m, query={query}")
             # Use geoNear when distance is specified
             user_view = self.mgdDB.db_users.aggregate([
                 {
@@ -293,6 +313,7 @@ class view_swipe:
             ])
         else:
             # Use regular match if distance is 0 (or disabled)
+            print(f"[api_find_match] non-geo match, query={query}, limit={limit}")
             user_view = self.mgdDB.db_users.aggregate([
                 {
                     "$match": query
@@ -323,8 +344,9 @@ class view_swipe:
                 {"$limit": limit}
             ])
   
-
-        return list(user_view)
+        response = list(user_view)
+        print(f"[api_find_match] results={len(response)}")
+        return response
         
     def _find_potential_match(self, params):
         now               = utils._get_current_datetime(hours = config.JKTA_TZ)
