@@ -71,6 +71,7 @@ class view_admin_panel_customer:
                 'city': user.get('city', ''),
                 'profile_photo': user.get('profile_photo', ''),
                 'rec_timestamp': user.get('rec_timestamp', ''),
+                'otp_4_number': user.get('otp_4_number', ''),
             }
             result.append(i)
 

@@ -1,0 +1,161 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Subscription Config{% endblock %}
+{% block content %}
+<div class="content-body">
+  <div class="container pd-x-0 pd-b-100">
+    <div class="card main-table p-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Plans</h5>
+        <button class="btn btn-primary" data-toggle="modal" data-target="#editPlanModal" data-plan="new">Add Plan</button>
+      </div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead class="thead-primary text-white">
+            <tr>
+              <th>Plan</th>
+              <th>DAILY_SWIPE</th>
+              <th>UNDO</th>
+              <th>SEE WHO LIKES</th>
+              <th>UPLOAD ALBUM</th>
+              <th>OFTEN SEEN</th>
+              <th>NEW USER INFO</th>
+              <th>FILTER</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in plans %}
+            <tr>
+              <td>{{ p.plan }}</td>
+              <td>{{ p.DAILY_SWIPE }}</td>
+              <td>{{ 'Yes' if p.CAN_UNDO_LAST_DISLIKE else 'No' }}</td>
+              <td>{{ 'Yes' if p.CAN_SEE_WHO_LIKE_USER else 'No' }}</td>
+              <td>{{ 'Yes' if p.CAN_UPLOAD_ALBUM else 'No' }}</td>
+              <td>{{ 'Yes' if p.MORE_OFTEN_SEEN else 'No' }}</td>
+              <td>{{ 'Yes' if p.GET_INFO_TOTAL_NEW_USER else 'No' }}</td>
+              <td>{{ 'Yes' if p.CAN_FILTER else 'No' }}</td>
+              <td>
+                <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#editPlanModal"
+                  data-plan="{{ p.plan }}" data-daily="{{ p.DAILY_SWIPE }}"
+                  data-undo="{{ 1 if p.CAN_UNDO_LAST_DISLIKE else 0 }}"
+                  data-see="{{ 1 if p.CAN_SEE_WHO_LIKE_USER else 0 }}"
+                  data-album="{{ 1 if p.CAN_UPLOAD_ALBUM else 0 }}"
+                  data-often="{{ 1 if p.MORE_OFTEN_SEEN else 0 }}"
+                  data-newinfo="{{ 1 if p.GET_INFO_TOTAL_NEW_USER else 0 }}"
+                  data-filter="{{ 1 if p.CAN_FILTER else 0 }}">
+                  Edit
+                </button>
+                <form action="/admin/process/subscription/delete" method="POST" class="d-inline">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="plan" value="{{ p.plan }}">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit/Add Modal -->
+<div class="modal fade" id="editPlanModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Plan</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form action="/admin/process/subscription/upsert" method="POST">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Plan Name</label>
+            <input type="text" class="form-control" name="plan" id="plan_name" required>
+          </div>
+          <div class="form-group">
+            <label>Daily Swipe</label>
+            <input type="number" class="form-control" name="DAILY_SWIPE" id="daily_swipe" min="0" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-6">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="undo" name="CAN_UNDO_LAST_DISLIKE">
+                <label class="custom-control-label" for="undo">Can Undo Last Dislike</label>
+              </div>
+            </div>
+            <div class="form-group col-6">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="see" name="CAN_SEE_WHO_LIKE_USER">
+                <label class="custom-control-label" for="see">Can See Who Likes</label>
+              </div>
+            </div>
+            <div class="form-group col-6">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="album" name="CAN_UPLOAD_ALBUM">
+                <label class="custom-control-label" for="album">Can Upload Album</label>
+              </div>
+            </div>
+            <div class="form-group col-6">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="often" name="MORE_OFTEN_SEEN">
+                <label class="custom-control-label" for="often">More Often Seen</label>
+              </div>
+            </div>
+            <div class="form-group col-6">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="newinfo" name="GET_INFO_TOTAL_NEW_USER">
+                <label class="custom-control-label" for="newinfo">Get New User Info</label>
+              </div>
+            </div>
+            <div class="form-group col-6">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="filter" name="CAN_FILTER">
+                <label class="custom-control-label" for="filter">Can Filter</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+<script>
+$('#editPlanModal').on('show.bs.modal', function (event) {
+  const button = $(event.relatedTarget);
+  const isNew = button.data('plan') === 'new';
+  const modal = $(this);
+  if (isNew) {
+    modal.find('#plan_name').val('');
+    modal.find('#daily_swipe').val('15');
+    modal.find('#undo').prop('checked', false);
+    modal.find('#see').prop('checked', false);
+    modal.find('#album').prop('checked', false);
+    modal.find('#often').prop('checked', false);
+    modal.find('#newinfo').prop('checked', false);
+    modal.find('#filter').prop('checked', false);
+  } else {
+    modal.find('#plan_name').val(button.data('plan'));
+    modal.find('#daily_swipe').val(button.data('daily'));
+    modal.find('#undo').prop('checked', !!button.data('undo'));
+    modal.find('#see').prop('checked', !!button.data('see'));
+    modal.find('#album').prop('checked', !!button.data('album'));
+    modal.find('#often').prop('checked', !!button.data('often'));
+    modal.find('#newinfo').prop('checked', !!button.data('newinfo'));
+    modal.find('#filter').prop('checked', !!button.data('filter'));
+  }
+});
+</script>
+{% endblock scripts %}
+{% endblock %}
+

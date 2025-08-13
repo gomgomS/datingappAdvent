@@ -189,6 +189,125 @@ class admin_proc:
             response["desc"] = "Internal error"
             return response
 
+    def _create_user_admin(self, params):
+        response = {
+            "status": "FAILED",
+            "desc": "",
+            "data": {}
+        }
+        try:
+            username = (params.get("username") or "").strip()
+            password = (params.get("password") or "").strip()
+            email = (params.get("email") or "").strip()
+            sex = (params.get("sex") or "male").strip()
+            dob = (params.get("dob") or "").strip()
+
+            if len(username) < 5:
+                response["desc"] = "Username must be at least 5 characters"
+                return response
+            if any(ch in username for ch in "!@#$%^&*()+=[]{}|\\:;\"'<>,.?/`~"):
+                response["desc"] = "Username must not contain punctuation"
+                return response
+            if len(password) < 8:
+                response["desc"] = "Password must be at least 8 characters"
+                return response
+            if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+                response["desc"] = "Invalid email"
+                return response
+            if sex not in ["male", "female", "superadmin"]:
+                response["desc"] = "Invalid sex value"
+                return response
+
+            # Prevent duplicates
+            dup = self.mgdDB.db_users.find_one({
+                "$or": [
+                    {"username": username},
+                    {"email": email}
+                ]
+            })
+            if dup is not None:
+                response["desc"] = "Username or email already exists"
+                return response
+
+            hashed_password = utils._get_passwd_hash({
+                "id": username,
+                "password": password
+            })
+
+            mdl_user = database.new(self.mgdDB, "db_users")
+            user_id = mdl_user.get()["pkey"]
+            mdl_user.put("user_id", user_id)
+            mdl_user.put("username", username)
+            mdl_user.put("email", email)
+            mdl_user.put("password", hashed_password)
+            mdl_user.put("verify_email", "FALSE")
+            mdl_user.put("is_premium", "FALSE")
+            mdl_user.put("subscription_type", "free")
+            mdl_user.put("sex", sex)
+            if dob:
+                try:
+                    dt = datetime.strptime(dob, '%Y-%m-%d')
+                    mdl_user.put("dob", dt.strftime('%Y-%m-%d'))
+                except Exception:
+                    response["desc"] = "Invalid date format (use YYYY-MM-DD)"
+                    return response
+            mdl_user.insert()
+
+            created = self.mgdDB.db_users.find_one({"user_id": user_id}, {"_id": 0, "user_id": 1, "username": 1, "email": 1, "sex": 1, "dob": 1})
+            response["status"] = "SUCCESS"
+            response["data"] = created or {}
+            return response
+        except Exception:
+            trace_back_msg = traceback.format_exc()
+            self.webapp.logger.debug(trace_back_msg)
+            response["desc"] = "Internal error"
+            return response
+
+    def _generate_user_otp(self, params):
+        response = {"status": "FAILED", "desc": "", "data": {}}
+        try:
+            user_id = (params.get("user_id") or "").strip()
+            if not user_id:
+                response["desc"] = "Missing user_id"
+                return response
+            otp_val = random.randint(100000, 999999)
+            self.mgdDB.db_users.update_one(
+                {"user_id": user_id},
+                {"$set": {"otp_4_number": otp_val}}
+            )
+            response["status"] = "SUCCESS"
+            response["data"] = {"otp_4_number": otp_val}
+            return response
+        except Exception:
+            trace_back_msg = traceback.format_exc()
+            self.webapp.logger.debug(trace_back_msg)
+            response["desc"] = "Internal error"
+            return response
+
+    def _set_user_otp(self, params):
+        response = {"status": "FAILED", "desc": "", "data": {}}
+        try:
+            user_id = (params.get("user_id") or "").strip()
+            otp = (params.get("otp") or "").strip()
+            if not user_id:
+                response["desc"] = "Missing user_id"
+                return response
+            if not otp.isdigit() or len(otp) != 6:
+                response["desc"] = "OTP must be 6 digits"
+                return response
+            self.mgdDB.db_users.update_one(
+                {"user_id": user_id},
+                {"$set": {"otp_4_number": int(otp)}}
+            )
+            response["status"] = "SUCCESS"
+            response["data"] = {"otp_4_number": int(otp)}
+            return response
+        except Exception:
+            trace_back_msg = traceback.format_exc()
+            self.webapp.logger.debug(trace_back_msg)
+            response["desc"] = "Internal error"
+            return response
+
     def _create_premium_request(self, params):
         response = {
             "status": "FAILED",
@@ -296,5 +415,79 @@ class admin_proc:
             response["desc"] = "Internal error"
             return response
 
+    def _subscription_upsert(self, params):
+        response = {"status": "FAILED", "desc": "", "data": {}}
+        try:
+            plan = (params.get("plan") or "").strip()
+            if not plan:
+                response["desc"] = "Missing plan"
+                return response
+            doc = {
+                "plan": plan,
+                "DAILY_SWIPE": int(params.get("DAILY_SWIPE", 15)),
+                "CAN_UNDO_LAST_DISLIKE": True if params.get("CAN_UNDO_LAST_DISLIKE") else False,
+                "CAN_SEE_WHO_LIKE_USER": True if params.get("CAN_SEE_WHO_LIKE_USER") else False,
+                "CAN_UPLOAD_ALBUM": True if params.get("CAN_UPLOAD_ALBUM") else False,
+                "MORE_OFTEN_SEEN": True if params.get("MORE_OFTEN_SEEN") else False,
+                "GET_INFO_TOTAL_NEW_USER": True if params.get("GET_INFO_TOTAL_NEW_USER") else False,
+                "CAN_FILTER": True if params.get("CAN_FILTER") else False,
+            }
+            self.mgdDB.db_subscription_config.update_one({"plan": plan}, {"$set": doc}, upsert=True)
+            response["status"] = "SUCCESS"
+            response["data"] = doc
+            return response
+        except Exception:
+            trace_back_msg = traceback.format_exc()
+            self.webapp.logger.debug(trace_back_msg)
+            response["desc"] = "Internal error"
+            return response
+
+    def _subscription_delete(self, params):
+        response = {"status": "FAILED", "desc": "", "data": {}}
+        try:
+            plan = (params.get("plan") or "").strip()
+            if not plan:
+                response["desc"] = "Missing plan"
+                return response
+            self.mgdDB.db_subscription_config.delete_one({"plan": plan})
+            response["status"] = "SUCCESS"
+            return response
+        except Exception:
+            trace_back_msg = traceback.format_exc()
+            self.webapp.logger.debug(trace_back_msg)
+            response["desc"] = "Internal error"
+            return response
+
+    def _city_add(self, params):
+        response = {"status": "FAILED", "desc": "", "data": {}}
+        try:
+            name = (params.get("name") or "").strip()
+            if not name:
+                response["desc"] = "Missing name"
+                return response
+            self.mgdDB.db_city_list.update_one({"name": name}, {"$set": {"name": name}}, upsert=True)
+            response["status"] = "SUCCESS"
+            return response
+        except Exception:
+            trace_back_msg = traceback.format_exc()
+            self.webapp.logger.debug(trace_back_msg)
+            response["desc"] = "Internal error"
+            return response
+
+    def _city_delete(self, params):
+        response = {"status": "FAILED", "desc": "", "data": {}}
+        try:
+            name = (params.get("name") or "").strip()
+            if not name:
+                response["desc"] = "Missing name"
+                return response
+            self.mgdDB.db_city_list.delete_one({"name": name})
+            response["status"] = "SUCCESS"
+            return response
+        except Exception:
+            trace_back_msg = traceback.format_exc()
+            self.webapp.logger.debug(trace_back_msg)
+            response["desc"] = "Internal error"
+            return response
 
 

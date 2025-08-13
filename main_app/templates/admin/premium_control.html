@@ -1,9 +1,10 @@
 {% extends 'core/base.html' %}
+{% block page_title %}Customer Premium Control{% endblock %}
 {% block content %}
 <div class="content-body">
   <div class="container pd-x-0 pd-b-100">
     <div class="">
-      <h1 class="font-weight-bold mg-b-10">Customer Premium Control</h1>      
+      <h1 class="font-weight-bold mg-b-10 d-none">Customer Premium Control</h1>      
 
       <ul class="nav nav-tabs" role="tablist">
         <li class="nav-item">
@@ -16,12 +17,12 @@
 
       <div class="tab-content pt-3">
         <div class="tab-pane fade show active" id="requestsTab" role="tabpanel" aria-labelledby="requests-tab">
-          <div class="card mb-4">
+          <div class="card mb-4 main-table">
           <div class="card-header bg-light"><strong>Premium Requests</strong></div>
           <div class="card-body p-0">
             <div class="table-responsive">
               <table class="table mb-0">
-                <thead>
+                <thead class="thead-primary text-white">
                   <tr>
                     <th>Created</th>
                     <th>Name</th>
@@ -84,6 +85,34 @@
             </div>
           </div>
         </div>
+        {% if requests_total_page > 1 %}
+        <nav aria-label="Page navigation" class="d-flex justify-content-end mt-3">
+          <ul class="pagination">
+            {% set req_prev_page = requests_page - 1 %}
+            {% set req_next_page = requests_page + 1 %}
+            <li class="page-item {% if requests_page <= 1 %}disabled{% endif %}">
+              <a class="page-link" href="?req_page={{ req_prev_page }}&req_per_page={{ requests_per_page }}&page={{ page }}&per_page={{ per_page }}&keyword={{ request.args.get('keyword','') }}">«</a>
+            </li>
+            {% if requests_page > 3 %}
+              <li class="page-item"><a class="page-link" href="?req_page=1&req_per_page={{ requests_per_page }}&page={{ page }}&per_page={{ per_page }}&keyword={{ request.args.get('keyword','') }}">1</a></li>
+              <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+            {% for p in range(requests_page-1, requests_page+2) %}
+              {% if 1 <= p <= requests_total_page %}
+                <li class="page-item {% if p == requests_page %}active{% endif %}"><a class="page-link" href="?req_page={{ p }}&req_per_page={{ requests_per_page }}&page={{ page }}&per_page={{ per_page }}&keyword={{ request.args.get('keyword','') }}">{{ p }}</a></li>
+              {% endif %}
+            {% endfor %}
+            {% if requests_page < requests_total_page - 2 %}
+              <li class="page-item disabled"><span class="page-link">...</span></li>
+              <li class="page-item"><a class="page-link" href="?req_page={{ requests_total_page }}&req_per_page={{ requests_per_page }}&page={{ page }}&per_page={{ per_page }}&keyword={{ request.args.get('keyword','') }}">{{ requests_total_page }}</a></li>
+            {% endif %}
+            <li class="page-item {% if requests_page >= requests_total_page %}disabled{% endif %}">
+              <a class="page-link" href="?req_page={{ req_next_page }}&req_per_page={{ requests_per_page }}&page={{ page }}&per_page={{ per_page }}&keyword={{ request.args.get('keyword','') }}">»</a>
+            </li>
+          </ul>
+        </nav>
+        {% endif %}
+        </div>
         <div class="tab-pane fade" id="manualTab" role="tabpanel" aria-labelledby="manual-tab">
         <div class="row mg-b-20">
           <div class="col-md-4 mg-t-10">
@@ -112,7 +141,7 @@
         </div>
         <div class="table-responsive" style="overflow-y: hidden;">
           <table id="user_list" class="table lynk-table">
-            <thead>
+            <thead class="thead-primary text-white">
               <tr>
                 
                 <th width="20%">Username</th>
@@ -196,13 +225,13 @@
 
         <!-- Previous -->
         <li class="page-item {% if page <= 1 %}disabled{% endif %}">
-          <a class="page-link" href="?page={{ prev_page }}&per_page={{ per_page }}&keyword={{ keyword }}">«</a>
+          <a class="page-link" href="?page={{ prev_page }}&per_page={{ per_page }}&keyword={{ keyword }}&req_page={{ requests_page }}&req_per_page={{ requests_per_page }}">«</a>
         </li>
 
         <!-- First page -->
         {% if page > 3 %}
           <li class="page-item">
-            <a class="page-link" href="?page=1&per_page={{ per_page }}&keyword={{ keyword }}">1</a>
+            <a class="page-link" href="?page=1&per_page={{ per_page }}&keyword={{ keyword }}&req_page={{ requests_page }}&req_per_page={{ requests_per_page }}">1</a>
           </li>
           <li class="page-item disabled"><span class="page-link">...</span></li>
         {% endif %}
@@ -211,7 +240,7 @@
         {% for p in range(page-1, page+2) %}
           {% if 1 <= p <= total_page %}
             <li class="page-item {% if p == page %}active{% endif %}">
-              <a class="page-link" href="?page={{ p }}&per_page={{ per_page }}&keyword={{ keyword }}">{{ p }}</a>
+              <a class="page-link" href="?page={{ p }}&per_page={{ per_page }}&keyword={{ keyword }}&req_page={{ requests_page }}&req_per_page={{ requests_per_page }}">{{ p }}</a>
             </li>
           {% endif %}
         {% endfor %}
@@ -220,13 +249,13 @@
         {% if page < total_page - 2 %}
           <li class="page-item disabled"><span class="page-link">...</span></li>
           <li class="page-item">
-            <a class="page-link" href="?page={{ total_page }}&per_page={{ per_page }}&keyword={{ keyword }}">{{ total_page }}</a>
+            <a class="page-link" href="?page={{ total_page }}&per_page={{ per_page }}&keyword={{ keyword }}&req_page={{ requests_page }}&req_per_page={{ requests_per_page }}">{{ total_page }}</a>
           </li>
         {% endif %}
 
         <!-- Next -->
         <li class="page-item {% if page >= total_page %}disabled{% endif %}">
-          <a class="page-link" href="?page={{ next_page }}&per_page={{ per_page }}&keyword={{ keyword }}">»</a>
+          <a class="page-link" href="?page={{ next_page }}&per_page={{ per_page }}&keyword={{ keyword }}&req_page={{ requests_page }}&req_per_page={{ requests_per_page }}">»</a>
         </li>
       </ul>
     </nav>
@@ -277,7 +306,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   document.getElementById("button_search").addEventListener("click", function () {
     const keyword = document.getElementById("custom_search").value;
-    window.location.href = `/admin/panel/premiumcontrol?keyword=${encodeURIComponent(keyword)}`;
+    const reqPage = queries.req_page || 1;
+    const reqPerPage = queries.req_per_page || 10;
+    window.location.href = `/admin/panel/premiumcontrol?keyword=${encodeURIComponent(keyword)}&req_page=${reqPage}&req_per_page=${reqPerPage}`;
   });
 
   document.getElementById("custom_select").addEventListener("change", function () {
@@ -291,7 +322,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const keyword = queries.keyword || "";
-    window.location.href = `/admin/panel/premium?per_page=${perPage}&page=${page}&keyword=${encodeURIComponent(keyword)}`;
+    const reqPage = queries.req_page || 1;
+    const reqPerPage = queries.req_per_page || 10;
+    window.location.href = `/admin/panel/premiumcontrol?per_page=${perPage}&page=${page}&keyword=${encodeURIComponent(keyword)}&req_page=${reqPage}&req_per_page=${reqPerPage}`;
   });
 
   $('#deleteUserModal').on('show.bs.modal', function (event) {

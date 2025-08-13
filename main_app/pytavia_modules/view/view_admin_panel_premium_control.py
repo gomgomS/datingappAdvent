@@ -29,6 +29,7 @@ from view import view_core_footer
 from view import view_core_script
 from view import view_core_css
 from view import view_core_dialog_message
+from flask import render_template
 
 class view_admin_panel_premium_control:
 
@@ -39,9 +40,14 @@ class view_admin_panel_premium_control:
     # end def
 
     def html(self, params):
+        # Manual tab (Users) pagination/search
         page = int(params.get('page', 1))
         per_page = int(params.get('per_page', 10))
         keyword = params.get('keyword')
+
+        # Requests tab pagination
+        requests_page = int(params.get('req_page', 1))
+        requests_per_page = int(params.get('req_per_page', 10))
         query = {}
 
         if keyword:
@@ -90,8 +96,10 @@ class view_admin_panel_premium_control:
 
         total_page = (numb_recs // per_page) + (1 if numb_recs % per_page != 0 else 0)
 
-        # Fetch latest premium requests (pending and recent others)
-        req_cursor = self.mgdDB.db_premium_requests.find({}).sort('created_at', -1).limit(100)
+        # Fetch premium requests with pagination
+        req_find = self.mgdDB.db_premium_requests.find({}).sort('created_at', -1)
+        numb_reqs = req_find.count()
+        req_cursor = req_find.skip((requests_page - 1) * requests_per_page).limit(requests_per_page)
         requests = []
         for r in req_cursor:
             requests.append({
@@ -108,6 +116,8 @@ class view_admin_panel_premium_control:
                 'approved_at': r.get('approved_at', ''),
             })
 
+        requests_total_page = (numb_reqs // requests_per_page) + (1 if numb_reqs % requests_per_page != 0 else 0)
+
         return render_template(
             "admin/premium_control.html",
             data=result,
@@ -115,6 +125,9 @@ class view_admin_panel_premium_control:
             page=page,
             per_page=per_page,
             total_page=total_page,
+            requests_page=requests_page,
+            requests_per_page=requests_per_page,
+            requests_total_page=requests_total_page,
             image_base_url=config.G_IMAGE_URL_DISPATCH
         )             
     # end def   

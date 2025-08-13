@@ -25,28 +25,50 @@
 <body class="body">
   <aside class="aside aside-fixed">
     <div class="aside-header">
-      <!-- <a href="" class="aside-logo img-logo"><img class="ht-36" src="/static/assets/img/logo/logo_main.svg"></a> -->
-      <div style="color:whitesmoke"></div>
-      <a href="" class="aside-menu-link">
-        <i data-feather="menu" class="text-success"></i>
-        <i data-feather="x" class="text-danger"></i>
-      </a>
+      <div class="d-flex align-items-center justify-content-between w-100">
+        <div class="d-flex align-items-center">
+          <span class="tx-14 tx-bold text-white">AdventMatch Admin</span>
+        </div>
+        
+        <!-- menu toggle -->
+        <a href="" class="aside-menu-link">
+          <i data-feather="menu" class="text-success"></i>
+          <i data-feather="x" class="text-danger"></i>
+        </a>
+      </div>
     </div>
     <div class="aside-body">      
       <ul class="nav nav-aside" style="height: 100%;">
         <!-- Customer Panel -->
-        <li class="nav-item">
-          <a href="{{ url_for('admin_panel_customer') }}" class="nav-link tx-14">
+        {% set active_endpoint = request.endpoint %}
+        <li class="nav-item {% if active_endpoint == 'admin_panel_customer' %}nav-item-active{% endif %}">
+          <a href="{{ url_for('admin_panel_customer') }}" class="nav-link tx-14 {% if active_endpoint == 'admin_panel_customer' %}nav-link-active{% endif %}">
             <i class="fas fa-users mg-r-10 tx-16"></i>
             <span style="font-size: 0.85rem;">Customer Panel</span>
           </a>
         </li>
       
         <!-- Customer Premium Control -->
-        <li class="nav-item">
-          <a href="{{ url_for('admin_panel_premium_control') }}" class="nav-link tx-14">
+        <li class="nav-item {% if active_endpoint == 'admin_panel_premium_control' %}nav-item-active{% endif %}">
+          <a href="{{ url_for('admin_panel_premium_control') }}" class="nav-link tx-14 {% if active_endpoint == 'admin_panel_premium_control' %}nav-link-active{% endif %}">
             <i class="fas fa-crown mg-r-10 tx-16"></i>
             <span style="font-size: 0.85rem;">Premium Control</span>
+          </a>
+        </li>
+
+        <!-- Config: Subscription -->
+        <li class="nav-item {% if active_endpoint == 'admin_panel_subscription_config' %}nav-item-active{% endif %}">
+          <a href="{{ url_for('admin_panel_subscription_config') }}" class="nav-link tx-14 {% if active_endpoint == 'admin_panel_subscription_config' %}nav-link-active{% endif %}">
+            <i class="fas fa-sliders-h mg-r-10 tx-16"></i>
+            <span style="font-size: 0.85rem;">Subscription Config</span>
+          </a>
+        </li>
+
+        <!-- Config: Cities -->
+        <li class="nav-item {% if active_endpoint == 'admin_panel_cities' %}nav-item-active{% endif %}">
+          <a href="{{ url_for('admin_panel_cities') }}" class="nav-link tx-14 {% if active_endpoint == 'admin_panel_cities' %}nav-link-active{% endif %}">
+            <i class="fas fa-city mg-r-10 tx-16"></i>
+            <span style="font-size: 0.85rem;">City List</span>
           </a>
         </li>
       
@@ -62,7 +84,20 @@
     </div>
   </aside>
   <div class="content ht-100v pd-0 position-relative">
-    <div class="content-header ">       
+    <div class="content-header ">
+      {% block page_header %}
+      <div class="container-fluid d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+          <div>
+            <h5 class="mb-0">{% block page_title %}{% endblock %}</h5>
+            {% block breadcrumb %}{% endblock %}
+          </div>
+        </div>
+        <div class="d-flex align-items-center">
+          {% block page_actions %}{% endblock %}
+        </div>
+      </div>
+      {% endblock %}
     </div>
 
     {% block content %}{% endblock %}             

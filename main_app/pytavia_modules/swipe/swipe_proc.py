@@ -40,7 +40,39 @@ class swipe_proc:
 
     def get_user_config(self, params):
         user_type = "premium" if params.get("is_premium") == "TRUE" else "free"
-        return config.SUBSCRIPTION_CONFIG[user_type]
+        # Read from database-driven subscription config
+        rec = self.mgdDB.db_subscription_config.find_one({"plan": user_type}, {"_id": 0})
+        if rec:
+            # Normalize keys to expected format
+            return {
+                "DAILY_SWIPE": int(rec.get("DAILY_SWIPE", 15)),
+                "CAN_UNDO_LAST_DISLIKE": bool(rec.get("CAN_UNDO_LAST_DISLIKE", False)),
+                "CAN_SEE_WHO_LIKE_USER": bool(rec.get("CAN_SEE_WHO_LIKE_USER", False)),
+                "CAN_UPLOAD_ALBUM": bool(rec.get("CAN_UPLOAD_ALBUM", False)),
+                "MORE_OFTEN_SEEN": bool(rec.get("MORE_OFTEN_SEEN", False)),
+                "GET_INFO_TOTAL_NEW_USER": bool(rec.get("GET_INFO_TOTAL_NEW_USER", False)),
+                "CAN_FILTER": bool(rec.get("CAN_FILTER", False)),
+            }
+        # Safe defaults
+        if user_type == "premium":
+            return {
+                "DAILY_SWIPE": 8,
+                "CAN_UNDO_LAST_DISLIKE": True,
+                "CAN_SEE_WHO_LIKE_USER": True,
+                "CAN_UPLOAD_ALBUM": True,
+                "MORE_OFTEN_SEEN": True,
+                "GET_INFO_TOTAL_NEW_USER": True,
+                "CAN_FILTER": True,
+            }
+        return {
+            "DAILY_SWIPE": 70,
+            "CAN_UNDO_LAST_DISLIKE": False,
+            "CAN_SEE_WHO_LIKE_USER": False,
+            "CAN_UPLOAD_ALBUM": False,
+            "MORE_OFTEN_SEEN": False,
+            "GET_INFO_TOTAL_NEW_USER": False,
+            "CAN_FILTER": False,
+        }
     # end def
 
 

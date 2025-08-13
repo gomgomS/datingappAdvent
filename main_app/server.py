@@ -670,6 +670,45 @@ def admin_user_update():
     else:
         flash(response.get('desc', 'Failed to update user'), 'danger')
     return redirect(url_for('admin_panel_customer'))
+
+@app.route('/admin/process/user/create', methods=["POST"])
+def admin_user_create():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    response = admin_proc.admin_proc(app)._create_user_admin(params)
+    if response.get('status') == 'SUCCESS':
+        flash('User created', 'success')
+    else:
+        flash(response.get('desc', 'Failed to create user'), 'danger')
+    return redirect(url_for('admin_panel_customer'))
+
+@app.route('/admin/process/user/otp/generate', methods=["POST"])
+def admin_user_otp_generate():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    resp = admin_proc.admin_proc(app)._generate_user_otp(params)
+    if resp.get('status') == 'SUCCESS':
+        flash(f"OTP generated: {resp['data'].get('otp_4_number')}", 'info')
+    else:
+        flash(resp.get('desc','Failed to generate OTP'), 'danger')
+    return redirect(url_for('admin_panel_customer'))
+
+@app.route('/admin/process/user/otp/set', methods=["POST"])
+def admin_user_otp_set():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    resp = admin_proc.admin_proc(app)._set_user_otp(params)
+    if resp.get('status') == 'SUCCESS':
+        flash('OTP updated', 'success')
+    else:
+        flash(resp.get('desc','Failed to update OTP'), 'danger')
+    return redirect(url_for('admin_panel_customer'))
 @app.route("/admin/panel/premiumcontrol")
 def admin_panel_premium_control():    
     redirect_return = login_admin_precheck({})
@@ -684,6 +723,78 @@ def admin_panel_premium_control():
 
     html   = view_admin_panel_premium_control.view_admin_panel_premium_control(app).html( params )
     return html
+
+@app.route("/admin/panel/subscription")
+def admin_panel_subscription_config():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    # load plans from DB
+    mgd = database.get_db_conn(config.mainDB)
+    plans = list(mgd.db_subscription_config.find({}, {"_id": 0}))
+    return render_template("admin/subscription_config.html", plans=plans)
+
+@app.route('/admin/process/subscription/upsert', methods=["POST"])
+def admin_subscription_upsert():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    resp = admin_proc.admin_proc(app)._subscription_upsert(params)
+    if resp.get('status') == 'SUCCESS':
+        flash('Subscription saved', 'success')
+    else:
+        flash(resp.get('desc','Failed to save'), 'danger')
+    return redirect(url_for('admin_panel_subscription_config'))
+
+@app.route('/admin/process/subscription/delete', methods=["POST"])
+def admin_subscription_delete():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    resp = admin_proc.admin_proc(app)._subscription_delete(params)
+    if resp.get('status') == 'SUCCESS':
+        flash('Subscription deleted', 'success')
+    else:
+        flash(resp.get('desc','Failed to delete'), 'danger')
+    return redirect(url_for('admin_panel_subscription_config'))
+
+@app.route("/admin/panel/cities")
+def admin_panel_cities():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    mgd = database.get_db_conn(config.mainDB)
+    cities = list(mgd.db_city_list.find({}, {"_id": 0, "name": 1}).sort("name", 1))
+    return render_template("admin/cities.html", cities=cities)
+
+@app.route('/admin/process/cities/add', methods=["POST"])
+def admin_cities_add():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    resp = admin_proc.admin_proc(app)._city_add(params)
+    if resp.get('status') == 'SUCCESS':
+        flash('City added', 'success')
+    else:
+        flash(resp.get('desc','Failed to add'), 'danger')
+    return redirect(url_for('admin_panel_cities'))
+
+@app.route('/admin/process/cities/delete', methods=["POST"])
+def admin_cities_delete():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    resp = admin_proc.admin_proc(app)._city_delete(params)
+    if resp.get('status') == 'SUCCESS':
+        flash('City deleted', 'success')
+    else:
+        flash(resp.get('desc','Failed to delete'), 'danger')
+    return redirect(url_for('admin_panel_cities'))
 
 
 @app.route('/admin/process/premium/apply', methods=["POST"])

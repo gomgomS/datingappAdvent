@@ -57,49 +57,13 @@ MAIL_PASSWORD  = "mxfk ezha kgjh sixk"
 MAIL_USE_TLS  = False
 MAIL_USE_SSL  = True
 
-CITY_LIST = [
-          "Jakarta", "Surabaya", "Bandung", "Medan", "Semarang",
-          "Palembang", "Makassar", "Bogor", "Depok", "Bekasi",
-          "Yogyakarta", "Malang", "Padang", "Pekanbaru", "Banjarmasin",
-          "Samarinda", "Pontianak", "Manado", "Denpasar", "Batam",
-          "Tangerang", "South Tangerang", "Bandar Lampung", "Cimahi", "Tasikmalaya",
-          "Serang", "Balikpapan", "Jambi", "Cirebon", "Surakarta",
-          "Kupang", "Mataram", "Jayapura", "Bengkulu", "Palu",
-          "Ambon", "Kendari", "Dumai", "Pekalongan", "Palangka Raya",
-          "Binjai", "Kediri", "Sorong", "Tegal", "Banda Aceh",
-          "Tarakan", "Probolinggo", "Singkawang", "Lubuklinggau", "Tanjungpinang",
-          "Bitung", "Pangkalpinang", "Batu", "Pasuruan", "Banjar",
-          "Gorontalo", "Ternate", "Madiun", "Salatiga", "Prabumulih",
-          "Lhokseumawe", "Langsa", "Bontang", "Tanjungbalai", "Tebing Tinggi",
-          "Metro", "Palopo", "Bima", "Baubau", "Parepare",
-          "Blitar", "Pagar Alam", "Payakumbuh", "Gunungsitoli", "Mojokerto",
-          "Bukittinggi", "Kotamobagu", "Magelang", "Tidore", "Tomohon",
-          "Sungai Penuh", "Subulussalam", "Pariaman", "Sibolga", "Tual",
-          "Solok", "Sawahlunto", "Padang Panjang", "Sabang","Timika"
-        ]
+## CITY_LIST has moved to database collection `db_city_list` and should no longer be used directly.
+# CITY_LIST = [ ... ]
 
 MIN_USER_SWIPE_ACCESSABLE = 200
 ########################### PREMIUM CONFIGURATION ###########################
-SUBSCRIPTION_CONFIG = {
-    "premium": {
-        "DAILY_SWIPE": 8,
-        "CAN_UNDO_LAST_DISLIKE": True,
-        "CAN_SEE_WHO_LIKE_USER": True,
-        "CAN_UPLOAD_ALBUM": True,
-        "MORE_OFTEN_SEEN": True,
-        "GET_INFO_TOTAL_NEW_USER": True,
-        "CAN_FILTER": True
-    },
-    "free": {
-        "DAILY_SWIPE": 70,
-        "CAN_UNDO_LAST_DISLIKE": False,
-        "CAN_SEE_WHO_LIKE_USER": False,
-        "CAN_UPLOAD_ALBUM": False,
-        "MORE_OFTEN_SEEN": False,
-        "GET_INFO_TOTAL_NEW_USER": False,
-        "CAN_FILTER": False
-    }
-}
+## SUBSCRIPTION_CONFIG has moved to database collection `db_subscription_config` and should no longer be used directly.
+# SUBSCRIPTION_CONFIG = { ... }
 
 
 superadmin_username = "gomgom" 

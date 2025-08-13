@@ -1,11 +1,15 @@
 {% extends 'core/base.html' %}
+{% block page_title %}Customer Manager{% endblock %}
 {% block content %}
 <div class="content-body">
   <div class="container pd-x-0 pd-b-100">
     <div class="">
-      <h1 class="font-weight-bold mg-b-10">Customer Manager</h1>      
+      <h1 class="font-weight-bold mg-b-10 d-none">Customer Manager</h1>      
       
-      <div class="">
+      <div class="d-flex justify-content-end mb-2">
+        <button class="btn btn-primary" data-toggle="modal" data-target="#createUserModal"><i class="fas fa-user-plus mr-1"></i>Create User</button>
+      </div>
+      <div class="card main-table p-3">
         <div class="row mg-b-20">
           <div class="col-md-4 mg-t-10">
             <label for="">Show</label>
@@ -34,7 +38,7 @@
         </div>
         <div class="table-responsive" style="overflow-y: hidden;">
           <table id="user_list" class="table lynk-table">
-            <thead>
+            <thead class="thead-primary text-white">
             <tr>
               <th width="10%">Avatar</th>
               <th width="20%">Username</th>
@@ -81,6 +85,15 @@
                       Actions
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                      <div class="dropdown-item-text">
+                        OTP:
+                        {% if user.otp_4_number %}
+                          <span class="badge badge-info">{{ user.otp_4_number }}</span>
+                        {% else %}
+                          <span class="text-muted">not generated yet</span>
+                        {% endif %}
+                      </div>
+                      <div class="dropdown-divider"></div>
                       <button class="dropdown-item" data-toggle="modal" data-target="#deleteUserModal" data-username="{{ user.username }}">Delete {{ user.username }}</button>
                       <button class="dropdown-item" data-toggle="modal" data-target="#editUserModal" data-username="{{ user.username }}" data-sex="{{ user.sex }}" data-email="{{ user.email }}" data-dob="{{ user.dob }}" data-userid="{{ user.user_id }}">Edit {{ user.username }}</button>
                     </div>
@@ -138,6 +151,52 @@
       </ul>
     </nav>
     {% endif %}
+    <!-- Create User Modal -->
+    <div class="modal fade" id="createUserModal" tabindex="-1" role="dialog" aria-labelledby="createUserLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="createUserLabel">Create user</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form id="create_user" action="/admin/process/user/create" method="POST">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+            <div class="modal-body">
+              <div class="form-group">
+                <label>Username</label>
+                <input type="text" class="form-control" name="username" minlength="5" required>
+              </div>
+              <div class="form-group">
+                <label>Password</label>
+                <input type="password" class="form-control" name="password" minlength="8" required>
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" class="form-control" name="email" required>
+              </div>
+              <div class="form-group">
+                <label>Sex/Role</label>
+                <select class="custom-select" name="sex">
+                  <option value="male">male</option>
+                  <option value="female">female</option>
+                  <option value="superadmin">superadmin</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Date of Birth</label>
+                <input type="date" class="form-control" name="dob">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Create</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
     <div class="modal fade" id="deleteUserModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -273,6 +332,7 @@
         modal.find('#edit_dob').val(dob);
         modal.find('#edit_user_id').val(userId);
     });
+
 });
 </script>
 {% endblock scripts %}

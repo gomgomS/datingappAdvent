@@ -48,6 +48,10 @@ class view_swipe:
         core_dialog_message     = view_core_dialog_message.view_core_dialog_message().html(params)   
         user_rec                = self.mgdDB.db_users.find_one({"user_id": params["user_id"]},{"location":1,"profile_photo":1,"name":1,"_id":0,"user_id":1})                 
 
+        # Fetch city list from DB instead of config
+        city_docs = list(self.mgdDB.db_city_list.find({}, {"_id": 0, "name": 1}).sort("name", 1))
+        city_list = [c.get("name") for c in city_docs]
+
         return render_template(
             "users/swipe.html",
             menu_list_html      = menu_list               ,
@@ -60,7 +64,7 @@ class view_swipe:
             main_app_url        = config.MAIN_APP_URL     ,                   
             G_IMAGE_URL_DISPATCH       = config.G_IMAGE_URL_DISPATCH     , 
             user_rec            = user_rec,
-            city_list           = config.CITY_LIST,
+            city_list           = city_list,
             is_premium          = params['is_premium']                  
             
         )                

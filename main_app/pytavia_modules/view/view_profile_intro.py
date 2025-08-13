@@ -48,6 +48,10 @@ class view_profile_intro:
 
         data_user        = self.data_user( params )
 
+        # Fetch city list from DB instead of config
+        city_docs = list(self.mgdDB.db_city_list.find({}, {"_id": 0, "name": 1}).sort("name", 1))
+        city_list = [c.get("name") for c in city_docs]
+
         return render_template(
             "users/profile_intro.html",
             menu_list_html      = menu_list               ,
@@ -59,7 +63,7 @@ class view_profile_intro:
             core_dialog_message = core_dialog_message     , 
             data_user           = data_user,        
             image_base_url      = config.G_IMAGE_URL_DISPATCH,
-            city_list           = config.CITY_LIST  
+            city_list           = city_list  
         )                
     # end def
     def data_user(self,params):              
