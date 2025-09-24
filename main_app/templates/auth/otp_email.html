@@ -51,6 +51,28 @@ body{
 {
 color: red;
 }
+
+/* Send Again Button Styles */
+#sendAgainBtn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+#sendAgainBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#sendAgainBtn:not(:disabled):hover {
+    background-color: #007bff;
+    color: white;
+}
+
+#countdownText {
+    color: #666;
+}
 </style>
 
 <body>  
@@ -91,6 +113,17 @@ color: red;
                 <input type="text" minlength="1" maxlength="1" class="form-control otp-inputbar" oninput="handleInput(this, 5)">
             </div>
         </form>
+        
+        <!-- Send Again Section -->
+        <div class="text-center mt-4">
+          <div id="sendAgainSection">
+            <p class="text-muted">Didn't receive the code?</p>
+            <button id="sendAgainBtn" class="btn btn-outline-primary" onclick="sendOTPAgain()" disabled>
+              <span id="sendAgainText">Send Again</span>
+              <span id="countdownText" style="display: none;">Send Again in <span id="countdown">60</span>s</span>
+            </button>
+          </div>
+        </div>
       </div>
       
     </div>
@@ -104,6 +137,90 @@ color: red;
   <script src="../../static/lib/jquery/jquery.min.js"></script>
   <script src="../../static/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script>
+    // Send Again functionality
+    let countdownTimer = null;
+    let timeLeft = 60;
+    
+    // Start countdown when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        startCountdown();
+    });
+    
+    function startCountdown() {
+        const sendAgainBtn = document.getElementById('sendAgainBtn');
+        const sendAgainText = document.getElementById('sendAgainText');
+        const countdownText = document.getElementById('countdownText');
+        const countdown = document.getElementById('countdown');
+        
+        sendAgainBtn.disabled = true;
+        sendAgainText.style.display = 'none';
+        countdownText.style.display = 'inline';
+        countdown.textContent = timeLeft;
+        
+        countdownTimer = setInterval(() => {
+            timeLeft--;
+            countdown.textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                clearInterval(countdownTimer);
+                sendAgainBtn.disabled = false;
+                sendAgainText.style.display = 'inline';
+                countdownText.style.display = 'none';
+                timeLeft = 60; // Reset for next use
+            }
+        }, 1000);
+    }
+    
+    function sendOTPAgain() {
+        const sendAgainBtn = document.getElementById('sendAgainBtn');
+        
+        // Disable button immediately
+        sendAgainBtn.disabled = true;
+        
+        // Show loading state
+        const originalText = sendAgainBtn.innerHTML;
+        sendAgainBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Sending...';
+        
+        // Send AJAX request to resend OTP
+        fetch('/auth/resend_otp', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `_csrf_token=${document.querySelector('input[name="_csrf_token"]').value}&email={{email}}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                showMessage('OTP sent successfully!', 'success');
+                // Start countdown again
+                startCountdown();
+            } else {
+                showMessage(data.message || 'Failed to send OTP. Please try again.', 'error');
+                sendAgainBtn.disabled = false;
+                sendAgainBtn.innerHTML = originalText;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage('An error occurred. Please try again.', 'error');
+            sendAgainBtn.disabled = false;
+            sendAgainBtn.innerHTML = originalText;
+        });
+    }
+    
+    function showMessage(message, type) {
+        const errmsg = document.getElementById('errmsg');
+        errmsg.textContent = message;
+        errmsg.style.color = type === 'success' ? 'green' : 'red';
+        errmsg.style.display = 'block';
+        
+        setTimeout(() => {
+            errmsg.style.display = 'none';
+        }, 3000);
+    }
+
     // automatic otp section
     const otpInputs = document.querySelectorAll(".otp-inputbar");
 

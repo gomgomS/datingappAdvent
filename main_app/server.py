@@ -265,6 +265,44 @@ def auth_check_verification_email():
     
     # end if
 
+@app.route("/auth/resend_otp", methods=["POST"])
+def auth_resend_otp():
+    try:
+        params = sanitize.clean_html_dic(request.form.to_dict())
+        
+        # Get user_id from session
+        user_id = session.get("user_id")
+        if not user_id:
+            return jsonify({
+                "success": False,
+                "message": "Session expired. Please try again."
+            })
+        
+        # Add user_id to params
+        params["user_id"] = user_id
+        
+        # Generate new OTP and send email
+        response = auth_proc.auth_proc(app).send_verification_email(params)
+        
+        # The function returns a URL string on success
+        if response and response.startswith("/"):
+            return jsonify({
+                "success": True,
+                "message": "OTP sent successfully!"
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "message": "Failed to send OTP. Please try again."
+            })
+            
+    except Exception as e:
+        print(f"Error in resend OTP: {e}")
+        return jsonify({
+            "success": False,
+            "message": "An error occurred. Please try again."
+        })
+
 @app.route("/")
 def landingpage():
     user_id  = session.get("user_id")

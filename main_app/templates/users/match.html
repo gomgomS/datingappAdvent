@@ -433,6 +433,10 @@
                   <i class="fas fa-ring"></i>
                   <span id="marital-status">Marital Status</span>
                 </div>
+                <div class="info-item">
+                  <i class="fas fa-church"></i>
+                  <span id="congregation">Jemaat Terdaftar</span>
+                </div>
                 <div class="info-item wide">
                   <i class="fas fa-comment-dots"></i>
                   <span id="about">About</span>
@@ -533,6 +537,7 @@
             document.getElementById('hobbies').textContent = data.hobbies;
             document.getElementById('tribe').textContent = data.tribe;
             document.getElementById('marital-status').textContent = data.marital_status;
+            document.getElementById('congregation').textContent = data.congregation || 'Tidak diisi';
             document.getElementById('about').textContent = data.about;
             
 

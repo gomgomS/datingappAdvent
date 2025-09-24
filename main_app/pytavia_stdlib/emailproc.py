@@ -38,9 +38,43 @@ def send_verification_email(params):
         my_password = "mxfk ezha kgjh sixk"  # Replace with your actual password
         receiver_email = params["email"]  
         # Email content
-        subject = "Verification Email your dating account"
-        body = "Your verification code is: "+params["unique_4_number"]
-        sender_name = "Datingapp Team's"
+        subject = "Verification Code - comes.id"
+        body = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h1 style="color: #FFDE59; font-size: 28px; margin: 0;">comes.id</h1>
+                    <p style="color: #666; font-size: 16px; margin: 5px 0;">Your Dating Adventure Starts Here</p>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 20px;">
+                    <h2 style="color: #333; margin-top: 0;">Email Verification</h2>
+                    <p>Hello! Thank you for joining comes.id. To complete your account setup, please use the verification code below:</p>
+                    
+                    <div style="text-align: center; margin: 25px 0;">
+                        <div style="display: inline-block; background: #FFDE59; color: #333; padding: 15px 30px; border-radius: 8px; font-size: 24px; font-weight: bold; letter-spacing: 3px;">
+                            {params["unique_4_number"]}
+                        </div>
+                    </div>
+                    
+                    <p style="margin-bottom: 0;">Enter this code in the verification field to activate your account.</p>
+                </div>
+                
+                <div style="text-align: center; color: #666; font-size: 14px;">
+                    <p>This code will expire in 10 minutes for security reasons.</p>
+                    <p>If you didn't create an account with comes.id, please ignore this email.</p>
+                </div>
+                
+                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+                <div style="text-align: center; color: #999; font-size: 12px;">
+                    <p>© 2024 comes.id - Connecting Hearts, Creating Stories</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        sender_name = "comes.id Team"
 
         # Setup the MIME
         message = MIMEMultipart()
@@ -49,7 +83,7 @@ def send_verification_email(params):
         message['Subject'] = subject
 
         # Attach the body to the email
-        message.attach(MIMEText(body, 'plain'))
+        message.attach(MIMEText(body, 'html'))
 
         # Create SMTP session for sending the mail
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:

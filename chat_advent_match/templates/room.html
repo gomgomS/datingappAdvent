@@ -239,7 +239,7 @@ body {
         <ul id="messages">
           {% for msg in chat_messages %}
             <li id="msg-seq-{{ msg.sequence }}" class="message-item {% if msg.sender_user_id == sender %}self-message-item{% else %}peer-message-item{% endif %}">
-              <small class="muted-text">{{ msg.timestamp }}{% if msg.is_read %} ✅ {% endif %}</small>
+              <small class="muted-text"><span class="smart-date" data-timestamp="{{ msg.timestamp }}">{{ msg.timestamp }}</span>{% if msg.is_read %} ✅ {% endif %}</small>
               <p>{{ msg.message }}</p>
             </li>
           {% endfor %}
@@ -253,6 +253,48 @@ body {
   </div>
 
   <script>
+    // Function to format date smartly with +7 hours timezone offset
+    function formatSmartDate(timestamp) {
+      const now = new Date();
+      const messageDate = new Date(timestamp);
+      
+      // Create a new date object for the adjusted time (UTC + 7 hours)
+      const adjustedMessageDate = new Date(messageDate.getTime() + (7 * 60 * 60 * 1000));
+      
+      // Calculate difference in days based on current local time vs adjusted message time
+      const nowAdjusted = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+      const diffTime = nowAdjusted - adjustedMessageDate;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      
+      // Format time as HH:MM with +7 hours adjustment
+      const timeStr = adjustedMessageDate.toLocaleTimeString('en-GB', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false 
+      });
+      
+      if (diffDays === 0) {
+        // Today - show only time
+        return timeStr;
+      } else if (diffDays === 1) {
+        // Yesterday
+        return `Yesterday ${timeStr}`;
+      } else if (diffDays === 2) {
+        // 2 days ago
+        return `2 days ago ${timeStr}`;
+      } else if (diffDays === 3) {
+        // 3 days ago
+        return `3 days ago ${timeStr}`;
+      } else {
+        // More than 3 days - show full date with adjusted time
+        return adjustedMessageDate.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: '2-digit'
+        }) + ' ' + timeStr;
+      }
+    }
+
     // Inisialisasi Socket.IO - connect to same origin, force polling (no eventlet/gevent needed)
     var socketio = io({ transports: ["polling"] });
 
@@ -296,7 +338,7 @@ body {
         newMessage.className = `message-item ${isSender ? "self-message-item" : "peer-message-item"}`;
         newMessage.id = `msg-seq-${data.sequence}`; // ID unik berdasarkan sequence
 
-        const formattedTime = data.timestamp ? new Date(data.timestamp).toLocaleString() : "Just now";
+        const formattedTime = data.timestamp ? formatSmartDate(data.timestamp) : "Just now";
 
         // Tambahkan pesan baru ke chat
         newMessage.innerHTML = `
@@ -352,7 +394,7 @@ body {
         message: message,
         sender_user_id: sender_id,
         sequence: new_sequence,
-        timestamp: new Date().toISOString() // Gunakan waktu lokal untuk tampilan
+        timestamp: new Date().toISOString()
       });
 
       // Update latest_sequence setelah mengirim pesan
@@ -399,6 +441,17 @@ body {
     document.getElementById("leave-chat-btn").addEventListener("click", function (event) {
         event.preventDefault(); // Mencegah default behavior link
         leaveChat();
+    });
+
+    // Format existing messages on page load
+    document.addEventListener("DOMContentLoaded", function() {
+        const smartDateElements = document.querySelectorAll('.smart-date');
+        smartDateElements.forEach(element => {
+            const timestamp = element.getAttribute('data-timestamp');
+            if (timestamp) {
+                element.textContent = formatSmartDate(timestamp);
+            }
+        });
     });
 
   </script>
