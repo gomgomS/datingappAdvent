@@ -3,80 +3,443 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Nano Folio - Simple HTML Template</title>
-	<link rel="stylesheet" href="../../static/assets/landingpage/fontawesome/css/all.min.css"> <!-- https://../../static/assets/landingpage/.com/ -->
-	<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap" rel="stylesheet"> <!-- https://fonts.google.com/ -->
+	<title>comes.id - Connect Adventist Young Hearts</title>
+	<link rel="stylesheet" href="../../static/assets/landingpage/fontawesome/css/all.min.css">
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Source+Sans+Pro&display=swap" rel="stylesheet">
 	<link href="../../static/assets/landingpage/css/magnific-popup.min.css" rel="stylesheet">
     <link href="../../static/assets/landingpage/css/tooplate-style.css" rel="stylesheet">
-<!--
-
-Tooplate 2122 Nano Folio
-
-https://www.tooplate.com/view/2122-nano-folio
-
--->
+	<style>
+		/* Mobile-first responsive design */
+		* {
+			box-sizing: border-box;
+		}
+		
+		body {
+			font-family: 'Poppins', sans-serif;
+			line-height: 1.6;
+			margin: 0;
+			padding: 0;
+			overflow-x: hidden;
+		}
+		
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 0 20px;
+		}
+		
+		/* Hero Section */
+		.hero {
+			background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+			color: #333;
+			padding: 80px 0;
+			text-align: center;
+			min-height: 100vh;
+			display: flex;
+			align-items: center;
+		}
+		
+		.hero-content h1 {
+			font-size: 3rem;
+			font-weight: 700;
+			margin-bottom: 20px;
+			line-height: 1.2;
+		}
+		
+		.hero-content p {
+			font-size: 1.2rem;
+			margin-bottom: 30px;
+			opacity: 0.8;
+		}
+		
+		.cta-button {
+			display: inline-block;
+			background: #333;
+			color: #FFDE59;
+			padding: 15px 40px;
+			border-radius: 50px;
+			text-decoration: none;
+			font-weight: 600;
+			font-size: 1.1rem;
+			transition: all 0.3s ease;
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+		}
+		
+		.cta-button:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+			color: #FFDE59;
+			text-decoration: none;
+		}
+		
+		/* Features Section */
+		.features {
+			padding: 80px 0;
+			background: #f8f9fa;
+		}
+		
+		.section-title {
+			text-align: center;
+			font-size: 2.5rem;
+			font-weight: 600;
+			margin-bottom: 60px;
+			color: #333;
+		}
+		
+		.features-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+			gap: 40px;
+			margin-top: 60px;
+		}
+		
+		.feature-card {
+			background: white;
+			padding: 40px 30px;
+			border-radius: 20px;
+			text-align: center;
+			box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+			transition: transform 0.3s ease;
+		}
+		
+		.feature-card:hover {
+			transform: translateY(-10px);
+		}
+		
+		.feature-icon {
+			font-size: 3rem;
+			color: #FFDE59;
+			margin-bottom: 20px;
+		}
+		
+		.feature-card h3 {
+			font-size: 1.5rem;
+			font-weight: 600;
+			margin-bottom: 15px;
+			color: #333;
+		}
+		
+		.feature-card p {
+			color: #666;
+			line-height: 1.6;
+		}
+		
+		/* About Section */
+		.about {
+			padding: 80px 0;
+			background: white;
+		}
+		
+		.about-content {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 60px;
+			align-items: center;
+		}
+		
+		.about-text h2 {
+			font-size: 2.5rem;
+			font-weight: 600;
+			margin-bottom: 30px;
+			color: #333;
+		}
+		
+		.about-text p {
+			font-size: 1.1rem;
+			color: #666;
+			margin-bottom: 20px;
+			line-height: 1.8;
+		}
+		
+		.about-image {
+			text-align: center;
+		}
+		
+		.about-image i {
+			font-size: 8rem;
+			color: #FFDE59;
+			opacity: 0.8;
+		}
+		
+		/* Contact Section */
+		.contact {
+			padding: 80px 0;
+			background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+			color: #333;
+		}
+		
+		.contact-content {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 60px;
+		}
+		
+		.contact-info h2 {
+			font-size: 2.5rem;
+			font-weight: 600;
+			margin-bottom: 30px;
+		}
+		
+		.contact-info p {
+			font-size: 1.1rem;
+			margin-bottom: 20px;
+			opacity: 0.8;
+		}
+		
+		.social-links {
+			margin-top: 30px;
+		}
+		
+		.social-links a {
+			display: inline-block;
+			margin-right: 20px;
+			font-size: 1.5rem;
+			color: #333;
+			transition: transform 0.3s ease;
+		}
+		
+		.social-links a:hover {
+			transform: scale(1.2);
+			color: #FFDE59;
+		}
+		
+		.contact-form {
+			background: rgba(255, 255, 255, 0.3);
+			padding: 40px;
+			border-radius: 20px;
+			backdrop-filter: blur(10px);
+		}
+		
+		.form-group {
+			margin-bottom: 20px;
+		}
+		
+		.form-group input,
+		.form-group textarea {
+			width: 100%;
+			padding: 15px;
+			border: none;
+			border-radius: 10px;
+			background: rgba(255, 255, 255, 0.8);
+			color: #333;
+			font-size: 1rem;
+		}
+		
+		.form-group input::placeholder,
+		.form-group textarea::placeholder {
+			color: rgba(51, 51, 51, 0.7);
+		}
+		
+		.form-group button {
+			background: #333;
+			color: #FFDE59;
+			border: none;
+			padding: 15px 30px;
+			border-radius: 10px;
+			font-size: 1rem;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
+		
+		.form-group button:hover {
+			background: #555;
+			transform: translateY(-2px);
+		}
+		
+		/* Footer */
+		.footer {
+			background: #333;
+			color: white;
+			text-align: center;
+			padding: 40px 0;
+		}
+		
+		/* Mobile Responsive */
+		@media (max-width: 768px) {
+			.hero-content h1 {
+				font-size: 2rem;
+			}
+			
+			.hero-content p {
+				font-size: 1rem;
+			}
+			
+			.section-title {
+				font-size: 2rem;
+			}
+			
+			.features-grid {
+				grid-template-columns: 1fr;
+				gap: 30px;
+			}
+			
+			.about-content,
+			.contact-content {
+				grid-template-columns: 1fr;
+				gap: 40px;
+			}
+			
+			.about-text h2,
+			.contact-info h2 {
+				font-size: 2rem;
+			}
+			
+			.contact-form {
+				padding: 30px 20px;
+			}
+			
+			.about-image i {
+				font-size: 6rem;
+			}
+		}
+		
+		@media (max-width: 480px) {
+			.hero {
+				padding: 60px 0;
+			}
+			
+			.hero-content h1 {
+				font-size: 1.8rem;
+			}
+			
+			.cta-button {
+				padding: 12px 30px;
+				font-size: 1rem;
+			}
+			
+			.features,
+			.about,
+			.contact {
+				padding: 60px 0;
+			}
+		}
+	</style>
 </head>
 <body>
-	<div class="tm-container-fluid">
-		<a href="/login" style="text-decoration: none; color: inherit;">
-         <section class="tm-site-header tm-flex-center tm-mb-50 tm-bgcolor-1 tm-border-rounded" style="cursor: pointer;">
-             <i class="fas fa-heart fa-3x"></i>
-             <h1>Login</h1>
-         </section>
-       </a>     
-
-		<section class="tm-about tm-mb-80 tm-p-50 tm-bgcolor-2 tm-border-rounded">
-			<div class="tm-about-header tm-flex-center">
-				<i class="fas fa-users fa-2x"></i>
-				<h2>comes.id</h2>
+	<!-- Hero Section -->
+	<section class="hero">
+		<div class="container">
+			<div class="hero-content">
+				<i class="fas fa-heart fa-4x" style="margin-bottom: 30px; color: #333;"></i>
+				<h1>Connect Adventist Young Hearts</h1>
+				<p>Find meaningful friendships and relationships within the Adventist community. comes.id helps young Adventists connect with like-minded individuals who share your values and faith.</p>
+				<a href="/login" class="cta-button">
+					<i class="fas fa-sign-in-alt"></i> Get Started Today
+				</a>
 			</div>
-			<div class="tm-about-text">
-				<p class="tm-mb-40">comes.id adalah aplikasi kencan modern yang membantu Anda menemukan pasangan yang cocok dengan mudah dan aman. Dengan algoritma pencocokan cerdas, filter preferensi, serta fitur interaktif, comes.id memberikan pengalaman berkencan yang lebih menyenangkan dan bermakna.</p>
-            <p class="tm-mb-0">Kami berkomitmen untuk menciptakan lingkungan yang aman dan nyaman bagi para pengguna. Jangan ragu untuk <a rel="nofollow" href="https://www.tooplate.com/contact" target="_blank">menghubungi kami</a> melalui email atau live chat jika Anda memiliki pertanyaan atau masukan.</p>
+		</div>
+	</section>
 
-			</div>
-		</section>
-
-		<!-- <div class="tm-gallery-section tm-mb-80">
-			<ul class="filters-button-group tm-mb-40">
-				<li><a href="#" data-filter=".city">City</a></li>
-				<li><a href="#" data-filter=".nature">Nature</a></li>
-				<li><a href="#" data-filter=".portraits">Portraits</a></li>
-				<li><a href="#" class="active" data-filter="*">Show All</a></li>
-			</ul>
-		
-		</div> -->
-
-		<section class="tm-contact tm-mb-50 tm-bgcolor-3 tm-border-rounded">
-			<div class="tm-contact-header tm-flex-center">
-				<i class="fas fa-map-pin fa-3x"></i>
-				<h2>Contact</h2>
-			</div>
-			<div class="tm-contact-info">
-				<address class="tm-mb-30">
-					headquarter, Bandung 
-				</address>
-				<!-- <div class="tm-text-white tm-mb-40">Tel: <a href="tel:0100200340" class="tm-link-white">010-020-0340</a></div> -->
-				<div class="tm-flex">
-					<a href="https://facebook.com" class="tm-social-link"><i class="fab fa-facebook"></i></a>
-					<a href="https://twitter.com" class="tm-social-link"><i class="fab fa-twitter"></i></a>
-					<a href="https://instagram.com" class="tm-social-link"><i class="fab fa-instagram"></i></a>
+	<!-- Features Section -->
+	<section class="features">
+		<div class="container">
+			<h2 class="section-title">Why Choose comes.id?</h2>
+			<div class="features-grid">
+				<div class="feature-card">
+					<div class="feature-icon">
+						<i class="fas fa-shield-alt"></i>
+					</div>
+					<h3>Safe & Secure</h3>
+					<p>Connect with verified Adventist members in a secure environment. Your privacy and safety are our top priorities.</p>
+				</div>
+				<div class="feature-card">
+					<div class="feature-icon">
+						<i class="fas fa-users"></i>
+					</div>
+					<h3>Community Focused</h3>
+					<p>Join a community of young Adventists who share your faith, values, and desire for meaningful connections.</p>
+				</div>
+				<div class="feature-card">
+					<div class="feature-icon">
+						<i class="fas fa-heart"></i>
+					</div>
+					<h3>Meaningful Matches</h3>
+					<p>Our smart matching system connects you with compatible individuals based on shared interests and values.</p>
+				</div>
+				<div class="feature-card">
+					<div class="feature-icon">
+						<i class="fas fa-mobile-alt"></i>
+					</div>
+					<h3>Mobile Friendly</h3>
+					<p>Connect on-the-go with our mobile-optimized platform. Chat and meet new people wherever you are.</p>
+				</div>
+				<div class="feature-card">
+					<div class="feature-icon">
+						<i class="fas fa-church"></i>
+					</div>
+					<h3>Faith-Based</h3>
+					<p>Connect with fellow Adventists who understand your faith journey and share your spiritual values.</p>
+				</div>
+				<div class="feature-card">
+					<div class="feature-icon">
+						<i class="fas fa-comments"></i>
+					</div>
+					<h3>Easy Communication</h3>
+					<p>Start conversations easily with our intuitive chat system. Break the ice and build lasting relationships.</p>
 				</div>
 			</div>
-			<div class="tm-contact-form-container">
-				<form id="contact-form" action="" method="POST" class="tm-contact-form">
-		          	<input type="text" name="name" placeholder="name" required="" />
-		          	<input type="email" name="email" placeholder="email" required="" />
-		          	<textarea rows="5" name="message" class="tm-mb-30" placeholder="message" required=""></textarea>		          	
-		          	<button type="submit" class="tm-right tm-btn-submit">send</button>          	
-		        </form>    
-			</div>
-		</section>
+		</div>
+	</section>
 
-		<footer class="tm-footer">
-			Copyright 2020  comes.id
-		</footer>
-	</div>
+	<!-- About Section -->
+	<section class="about">
+		<div class="container">
+			<div class="about-content">
+				<div class="about-text">
+					<h2>About comes.id</h2>
+					<p>comes.id is a modern dating and friendship platform specifically designed for young Adventist Christians. We understand the importance of finding connections within your faith community.</p>
+					<p>Whether you're looking for friendship, companionship, or a potential life partner, comes.id provides a safe and welcoming environment where you can meet like-minded individuals who share your values and beliefs.</p>
+					<p>Our mission is to help young Adventists build meaningful relationships that honor God and strengthen the community. Join thousands of young people who have already found their perfect match through comes.id.</p>
+				</div>
+				<div class="about-image">
+					<i class="fas fa-users"></i>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Contact Section -->
+	<section class="contact">
+		<div class="container">
+			<div class="contact-content">
+				<div class="contact-info">
+					<h2>Get In Touch</h2>
+					<p>Have questions about comes.id? We're here to help! Reach out to our support team or connect with us on social media.</p>
+					<p><strong>Headquarters:</strong> Bandung, Indonesia</p>
+					<div class="social-links">
+						<a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i></a>
+						<a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
+						<a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+						<a href="https://youtube.com" target="_blank"><i class="fab fa-youtube"></i></a>
+					</div>
+				</div>
+				<div class="contact-form">
+					<form id="contact-form" action="" method="POST">
+						<div class="form-group">
+							<input type="text" name="name" placeholder="Your Name" required />
+						</div>
+						<div class="form-group">
+							<input type="email" name="email" placeholder="Your Email" required />
+						</div>
+						<div class="form-group">
+							<textarea name="message" rows="4" placeholder="Your Message" required></textarea>
+						</div>
+						<div class="form-group">
+							<button type="submit">Send Message</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Footer -->
+	<footer class="footer">
+		<div class="container">
+			<p>&copy; 2024 comes.id - Connecting Adventist Young Hearts. All rights reserved.</p>
+		</div>
+	</footer>
 
 	<script src="../../static/assets/landingpage/js/jquery.min.js"></script>
 	<script src="../../static/assets/landingpage/js/imagesloaded.pkgd.min.js"></script>

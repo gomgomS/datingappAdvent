@@ -29,7 +29,7 @@
             height: 100%;
             overflow: hidden;
             font-family: 'Nunito', sans-serif;
-            background: #fff;
+            background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
         }
 
         .frame {
@@ -199,9 +199,9 @@
         /* Bumble-inspired Menu Styling */
         :root {
             --bumble-yellow: #FFDE59;
-            --bumble-dark: #222;
+            --bumble-dark: #333;
             --glass-bg: rgba(255, 255, 255, 0.3);
-            --glass-border: rgba(255, 255, 255, 0.5);
+            --glass-border: rgba(255, 222, 89, 0.3);
         }
 
         /* Top & Bottom Menu Box */
@@ -238,15 +238,15 @@
             border-radius: 9999px;
             padding: 8px 20px;
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
-            background-color: #f7c948;
+            background-color: var(--bumble-dark);
             border: none;
-            color: #000;
+            color: var(--bumble-yellow);
             font-weight: 600;
         }
 
         .detail-trigger .btn:hover {
-            background-color: #e6a420;
-            color: #fff;
+            background-color: #555;
+            color: var(--bumble-yellow);
         }
 
         .menu-top {
@@ -271,7 +271,7 @@
 
         .menu-item:hover {
             transform: scale(1.08);
-            color: #88cafc;
+            color: var(--bumble-yellow);
         }
 
         /* Active Item */
@@ -286,6 +286,25 @@
         .menu-icon {
             font-size: 20px;
             margin-bottom: 4px;
+            color: var(--bumble-dark);
+            transition: color 0.2s ease;
+        }
+        
+        .menu-icon:hover {
+            color: var(--bumble-yellow);
+        }
+        
+        .undo-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--bumble-dark);
+            transition: color 0.2s ease;
+            font-size: 20px;
+        }
+        
+        .undo-button:hover {
+            color: var(--bumble-yellow);
         }
 
         /* Responsive Adjustments */
@@ -312,7 +331,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: linear-gradient(135deg, #fff6e0, #ffe9b3); /* warm pastel yellow */
+            background: linear-gradient(135deg, #FFDE59, #FFB347); /* yellow gradient */
             z-index: 9999;
             display: flex;
             justify-content: center;
@@ -336,15 +355,15 @@
         }
 
         .sda-logo span {
-            color: #F96699; /* accent pink */
+            color: var(--bumble-yellow); /* yellow accent */
             font-weight: normal;
         }
 
         .spinner {
             width: 50px;
             height: 50px;
-            border: 5px solid #ffe0ea;
-            border-top: 5px solid #F96699;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid var(--bumble-dark);
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 1rem;
@@ -369,14 +388,15 @@
 
         .modal-content {
           border-radius: 15px;
-          background: linear-gradient(135deg, #ffe5ec, #ffffff);
+          background: rgba(255, 255, 255, 0.95);
           box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+          backdrop-filter: blur(10px);
         }
 
         .profile-header {
           text-align: center;
-          background: linear-gradient(145deg, #ff6f91, #ff9472);
-          color: white;
+          background: linear-gradient(145deg, #FFDE59, #FFB347);
+          color: var(--bumble-dark);
           padding: 30px 20px;
           border-top-left-radius: 15px;
           border-top-right-radius: 15px;
@@ -387,15 +407,16 @@
         .bumble-profile {
           border-radius: 20px;
           overflow: hidden;
-          background: #fffdf5;
+          background: rgba(255, 255, 255, 0.95);
           box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
           font-family: 'Segoe UI', sans-serif;
+          backdrop-filter: blur(10px);
         }
 
         /* Header Section */
         .profile-header {
           padding: 24px;
-          background: #fff8e1;
+          background: linear-gradient(145deg, #FFDE59, #FFB347);
           text-align: center;
         }
 
@@ -426,8 +447,8 @@
         .section-title {
           font-weight: 600;
           font-size: 16px;
-          color: #444;
-          border-bottom: 2px solid #f7c948;
+          color: var(--bumble-dark);
+          border-bottom: 2px solid var(--bumble-yellow);
           display: inline-block;
           margin-bottom: 14px;
           padding-bottom: 6px;
@@ -443,7 +464,7 @@
 
         /* Info Cards */
         .info-item {
-          background: #fff5d0;
+          background: rgba(255, 222, 89, 0.2);
           padding: 14px;
           border-radius: 14px;
           display: flex;
@@ -451,7 +472,7 @@
           gap: 10px;
           font-size: 14px;
           box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-          color: #333;
+          color: var(--bumble-dark);
         }
 
         .info-item.wide {
@@ -459,7 +480,7 @@
         }
 
         .info-item i {
-          color: #f5a623;
+          color: var(--bumble-yellow);
           font-size: 18px;
         }
 
@@ -493,18 +514,18 @@
         }
 
         .modal-footer .btn {
-          background-color: #f7c948;
+          background-color: var(--bumble-dark);
           border: none;
           border-radius: 30px;
-          color: #000;
+          color: var(--bumble-yellow);
           padding: 8px 24px;
           font-weight: 600;
           transition: background 0.3s ease;
         }
 
         .modal-footer .btn:hover {
-          background-color: #f4b400;
-          color: #fff;
+          background-color: #555;
+          color: var(--bumble-yellow);
         }
 
         /* Responsive Optimizations */
@@ -542,10 +563,11 @@
       /* MODAL FILTER */
       /* Bumble-style modal content */
       .modal-content {
-        background-color: #fffbe6; /* Soft yellow background */
+        background-color: rgba(255, 255, 255, 0.95); /* Semi-transparent white */
         border-radius: 1rem;
         border: none;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
       }
 
       /* Redesigned Filter Modal */
@@ -562,8 +584,8 @@
       }
       .filter-chip {
         background: #fff;
-        border: 1px solid #f7c948;
-        color: #333;
+        border: 1px solid var(--bumble-yellow);
+        color: var(--bumble-dark);
         padding: 4px 10px;
         border-radius: 999px;
         font-size: 12px;
@@ -578,7 +600,7 @@
       }
       .filter-card {
         background: #fff;
-        border: 1px solid #ffe7a3;
+        border: 1px solid rgba(255, 222, 89, 0.3);
         border-radius: 12px;
         padding: 14px;
       }
@@ -593,14 +615,14 @@
         align-items: center;
         gap: 8px;
         font-weight: 600;
-        color: #333;
+        color: var(--bumble-dark);
       }
-      .filter-card-title i { color: #f5a623; }
+      .filter-card-title i { color: var(--bumble-yellow); }
 
       /* Header title */
       .modal-title {
         font-size: 1.3rem;
-        color: #333;
+        color: var(--bumble-dark);
       }
 
       /* Section headings */
@@ -614,34 +636,35 @@
       /* Form labels */
       .form-group label {
         font-weight: 500;
-        color: #333;
+        color: var(--bumble-dark);
       }
 
       /* Range slider */
       input[type=range] {
-        accent-color: #f9b233; /* Bumble yellow */
+        accent-color: var(--bumble-yellow);
       }
 
       /* Radio buttons */
       .custom-control-label::before {
-        border-color: #f9b233;
+        border-color: var(--bumble-yellow);
       }
 
       .custom-control-input:checked ~ .custom-control-label::before {
-        background-color: #f9b233;
-        border-color: #f9b233;
+        background-color: var(--bumble-yellow);
+        border-color: var(--bumble-yellow);
       }
 
       /* Buttons */
       .btn-primary {
-        background-color: #f9b233;
-        border-color: #f9b233;
-        color: white;
+        background-color: var(--bumble-dark);
+        border-color: var(--bumble-dark);
+        color: var(--bumble-yellow);
       }
 
       .btn-primary:hover {
-        background-color: #e6a420;
-        border-color: #e6a420;
+        background-color: #555;
+        border-color: #555;
+        color: var(--bumble-yellow);
       }
 
       .btn-outline-secondary {
@@ -707,12 +730,12 @@
           <i class="fas fa-undo"></i>
         </a>
         
-        <a href="/upgrade-premium" class="menu-icon" style="text-decoration: none; color: black;">
+        <a href="/upgrade-premium" class="menu-icon" style="text-decoration: none;">
           <i class="fas fa-crown"></i> 
         </a>
-    
+
         <!-- Logout Icon -->
-        <a href="/auth/logout" class="menu-icon" style="text-decoration: none; color: black;">
+        <a href="/auth/logout" class="menu-icon" style="text-decoration: none;">
           <i class="fas fa-sign-out-alt"></i>
         </a>
       </div>

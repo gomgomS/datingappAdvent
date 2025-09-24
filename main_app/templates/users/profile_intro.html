@@ -27,12 +27,24 @@
       }
       body {
         font-family: "Inter", sans-serif;
+        background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+        min-height: 100vh;
       }
       .formbold-main-wrapper {
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 48px;
+        min-height: 100vh;
+      }
+      
+      /* Mobile: Full page with no gaps */
+      @media (max-width: 768px) {
+        .formbold-main-wrapper {
+          padding: 0;
+          align-items: flex-start;
+          justify-content: flex-start;
+        }
       }
       
     
@@ -40,23 +52,64 @@
         margin: 0 auto;
         max-width: 550px;
         width: 100%;
-        background: white;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 20px;
+      }
+      
+      /* Mobile: Full page styling */
+      @media (max-width: 768px) {
+        .formbold-form-wrapper {
+          margin: 0;
+          max-width: 100%;
+          width: 100%;
+          border-radius: 0;
+          box-shadow: none;
+          backdrop-filter: none;
+          background: rgba(255, 255, 255, 0.98);
+          padding: 20px 15px;
+          min-height: 100vh;
+        }
       }
     
       .formbold-container {
       max-width: 600px;
       margin: 50px auto;
       padding: 30px;
-      background: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+  }
+  
+  /* Mobile: Full page container */
+  @media (max-width: 768px) {
+    .formbold-container {
+      margin: 0;
+      max-width: 100%;
+      width: 100%;
+      border-radius: 0;
+      box-shadow: none;
+      backdrop-filter: none;
+      background: transparent;
+      padding: 0;
+    }
   }
   
   .formbold-steps {
       padding-bottom: 20px;
       margin-bottom: 30px;
-      border-bottom: 2px solid #DDE3EC;
+      border-bottom: 2px solid rgba(255, 222, 89, 0.3);
       text-align: center;
+  }
+  
+  /* Mobile: Center align step navigation */
+  @media (max-width: 768px) {
+    .formbold-steps ul {
+      justify-content: center !important;
+    }
   }
   
   .formbold-steps ul {
@@ -75,7 +128,7 @@
       left: 10%;
       width: 80%;
       height: 2px;
-      background: #DDE3EC;
+      background: rgba(255, 222, 89, 0.3);
       z-index: -1;
   }
   
@@ -94,23 +147,23 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #DDE3EC;
+      background: rgba(255, 222, 89, 0.3);
       border-radius: 50%;
       width: 40px;
       height: 40px;
       font-weight: 600;
       font-size: 10px;
-      color: #536387;
+      color: #333;
       transition: background 0.3s, color 0.3s;
   }
   
   .formbold-steps li.active {
-      color: #07074D;
+      color: #333;
   }
   
   .formbold-steps li.active span {
-      background: #F96699;
-      color: #FFFFFF;
+      background: #FFDE59;
+      color: #333;
   }
   
   .formbold-form {
@@ -147,22 +200,24 @@
       transition: 0.3s;
   }
   
-  .formbold-btn {
-      background: #F96699;
-      color: white;
-  }
+      .formbold-btn {
+        background: #FFDE59;
+        color: #333;
+      }
   
-  .formbold-btn:hover {
-      background: #5148d6;
-  }
+      .formbold-btn:hover {
+        background: #FFB347;
+        color: #333;
+      }
   
   .formbold-back-btn {
-      background: #DDE3EC;
-      color: #536387;
+      background: rgba(255, 222, 89, 0.3);
+      color: #333;
   }
   
   .formbold-back-btn:hover {
-      background: #c5cad8;
+      background: rgba(255, 222, 89, 0.5);
+      color: #333;
   }
   
     
@@ -178,17 +233,17 @@
         width: 100%;
         padding: 12px 16px;
         border-radius: 5px;
-        border: 1px solid #DDE3EC;
-        background: #FFFFFF;
+        border: 1px solid rgba(255, 222, 89, 0.3);
+        background: rgba(255, 255, 255, 0.9);
         font-weight: 500;
         font-size: 14px;
-        color: #536387;
+        color: #333;
         outline: none;
         resize: none;
       }
       .formbold-form-input:focus {
-        border-color: #F96699;
-        box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.05);
+        border-color: #FFDE59;
+        box-shadow: 0px 3px 8px rgba(255, 222, 89, 0.2);
       }
   
   /* Desktop date picker styling */
@@ -206,7 +261,7 @@
     opacity: 1;
   }
       .formbold-form-label {
-        color: #07074D;
+        color: #333;
         font-weight: 500;
         font-size: 14px;
         line-height: 24px;
@@ -215,7 +270,7 @@
       }
     
       .formbold-form-confirm {
-        border-bottom: 1px solid #DDE3EC;
+        border-bottom: 1px solid rgba(255, 222, 89, 0.3);
         padding-bottom: 35px;
       }
       .formbold-form-confirm p {
@@ -248,8 +303,8 @@
         box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.12);
       }
       .formbold-confirm-btn.active {
-        background: #F96699;
-        color: #FFFFFF;
+        background: #FFDE59;
+        color: #333;
       }
     
       .formbold-form-step-1,
@@ -300,12 +355,13 @@
         padding: 10px 25px;
         border: none;
         font-weight: 500;
-        background-color: #F96699;
-        color: white;
+        background-color: #FFDE59;
+        color: #333;
         cursor: pointer;
       }
       .formbold-btn:hover {
-        box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.05);
+        background-color: #FFB347;
+        box-shadow: 0px 3px 8px rgba(255, 222, 89, 0.3);
       }
 
       /* Locked field visuals */
@@ -359,16 +415,17 @@
   
       .formbold-sex-button {
           padding: 10px 20px;
-          border: 1px solid #ccc;
-          background-color: #f9f9f9;
+          border: 1px solid rgba(255, 222, 89, 0.3);
+          background-color: rgba(255, 255, 255, 0.9);
           cursor: pointer;
           border-radius: 5px;
+          color: #333;
       }
-  
+
       .formbold-sex-button.selected {
-          background-color: #38CCCC;
-          color: white;
-          border-color: #38CCCC;
+          background-color: #FFDE59;
+          color: #333;
+          border-color: #FFDE59;
       }
       /* Hobi selection container */
       .formbold-hobi-selection {
@@ -390,16 +447,18 @@
           display: flex;
           align-items: center;
           padding: 10px;
-          border: 1px solid #ccc;
+          border: 1px solid rgba(255, 222, 89, 0.3);
           border-radius: 5px;
           cursor: pointer;
           transition: background-color 0.3s, border-color 0.3s;
+          background-color: rgba(255, 255, 255, 0.9);
+          color: #333;
       }
-  
+
       .formbold-hobi-option.selected {
-          background-color: #38CCCC;
-          border-color: #38CCCC;
-          color: white;
+          background-color: #FFDE59;
+          border-color: #FFDE59;
+          color: #333;
       }
   
       .formbold-hobi-option i {
@@ -410,7 +469,7 @@
       }
       
       .formbold-hobi-option.selected i {
-          color: white;
+          color: #333;
       }
   
       .formbold-hobi-option span {
@@ -427,17 +486,19 @@
   
     .formbold-status-option-marital {
       padding: 12px;
-      border: 1px solid #ccc;
+      border: 1px solid rgba(255, 222, 89, 0.3);
       border-radius: 5px;
       cursor: pointer;
       text-align: center;
       transition: all 0.3s ease;
+      background-color: rgba(255, 255, 255, 0.9);
+      color: #333;
     }
-  
+
     .formbold-status-option-marital.selected {
-      background-color: #38CCCC;
-      color: white;
-      border-color: #38CCCC;
+      background-color: #FFDE59;
+      color: #333;
+      border-color: #FFDE59;
     }
   
     /* Textarea Styling */
@@ -461,17 +522,19 @@
   
     .formbold-status-option-advent {
       padding: 12px;
-      border: 1px solid #ccc;
+      border: 1px solid rgba(255, 222, 89, 0.3);
       border-radius: 5px;
       cursor: pointer;
       text-align: center;
       transition: all 0.3s ease;
+      background-color: rgba(255, 255, 255, 0.9);
+      color: #333;
     }
-  
+
     .formbold-status-option-advent.selected {
-      background-color: #38CCCC;
-      color: white;
-      border-color: #38CCCC;
+      background-color: #FFDE59;
+      color: #333;
+      border-color: #FFDE59;
     }
 
     .formbold-steps ul li {
@@ -482,7 +545,7 @@
     /* Mobile adjustments: Keep steps in one row with horizontal scroll */
     @media (max-width: 576px) {
       .formbold-steps ul {
-        justify-content: flex-start !important;
+        justify-content: center !important;
         gap: 8px;
         flex-wrap: nowrap !important;
         overflow-x: auto;
@@ -503,6 +566,35 @@
         font-size: 16px; /* Prevent zoom on iOS */
         min-height: 44px; /* Ensure touch target is large enough */
       }
+      
+      /* Mobile full page adjustments */
+      .formbold-main-wrapper {
+        padding: 0 !important;
+      }
+      
+      .formbold-form-wrapper {
+        margin: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        background: rgba(255, 255, 255, 0.98) !important;
+        padding: 15px !important;
+        min-height: 100vh !important;
+      }
+      
+      .formbold-container {
+        margin: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+      }
+    }
       
       /* Specific fixes for date input on mobile */
       input[type="date"] {
@@ -559,26 +651,26 @@
         <input name="user_id" type="hidden" value="{{ data_user.user_id }}">  
         <div class="formbold-steps">
           <ul style="display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; list-style: none; justify-content: center;">
-            <li class="formbold-step-menu1 active" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #536387;">
-              <span style="display: flex; align-items: center; justify-content: center; background: #DDE3EC; border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #536387;">1</span> Profil
+            <li class="formbold-step-menu1 active" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #333;">
+              <span style="display: flex; align-items: center; justify-content: center; background: #FFDE59; border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #333;">1</span> Profil
             </li>
-            <li class="formbold-step-menu2" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #536387;">
-              <span style="display: flex; align-items: center; justify-content: center; background: #DDE3EC; border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #536387;">2</span> Gender
+            <li class="formbold-step-menu2" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #666;">
+              <span style="display: flex; align-items: center; justify-content: center; background: rgba(255, 222, 89, 0.3); border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #333;">2</span> Gender
             </li>
-            <li class="formbold-step-menu3" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #536387;">
-              <span style="display: flex; align-items: center; justify-content: center; background: #DDE3EC; border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #536387;">3</span> Hobi
+            <li class="formbold-step-menu3" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #666;">
+              <span style="display: flex; align-items: center; justify-content: center; background: rgba(255, 222, 89, 0.3); border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #333;">3</span> Hobi
             </li>
-            <li class="formbold-step-menu4" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #536387;">
-              <span style="display: flex; align-items: center; justify-content: center; background: #DDE3EC; border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #536387;">4</span> Asal
+            <li class="formbold-step-menu4" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #666;">
+              <span style="display: flex; align-items: center; justify-content: center; background: rgba(255, 222, 89, 0.3); border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #333;">4</span> Asal
             </li>
-            <li class="formbold-step-menu5" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #536387;">
-              <span style="display: flex; align-items: center; justify-content: center; background: #DDE3EC; border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #536387;">5</span> Status
+            <li class="formbold-step-menu5" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #666;">
+              <span style="display: flex; align-items: center; justify-content: center; background: rgba(255, 222, 89, 0.3); border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #333;">5</span> Status
             </li>
-            <li class="formbold-step-menu6" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #536387;">
-              <span style="display: flex; align-items: center; justify-content: center; background: #DDE3EC; border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #536387;">6</span> Advent
+            <li class="formbold-step-menu6" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #666;">
+              <span style="display: flex; align-items: center; justify-content: center; background: rgba(255, 222, 89, 0.3); border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #333;">6</span> Advent
             </li>
-            <li class="formbold-step-menu7" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #536387;">
-              <span style="display: flex; align-items: center; justify-content: center; background: #DDE3EC; border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #536387;">7</span> Kirim
+            <li class="formbold-step-menu7" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #666;">
+              <span style="display: flex; align-items: center; justify-content: center; background: rgba(255, 222, 89, 0.3); border-radius: 50%; width: 24px; height: 24px; font-size: 10px; font-weight: 600; color: #333;">7</span> Kirim
             </li>
           </ul>
         </div>
