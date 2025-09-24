@@ -216,5 +216,4 @@ def handle_leave(data):
     print(f"User {sender} left room: {room} and messages were cleared.")
 
 if __name__ == "__main__":
-    # socketio.run(app, debug=True)
-    socketio.run(app, debug=True, port=50013)
+    socketio.run(app, debug=True)
