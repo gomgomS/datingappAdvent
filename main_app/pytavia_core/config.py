@@ -28,9 +28,9 @@ mainDB_string               = "mongodb://127.0.0.1:27017/"  + mainDB
 G_BASE_S3_URL               = "http://127.0.0.1:50012"
 G_IMAGE_URL_DISPATCH        = G_BASE_S3_URL + "/v1/cfs/get-file?"
 
-G_IMAGE_BUCKET              = "ADVENT-MATCH"
-G_IMAGE_LABEL               = "ADVENT-MATCH"
-G_IMAGE_DEFAULT_URL         = "key=/placeholder/02-01-2021/placeholder_1609559601948_7656949&bucket=ADVENT-MATCH"
+G_IMAGE_BUCKET              = "COMES-ID"
+G_IMAGE_LABEL               = "COMES-ID"
+G_IMAGE_DEFAULT_URL         = "key=/placeholder/02-01-2021/placeholder_1609559601948_7656949&bucket=COMES-ID"
 
 
 # IMAGE SERVER

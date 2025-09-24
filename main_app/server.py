@@ -305,10 +305,10 @@ def auth_register():
     response   = auth_proc.auth_proc(app).register( params )
     
     if response["message_action"] != "REGISTER_SUCCESS":
-        flash(response["message_desc"], "danger")
-        return redirect(url_for("login_html"))
+        flash(response["message_desc"], "register")
+        return redirect(url_for("login_html") + "?show_signup=true")
     else:
-        flash("register success!!", "success")
+        flash("register success!!", "login")
         return redirect(url_for("login_html"))
         
     # end if
@@ -321,6 +321,7 @@ def login_html():
         return redirect(url_for("swipe"))
         
     params = request.form.to_dict()
+    params['show_signup'] = request.args.get('show_signup', 'false')
 
     html   = view_login.view_login().html( params )
     return html
@@ -339,7 +340,7 @@ def auth_login():
     if m_title != "" or m_desc != "":
         # flash(m_title,"title")
         # flash(m_desc,"desc")
-        flash("Username and Password Not Match", "danger")
+        flash("Username and Password Not Match", "login")
     #end if
     if m_action == "LOGIN_SUCCESS":
         # Be tolerant to payload differences; set both IDs if available

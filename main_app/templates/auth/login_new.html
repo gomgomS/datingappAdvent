@@ -7,7 +7,7 @@
   <!-- Favico -->
   <link rel="shortcut icon" href="../../static/assets/img/favicon.png" type="image/x-icon">
   <link rel="icon" href="../../static/assets/img/favicon.png" type="image/x-icon">
-  <title>AdventMatch.space - Sign In</title>
+  <title>comes.id - Sign In</title>
   <!-- Lib Css -->
   <link href="../../static/lib/ionicons/css/ionicons.min.css" rel="stylesheet">
   <!-- DashForge CSS -->
@@ -313,7 +313,7 @@ h6 span{
 <body>  
 
 	<a href="/" class="logo" target="_blank">
-		Advent Match
+		comes.id
 	</a>
 
 	<div class="section">
@@ -322,7 +322,7 @@ h6 span{
 				<div class="col-12 text-center align-self-center py-5">
                     <div class="section pb-5 pt-5 pt-sm-2 text-center">
                         <h6 class="mb-0 pb-3"><span id="tab-login" style="cursor:pointer">Log In </span><span id="tab-signup" style="cursor:pointer">Sign Up</span></h6>
-			          	<input class="checkbox" type="checkbox" id="reg-log" name="reg-log"/>
+			          	<input class="checkbox" type="checkbox" id="reg-log" name="reg-log" {% if show_signup == 'true' %}checked{% endif %}/>
 			          	<label for="reg-log"></label>
 						<div class="card-3d-wrap mx-auto">
 							<div class="card-3d-wrapper">
@@ -332,14 +332,20 @@ h6 span{
                       <form method="POST" action="/auth/login" >
 											<h4 class="mb-4 pb-3">Log In</h4>
                       <!-- Flash messages section -->
-                          <!-- Display Flash Messages -->
-                          {% with messages = get_flashed_messages(with_categories=true) %}
+                          <!-- Display Flash Messages for Login only -->
+                          {% with messages = get_flashed_messages(with_categories=true, category_filter=['login', 'error']) %}
                           {% if messages %}
                               <div class="flash-messages">
                                   {% for category, message in messages %}
-                                      <div class="alert alert-{{ category }}">
-                                          {{ message }}
-                                      </div>
+                                      {% if category == 'login' %}
+                                          <div class="alert alert-success" style="background-color: #28a745; color: white; border: none;">
+                                              {{ message }}
+                                          </div>
+                                      {% else %}
+                                          <div class="alert alert-danger">
+                                              {{ message }}
+                                          </div>
+                                      {% endif %}
                                   {% endfor %}
                               </div>
                           {% endif %}
@@ -368,12 +374,12 @@ h6 span{
                       <form method="POST" action="/auth/register" >
 											<h4 class="mb-4 pb-3">Sign Up</h4>
                       <!-- Flash messages section -->
-                          <!-- Display Flash Messages -->
-                        {% with messages = get_flashed_messages(with_categories=true) %}
+                          <!-- Display Flash Messages for Registration only -->
+                        {% with messages = get_flashed_messages(category_filter=['register', 'warning', 'success']) %}
                             {% if messages %}
                                 <div class="flash-messages">
-                                    {% for category, message in messages %}
-                                        <div class="alert alert-{{ category }}">
+                                    {% for message in messages %}
+                                        <div class="alert alert-warning">
                                             {{ message }}
                                         </div>
                                     {% endfor %}

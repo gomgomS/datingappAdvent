@@ -36,7 +36,8 @@ class view_login:
             core_script         = core_script         , 
             core_css            = core_css            , 
             core_dialog_message = core_dialog_message , 
-            core_display        = core_display
+            core_display        = core_display,
+            show_signup         = params.get('show_signup', 'false')
         )                
     # end def
 
