@@ -980,6 +980,40 @@ def admin_user_detail(user_id):
     return html
 # end def
 
+@app.route('/admin/chat-messages/<match_id>')
+def admin_chat_messages(match_id):
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    
+    try:
+        # Get database connection (same as admin_match_details route)
+        mgd = database.get_db_conn(config.mainDB)
+        
+        # Fetch chat messages for the match
+        chat_messages = list(mgd.db_chat.find(
+            {"match_id": match_id}
+        ).sort("timestamp", 1))  # Sort by timestamp ascending
+        
+        # Convert ObjectId to string for JSON serialization
+        for message in chat_messages:
+            message['_id'] = str(message['_id'])
+        
+        response = {
+            "status": "success",
+            "messages": chat_messages
+        }
+        
+        return json.dumps(response)
+        
+    except Exception as e:
+        response = {
+            "status": "error",
+            "message": f"Error fetching chat messages: {str(e)}"
+        }
+        return json.dumps(response)
+# end def
+
 @app.route('/admin/process/premium/apply', methods=["POST"])
 def premium_apply():
     params               = sanitize.clean_html_dic(request.form.to_dict())
@@ -1035,8 +1069,11 @@ def admin_process_clear_likes():
         return redirect_return
     
     try:
+        # Get database connection
+        mgd = database.get_db_conn(config.mainDB)
+        
         # Clear user likes/dislikes
-        result = mgdDB.db_users.update_many(
+        result = mgd.db_users.update_many(
             {},
             {"$set": {"fk_user_id_like": [], "fk_user_id_dislike": []}}
         )
@@ -1053,9 +1090,12 @@ def admin_process_clear_matches():
         return redirect_return
     
     try:
+        # Get database connection
+        mgd = database.get_db_conn(config.mainDB)
+        
         # Count and delete matches
-        matches_count = mgdDB.db_matches.count_documents({})
-        mgdDB.db_matches.delete_many({})
+        matches_count = mgd.db_matches.count_documents({})
+        mgd.db_matches.delete_many({})
         flash(f'Successfully deleted {matches_count} matches', 'success')
     except Exception as e:
         flash(f'Error clearing matches: {str(e)}', 'danger')
@@ -1069,9 +1109,12 @@ def admin_process_clear_chats():
         return redirect_return
     
     try:
+        # Get database connection
+        mgd = database.get_db_conn(config.mainDB)
+        
         # Count and delete chats
-        chat_count = mgdDB.db_chat.count_documents({})
-        mgdDB.db_chat.delete_many({})
+        chat_count = mgd.db_chat.count_documents({})
+        mgd.db_chat.delete_many({})
         flash(f'Successfully deleted {chat_count} chat messages', 'success')
     except Exception as e:
         flash(f'Error clearing chats: {str(e)}', 'danger')
@@ -1085,9 +1128,12 @@ def admin_process_clear_logs():
         return redirect_return
     
     try:
+        # Get database connection
+        mgd = database.get_db_conn(config.mainDB)
+        
         # Count and delete swipe logs
-        logs_count = mgdDB.db_swipe_logs_daily.count_documents({})
-        mgdDB.db_swipe_logs_daily.delete_many({})
+        logs_count = mgd.db_swipe_logs_daily.count_documents({})
+        mgd.db_swipe_logs_daily.delete_many({})
         flash(f'Successfully deleted {logs_count} swipe logs', 'success')
     except Exception as e:
         flash(f'Error clearing swipe logs: {str(e)}', 'danger')
@@ -1101,23 +1147,26 @@ def admin_process_clear_all():
         return redirect_return
     
     try:
+        # Get database connection
+        mgd = database.get_db_conn(config.mainDB)
+        
         # Clear user likes/dislikes
-        likes_result = mgdDB.db_users.update_many(
+        likes_result = mgd.db_users.update_many(
             {},
             {"$set": {"fk_user_id_like": [], "fk_user_id_dislike": []}}
         )
         
         # Clear matches
-        matches_count = mgdDB.db_matches.count_documents({})
-        mgdDB.db_matches.delete_many({})
+        matches_count = mgd.db_matches.count_documents({})
+        mgd.db_matches.delete_many({})
         
         # Clear chats
-        chat_count = mgdDB.db_chat.count_documents({})
-        mgdDB.db_chat.delete_many({})
+        chat_count = mgd.db_chat.count_documents({})
+        mgd.db_chat.delete_many({})
         
         # Clear swipe logs
-        logs_count = mgdDB.db_swipe_logs_daily.count_documents({})
-        mgdDB.db_swipe_logs_daily.delete_many({})
+        logs_count = mgd.db_swipe_logs_daily.count_documents({})
+        mgd.db_swipe_logs_daily.delete_many({})
         
         total_operations = likes_result.modified_count + matches_count + chat_count + logs_count
         flash(f'Successfully cleared all data: {total_operations} total operations completed', 'success')
