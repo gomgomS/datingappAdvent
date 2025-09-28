@@ -21,70 +21,251 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/dashforge.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
   
+  <!-- Custom Admin Theme -->
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+      --dark-bg: #080710;
+      --card-bg: rgba(255, 255, 255, 0.13);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --text-primary: #333;
+      --text-white: #ffffff;
+      --sidebar-bg: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+      --sidebar-width: 280px;
+    }
+
+    body {
+      background: var(--dark-bg);
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .admin-sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--sidebar-bg);
+      backdrop-filter: blur(10px);
+      border-right: 2px solid var(--card-border);
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      color: var(--text-white);
+      font-size: 1.2rem;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .sidebar-brand i {
+      margin-right: 10px;
+      color: #FFDE59;
+      font-size: 1.5rem;
+    }
+
+    .sidebar-menu {
+      padding: 20px 0;
+      height: calc(100vh - 80px);
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      margin: 5px 15px;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 222, 89, 0.1);
+      transform: translateX(5px);
+    }
+
+    .nav-item-active {
+      background: var(--primary-gradient);
+      box-shadow: 0 4px 15px rgba(255, 222, 89, 0.3);
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      padding: 15px 20px;
+      color: var(--text-white);
+      text-decoration: none;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .nav-link:hover {
+      color: var(--text-white);
+      text-decoration: none;
+    }
+
+    .nav-link-active {
+      color: var(--text-primary) !important;
+      font-weight: 600;
+    }
+
+    .nav-link i {
+      margin-right: 12px;
+      font-size: 1.1rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    .nav-link span {
+      font-size: 0.9rem;
+    }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      background: var(--dark-bg);
+      transition: all 0.3s ease;
+    }
+
+    .content-header {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 20px 30px;
+      margin-bottom: 30px;
+    }
+
+    .content-header h5 {
+      color: var(--text-white);
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .content-body {
+      padding: 0 30px 30px;
+    }
+
+    /* Scrollbar Styling */
+    .sidebar-menu::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .sidebar-menu::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-menu::-webkit-scrollbar-thumb {
+      background: rgba(255, 222, 89, 0.5);
+      border-radius: 3px;
+    }
+
+    .sidebar-menu::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 222, 89, 0.7);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .admin-sidebar {
+        transform: translateX(-100%);
+      }
+
+      .admin-sidebar.show {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .content-body {
+        padding: 0 15px 15px;
+      }
+    }
+  </style>
+  
 </head>
-<body class="body">
-  <aside class="aside aside-fixed">
-    <div class="aside-header">
-      <div class="d-flex align-items-center justify-content-between w-100">
-        <div class="d-flex align-items-center">
-          <span class="tx-14 tx-bold text-white">comes.id Admin</span>
-        </div>
-        
-        <!-- menu toggle -->
-        <a href="" class="aside-menu-link">
-          <i data-feather="menu" class="text-success"></i>
-          <i data-feather="x" class="text-danger"></i>
-        </a>
-      </div>
+<body>
+  <!-- Admin Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <a href="{{ url_for('admin_dashboard') }}" class="sidebar-brand">
+        <i class="fas fa-heart"></i>
+        comes.id Admin
+      </a>
     </div>
-    <div class="aside-body">      
-      <ul class="nav nav-aside" style="height: 100%;">
-        <!-- Customer Panel -->
+    
+    <div class="sidebar-menu">
+      <ul class="nav flex-column">
+        <!-- Dashboard -->
         {% set active_endpoint = request.endpoint %}
+        <li class="nav-item {% if active_endpoint == 'admin_dashboard' %}nav-item-active{% endif %}">
+          <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if active_endpoint == 'admin_dashboard' %}nav-link-active{% endif %}">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+      
+        <!-- Customer Panel -->
         <li class="nav-item {% if active_endpoint == 'admin_panel_customer' %}nav-item-active{% endif %}">
-          <a href="{{ url_for('admin_panel_customer') }}" class="nav-link tx-14 {% if active_endpoint == 'admin_panel_customer' %}nav-link-active{% endif %}">
-            <i class="fas fa-users mg-r-10 tx-16"></i>
-            <span style="font-size: 0.85rem;">Customer Panel</span>
+          <a href="{{ url_for('admin_panel_customer') }}" class="nav-link {% if active_endpoint == 'admin_panel_customer' %}nav-link-active{% endif %}">
+            <i class="fas fa-users"></i>
+            <span>Customer Panel</span>
           </a>
         </li>
       
         <!-- Customer Premium Control -->
         <li class="nav-item {% if active_endpoint == 'admin_panel_premium_control' %}nav-item-active{% endif %}">
-          <a href="{{ url_for('admin_panel_premium_control') }}" class="nav-link tx-14 {% if active_endpoint == 'admin_panel_premium_control' %}nav-link-active{% endif %}">
-            <i class="fas fa-crown mg-r-10 tx-16"></i>
-            <span style="font-size: 0.85rem;">Premium Control</span>
+          <a href="{{ url_for('admin_panel_premium_control') }}" class="nav-link {% if active_endpoint == 'admin_panel_premium_control' %}nav-link-active{% endif %}">
+            <i class="fas fa-crown"></i>
+            <span>Premium Control</span>
           </a>
         </li>
 
         <!-- Config: Subscription -->
         <li class="nav-item {% if active_endpoint == 'admin_panel_subscription_config' %}nav-item-active{% endif %}">
-          <a href="{{ url_for('admin_panel_subscription_config') }}" class="nav-link tx-14 {% if active_endpoint == 'admin_panel_subscription_config' %}nav-link-active{% endif %}">
-            <i class="fas fa-sliders-h mg-r-10 tx-16"></i>
-            <span style="font-size: 0.85rem;">Subscription Config</span>
+          <a href="{{ url_for('admin_panel_subscription_config') }}" class="nav-link {% if active_endpoint == 'admin_panel_subscription_config' %}nav-link-active{% endif %}">
+            <i class="fas fa-sliders-h"></i>
+            <span>Subscription Config</span>
           </a>
         </li>
 
         <!-- Config: Cities -->
         <li class="nav-item {% if active_endpoint == 'admin_panel_cities' %}nav-item-active{% endif %}">
-          <a href="{{ url_for('admin_panel_cities') }}" class="nav-link tx-14 {% if active_endpoint == 'admin_panel_cities' %}nav-link-active{% endif %}">
-            <i class="fas fa-city mg-r-10 tx-16"></i>
-            <span style="font-size: 0.85rem;">City List</span>
+          <a href="{{ url_for('admin_panel_cities') }}" class="nav-link {% if active_endpoint == 'admin_panel_cities' %}nav-link-active{% endif %}">
+            <i class="fas fa-city"></i>
+            <span>City List</span>
+          </a>
+        </li>
+
+        <!-- Match Admin -->
+        <li class="nav-item {% if active_endpoint == 'admin_panel_matches' %}nav-item-active{% endif %}">
+          <a href="{{ url_for('admin_panel_matches') }}" class="nav-link {% if active_endpoint == 'admin_panel_matches' %}nav-link-active{% endif %}">
+            <i class="fas fa-heart"></i>
+            <span>Match Admin</span>
           </a>
         </li>
       
         <!-- Logout -->
         <li class="nav-item" style="margin-top: auto;">
-          <a href="/auth/logout" class="nav-link tx-14">
-            <i class="fas fa-sign-out-alt mg-r-10 tx-16"></i>
-            <span style="font-size: 0.85rem;">Logout</span>
+          <a href="/auth/logout" class="nav-link">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
           </a>
         </li>
       </ul>
-      
     </div>
   </aside>
-  <div class="content ht-100v pd-0 position-relative">
-    <div class="content-header ">
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="content-header">
       {% block page_header %}
       <div class="container-fluid d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center">
@@ -100,10 +281,11 @@
       {% endblock %}
     </div>
 
-    {% block content %}{% endblock %}             
-    <footer class="footer" style="position: absolute;bottom: 0;width: 100%;"> 
-    </footer> 
+    <div class="content-body">
+      {% block content %}{% endblock %}
+    </div>
   </div>
+</div>
   
   <script src="{{ url_for('static', filename='lib/jquery/jquery.min.js') }}"></script>
   <script src="{{ url_for('static', filename='lib/bootstrap/js/bootstrap.bundle.min.js') }}"></script>

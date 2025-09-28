@@ -125,6 +125,9 @@ from view               import view_chat
 
 from view               import view_admin_panel_customer
 from view               import view_admin_panel_premium_control
+from view               import view_admin_panel_matches
+from view               import view_admin_user_detail
+from view               import view_admin_dashboard
 
 from admin              import admin_proc
 
@@ -680,6 +683,18 @@ def chat():
 # ADMIN PANEL
 #
 
+@app.route("/admin/dashboard")
+def admin_dashboard():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    
+    html = view_admin_dashboard.view_admin_dashboard(app).html(params)
+    return html
+# end def
+
 @app.route("/admin/panel/customer")
 def admin_panel_customer():    
     redirect_return = login_admin_precheck({})
@@ -835,6 +850,133 @@ def admin_cities_delete():
         flash(resp.get('desc','Failed to delete'), 'danger')
     return redirect(url_for('admin_panel_cities'))
 
+@app.route("/admin/panel/matches")
+def admin_panel_matches():    
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    # end if
+   
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    params['per_page'   ] = request.args.get('per_page', 10)
+    params['page'       ] = request.args.get('page', 1)
+    params['keyword'    ] = request.args.get('keyword', '')
+
+    html   = view_admin_panel_matches.view_admin_panel_matches(app).html( params )
+    return html
+# end def
+
+@app.route('/admin/match-details/<match_id>')
+def admin_match_details(match_id):
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    
+    # Get match details with user information
+    mgd = database.get_db_conn(config.mainDB)
+    
+    pipeline = [
+        {'$match': {'match_id': match_id}},
+        {
+            '$lookup': {
+                'from': 'db_users',
+                'localField': 'user_id_1',
+                'foreignField': 'user_id',
+                'as': 'user_1_details'
+            }
+        },
+        {
+            '$lookup': {
+                'from': 'db_users',
+                'localField': 'user_id_2',
+                'foreignField': 'user_id',
+                'as': 'user_2_details'
+            }
+        },
+        {
+            '$unwind': '$user_1_details'
+        },
+        {
+            '$unwind': '$user_2_details'
+        }
+    ]
+    
+    match_data = list(mgd.db_matches.aggregate(pipeline))
+    
+    if not match_data:
+        return "Match not found", 404
+    
+    match = match_data[0]
+    
+    html = f"""
+    <div class="row">
+        <div class="col-md-6">
+            <h6><strong>Match Information</strong></h6>
+            <table class="table table-sm">
+                <tr><td><strong>Match ID:</strong></td><td>{match.get('match_id', 'N/A')}</td></tr>
+                <tr><td><strong>Is Mutual:</strong></td><td>{'Yes' if match.get('is_mutual') else 'No'}</td></tr>
+                <tr><td><strong>Created At:</strong></td><td>{match.get('created_at') or 'N/A'}</td></tr>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <h6><strong>User 1 Details</strong></h6>
+            <table class="table table-sm">
+                <tr><td><strong>Name:</strong></td><td>{match['user_1_details'].get('name', 'N/A')}</td></tr>
+                <tr><td><strong>Email:</strong></td><td>{match['user_1_details'].get('email', 'N/A')}</td></tr>
+                <tr><td><strong>Username:</strong></td><td>{match['user_1_details'].get('username', 'N/A')}</td></tr>
+                <tr><td><strong>City:</strong></td><td>{match['user_1_details'].get('city', 'N/A')}</td></tr>
+                <tr><td><strong>Sex:</strong></td><td>{match['user_1_details'].get('sex', 'N/A')}</td></tr>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h6><strong>User 2 Details</strong></h6>
+            <table class="table table-sm">
+                <tr><td><strong>Name:</strong></td><td>{match['user_2_details'].get('name', 'N/A')}</td></tr>
+                <tr><td><strong>Email:</strong></td><td>{match['user_2_details'].get('email', 'N/A')}</td></tr>
+                <tr><td><strong>Username:</strong></td><td>{match['user_2_details'].get('username', 'N/A')}</td></tr>
+                <tr><td><strong>City:</strong></td><td>{match['user_2_details'].get('city', 'N/A')}</td></tr>
+                <tr><td><strong>Sex:</strong></td><td>{match['user_2_details'].get('sex', 'N/A')}</td></tr>
+            </table>
+        </div>
+    </div>
+    """
+    
+    return html
+
+@app.route('/admin/delete-match', methods=["POST"])
+def admin_delete_match():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    match_id = params.get('match_id')
+    
+    if not match_id:
+        return json.dumps({'status': 'error', 'message': 'Match ID is required'})
+    
+    mgd = database.get_db_conn(config.mainDB)
+    result = mgd.db_matches.delete_one({'match_id': match_id})
+    
+    if result.deleted_count > 0:
+        return json.dumps({'status': 'success', 'message': 'Match deleted successfully'})
+    else:
+        return json.dumps({'status': 'error', 'message': 'Match not found'})
+
+@app.route("/admin/user-detail/<user_id>")
+def admin_user_detail(user_id):
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    params['user_id'] = user_id
+
+    html = view_admin_user_detail.view_admin_user_detail(app).html(params)
+    return html
+# end def
 
 @app.route('/admin/process/premium/apply', methods=["POST"])
 def premium_apply():

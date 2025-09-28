@@ -439,6 +439,42 @@ h6 span{
           toggleCheckbox.dispatchEvent(new Event("change"));
         });
       }
+
+      // Prevent spaces in username field during registration
+      const usernameField = document.querySelector('input[name="username"]');
+      if (usernameField) {
+        usernameField.addEventListener('keypress', function(e) {
+          // Prevent space character (keyCode 32)
+          if (e.keyCode === 32) {
+            e.preventDefault();
+            return false;
+          }
+        });
+
+        // Also prevent pasting spaces
+        usernameField.addEventListener('paste', function(e) {
+          // Get the pasted text
+          const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+          
+          // Check if pasted text contains spaces
+          if (pastedText.includes(' ')) {
+            e.preventDefault();
+            
+            // Remove spaces and set the cleaned value
+            const cleanedText = pastedText.replace(/\s+/g, '');
+            setTimeout(() => {
+              usernameField.value = cleanedText;
+            }, 0);
+          }
+        });
+
+        // Prevent spaces on input event as well
+        usernameField.addEventListener('input', function(e) {
+          if (e.target.value.includes(' ')) {
+            e.target.value = e.target.value.replace(/\s+/g, '');
+          }
+        });
+      }
     });
   </script>
 </body>

@@ -1,223 +1,301 @@
 {% extends 'core/base.html' %}
-{% block page_title %}Customer Premium Control{% endblock %}
+{% block page_title %}Premium Control{% endblock %}
 {% block content %}
-<div class="content-body">
-  <div class="container pd-x-0 pd-b-100">
-    <div class="">
-      <h1 class="font-weight-bold mg-b-10 d-none">Customer Premium Control</h1>      
+<div class="premium-container">
+  <div class="premium-header">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="page-title">Premium Control</h2>
+        <p class="page-subtitle">Manage premium subscriptions and requests</p>
+      </div>
+    </div>
+  </div>
 
-      <ul class="nav nav-tabs" role="tablist">
-        <li class="nav-item">
-          <a class="nav-link active" id="requests-tab" data-toggle="tab" href="#requestsTab" role="tab" aria-controls="requestsTab" aria-selected="true">Requests</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="manual-tab" data-toggle="tab" href="#manualTab" role="tab" aria-controls="manualTab" aria-selected="false">Manual</a>
-        </li>
-      </ul>
+  <!-- Modern Tabs -->
+  <div class="premium-tabs">
+    <ul class="modern-tab-nav" role="tablist">
+      <li class="tab-item">
+        <a class="tab-link active" id="requests-tab" data-toggle="tab" href="#requestsTab" role="tab" aria-controls="requestsTab" aria-selected="true">
+          <i class="fas fa-clock"></i>
+          <span>Premium Requests</span>
+        </a>
+      </li>
+      <li class="tab-item">
+        <a class="tab-link" id="manual-tab" data-toggle="tab" href="#manualTab" role="tab" aria-controls="manualTab" aria-selected="false">
+          <i class="fas fa-user-cog"></i>
+          <span>Manual Control</span>
+        </a>
+      </li>
+    </ul>
 
-      <div class="tab-content pt-3">
-        <div class="tab-pane fade show active" id="requestsTab" role="tabpanel" aria-labelledby="requests-tab">
-          <div class="card mb-4 main-table">
-          <div class="card-header bg-light"><strong>Premium Requests</strong></div>
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table mb-0">
-                <thead class="thead-primary text-white">
-                  <tr>
-                    <th>Created</th>
-                    <th>Name</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Plan</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for r in requests %}
-                  <tr>
-                    <td>{{ r.created_at }}</td>
-                    <td>{{ r.name }}</td>
-                    <td>{{ r.username }}</td>
-                    <td>{{ r.email }}</td>
-                    <td>{{ r.phone }}</td>
-                    <td>{{ r.plan }}</td>
-                    <td>
-                      {% if r.status == 'pending' %}
-                        <span class="badge badge-warning">Pending</span>
-                      {% elif r.status == 'approved' %}
-                        <span class="badge badge-success">Approved</span>
-                      {% elif r.status == 'rejected' %}
-                        <span class="badge badge-danger">Rejected</span>
-                      {% else %}
-                        <span class="badge badge-secondary">{{ r.status }}</span>
-                      {% endif %}
-                    </td>
-                    <td>
-                      {% if r.status == 'pending' %}
-                        <form action="/admin/process/premium/request/approve" method="POST" class="form-inline mb-1">
-                          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                          <input type="hidden" name="request_id" value="{{ r.request_id }}">
-                          <select name="duration" class="custom-select custom-select-sm mr-2" required>
-                            <option value="1">1 bulan</option>
-                            <option value="3">3 bulan</option>
-                            <option value="6">6 bulan</option>
-                            <option value="12">12 bulan</option>
-                          </select>
-                          <button type="submit" class="btn btn-sm btn-primary">Approve</button>
-                        </form>
-                        <form action="/admin/process/premium/request/reject" method="POST" class="d-inline">
-                          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                          <input type="hidden" name="request_id" value="{{ r.request_id }}">
-                          <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
-                        </form>
-                      {% else %}
-                        {% if r.status == 'approved' %}
-                          <small class="text-muted">Approved {{ r.approved_at }}</small>
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="requestsTab" role="tabpanel" aria-labelledby="requests-tab">
+        <div class="requests-section">
+          <div class="section-card">
+            <div class="section-header">
+              <h5 class="section-title">
+                <i class="fas fa-list-alt"></i>
+                Premium Requests
+              </h5>
+            </div>
+            <div class="section-body">
+              <div class="table-responsive">
+                <table class="modern-table">
+                  <thead>
+                    <tr>
+                      <th>Created</th>
+                      <th>Name</th>
+                      <th>Username</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Plan</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for r in requests %}
+                    <tr class="table-row">
+                      <td class="date-cell">{{ r.created_at }}</td>
+                      <td class="name-cell">{{ r.name }}</td>
+                      <td class="username-cell">
+                        <span class="username-text">{{ r.username }}</span>
+                      </td>
+                      <td class="email-cell">{{ r.email }}</td>
+                      <td class="phone-cell">{{ r.phone }}</td>
+                      <td class="plan-cell">
+                        <span class="plan-badge">{{ r.plan }}</span>
+                      </td>
+                      <td class="status-cell">
+                        {% if r.status == 'pending' %}
+                          <span class="status-badge pending">Pending</span>
+                        {% elif r.status == 'approved' %}
+                          <span class="status-badge approved">Approved</span>
+                        {% elif r.status == 'rejected' %}
+                          <span class="status-badge rejected">Rejected</span>
+                        {% else %}
+                          <span class="status-badge unknown">{{ r.status }}</span>
                         {% endif %}
-                      {% endif %}
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+                      </td>
+                      <td class="actions-cell">
+                        {% if r.status == 'pending' %}
+                          <div class="request-actions">
+                            <form action="/admin/process/premium/request/approve" method="POST" class="approve-form">
+                              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                              <input type="hidden" name="request_id" value="{{ r.request_id }}">
+                              <div class="action-group">
+                                <select name="duration" class="duration-select" required>
+                                  <option value="1">1 Month</option>
+                                  <option value="3">3 Months</option>
+                                  <option value="6">6 Months</option>
+                                  <option value="12">12 Months</option>
+                                </select>
+                                <button type="submit" class="action-btn approve">
+                                  <i class="fas fa-check"></i>
+                                  Approve
+                                </button>
+                              </div>
+                            </form>
+                            <form action="/admin/process/premium/request/reject" method="POST" class="reject-form">
+                              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                              <input type="hidden" name="request_id" value="{{ r.request_id }}">
+                              <button type="submit" class="action-btn reject">
+                                <i class="fas fa-times"></i>
+                                Reject
+                              </button>
+                            </form>
+                          </div>
+                        {% else %}
+                          {% if r.status == 'approved' %}
+                            <div class="approved-info">
+                              <i class="fas fa-check-circle text-success"></i>
+                              <small class="approved-text">Approved {{ r.approved_at }}</small>
+                            </div>
+                          {% endif %}
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
         {% if requests_total_page > 1 %}
-        <nav aria-label="Page navigation" class="d-flex justify-content-end mt-3">
-          <ul class="pagination">
-            {% set req_prev_page = requests_page - 1 %}
-            {% set req_next_page = requests_page + 1 %}
-            <li class="page-item {% if requests_page <= 1 %}disabled{% endif %}">
-              <a class="page-link" href="?req_page={{ req_prev_page }}&req_per_page={{ requests_per_page }}&page={{ page }}&per_page={{ per_page }}&keyword={{ request.args.get('keyword','') }}">«</a>
-            </li>
-            {% if requests_page > 3 %}
-              <li class="page-item"><a class="page-link" href="?req_page=1&req_per_page={{ requests_per_page }}&page={{ page }}&per_page={{ per_page }}&keyword={{ request.args.get('keyword','') }}">1</a></li>
-              <li class="page-item disabled"><span class="page-link">...</span></li>
-            {% endif %}
-            {% for p in range(requests_page-1, requests_page+2) %}
-              {% if 1 <= p <= requests_total_page %}
-                <li class="page-item {% if p == requests_page %}active{% endif %}"><a class="page-link" href="?req_page={{ p }}&req_per_page={{ requests_per_page }}&page={{ page }}&per_page={{ per_page }}&keyword={{ request.args.get('keyword','') }}">{{ p }}</a></li>
+        <div class="pagination-section">
+          <nav aria-label="Page navigation">
+            <ul class="modern-pagination">
+              {% set req_prev_page = requests_page - 1 %}
+              {% set req_next_page = requests_page + 1 %}
+              <li class="page-item {% if requests_page <= 1 %}disabled{% endif %}">
+                <a class="page-link" href="?req_page={{ req_prev_page }}&req_per_page={{ requests_per_page }}&page={{ page }}&per_page={{ per_page }}&keyword={{ request.args.get('keyword','') }}">
+                  <i class="fas fa-chevron-left"></i>
+                </a>
+              </li>
+              {% if requests_page > 3 %}
+                <li class="page-item"><a class="page-link" href="?req_page=1&req_per_page={{ requests_per_page }}&page={{ page }}&per_page={{ per_page }}&keyword={{ request.args.get('keyword','') }}">1</a></li>
+                <li class="page-item disabled"><span class="page-link">...</span></li>
               {% endif %}
-            {% endfor %}
-            {% if requests_page < requests_total_page - 2 %}
-              <li class="page-item disabled"><span class="page-link">...</span></li>
-              <li class="page-item"><a class="page-link" href="?req_page={{ requests_total_page }}&req_per_page={{ requests_per_page }}&page={{ page }}&per_page={{ per_page }}&keyword={{ request.args.get('keyword','') }}">{{ requests_total_page }}</a></li>
-            {% endif %}
-            <li class="page-item {% if requests_page >= requests_total_page %}disabled{% endif %}">
-              <a class="page-link" href="?req_page={{ req_next_page }}&req_per_page={{ requests_per_page }}&page={{ page }}&per_page={{ per_page }}&keyword={{ request.args.get('keyword','') }}">»</a>
-            </li>
-          </ul>
-        </nav>
-        {% endif %}
+              {% for p in range(requests_page-1, requests_page+2) %}
+                {% if 1 <= p <= requests_total_page %}
+                  <li class="page-item {% if p == requests_page %}active{% endif %}"><a class="page-link" href="?req_page={{ p }}&req_per_page={{ requests_per_page }}&page={{ page }}&per_page={{ per_page }}&keyword={{ request.args.get('keyword','') }}">{{ p }}</a></li>
+                {% endif %}
+              {% endfor %}
+              {% if requests_page < requests_total_page - 2 %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+                <li class="page-item"><a class="page-link" href="?req_page={{ requests_total_page }}&req_per_page={{ requests_per_page }}&page={{ page }}&per_page={{ per_page }}&keyword={{ request.args.get('keyword','') }}">{{ requests_total_page }}</a></li>
+              {% endif %}
+              <li class="page-item {% if requests_page >= requests_total_page %}disabled{% endif %}">
+                <a class="page-link" href="?req_page={{ req_next_page }}&req_per_page={{ requests_per_page }}&page={{ page }}&per_page={{ per_page }}&keyword={{ request.args.get('keyword','') }}">
+                  <i class="fas fa-chevron-right"></i>
+                </a>
+              </li>
+            </ul>
+          </nav>
         </div>
-        <div class="tab-pane fade" id="manualTab" role="tabpanel" aria-labelledby="manual-tab">
-        <div class="row mg-b-20">
-          <div class="col-md-4 mg-t-10">
-            <label for="">Show</label>
-            <select autocomplete="off" class="custom-select" id="custom_select" style="max-width: 100px;">
-              <option value="10" selected>10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="40">40</option>
-              <option value="50">50</option>
-            </select>
-          </div>
-          <div class="col-md-4 mg-t-10 ">
-          </div>
-          <div class="col-md-4 mg-t-10 d-flex justify-content-end">
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text"><i class="fas fa-search"></i></span>
+        {% endif %}
+      </div>
+
+      <div class="tab-pane fade" id="manualTab" role="tabpanel" aria-labelledby="manual-tab">
+        <div class="manual-section">
+          <div class="manual-filters">
+            <div class="filters-card">
+              <div class="row align-items-center">
+                <div class="col-md-3">
+                  <div class="filter-group">
+                    <label class="filter-label">Show</label>
+                    <select class="filter-select" id="custom_select">
+                      <option value="10" selected>10</option>
+                      <option value="20">20</option>
+                      <option value="30">30</option>
+                      <option value="40">40</option>
+                      <option value="50">50</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="search-group">
+                    <div class="search-input-wrapper">
+                      <i class="fas fa-search search-icon"></i>
+                      <input type="text" id="custom_search" class="search-input" placeholder="Search by username, email..." aria-label="Search">
+                      <button class="search-btn" type="button" id="button_search">
+                        <i class="fas fa-search"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3 text-right">
+                  <div class="total-info">
+                    <span class="total-text">Total Users: <strong>{{ total_users or 0 }}</strong></span>
+                  </div>
+                </div>
               </div>
-              <input type="text" id="custom_search" class="form-control" placeholder="Search" aria-label="Search">
-              <div class="input-group-append">
-                <button class="btn btn-success text-white" type="button" id="button_search">Search</button>
+            </div>
+          </div>
+
+          <div class="manual-table">
+            <div class="table-card">
+              <div class="table-responsive">
+                <table id="user_list" class="modern-table">
+                  <thead>
+                    <tr>
+                      <th>Username</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Premium Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for user in data %}
+                    <tr class="table-row">
+                      <td class="username-cell">
+                        <span class="username-text">{{ user.username }}</span>
+                      </td>
+                      <td class="email-cell">
+                        <div class="email-info">
+                          <span class="email-text">{{ user.email }}</span>
+                          {% if user.verify_email %}
+                            <span class="status-badge verified">Verified</span>
+                          {% else %}
+                            <span class="status-badge unverified">Unverified</span>
+                          {% endif %}
+                        </div>
+                      </td>
+                      <td class="phone-cell">{{ user.phone }}</td>
+                      <td class="premium-status-cell">
+                        {% if user.is_premium == "TRUE" and user.premium_expiry %}
+                          <div class="premium-info">
+                            <span class="subscription-badge premium">Premium</span>
+                            <div class="premium-details">
+                              <span class="expiry-text">{{ user.premium_expiry }}</span>
+                              <small class="countdown-text">{{ user.premium_countdown }}</small>
+                            </div>
+                          </div>
+                        {% elif user.is_premium == "TRUE" %}
+                          <div class="premium-info">
+                            <span class="subscription-badge premium">Premium</span>
+                            <small class="no-expiry-text">No expiry</small>
+                          </div>
+                        {% else %}
+                          <div class="premium-info">
+                            <span class="subscription-badge free">Free</span>
+                            <small class="subscription-type-text">{{user.subscription_type}}</small>
+                          </div>
+                        {% endif %}
+                      </td>
+                      <td class="actions-cell">
+                        <div class="actions-dropdown">
+                          <button class="actions-btn" type="button" data-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                          </button>
+                          <div class="dropdown-menu">
+                            <form action="/admin/process/premium/apply" method="POST" class="premium-form">
+                              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                              <input type="hidden" name="customer_id" value="{{ user.user_id }}">
+                              <input type="hidden" name="duration" value="1">
+                              <button type="submit" class="dropdown-item">
+                                <i class="fas fa-crown"></i> Apply Premium (1 Month)
+                              </button>
+                            </form>
+                            <form action="/admin/process/premium/apply" method="POST" class="premium-form">
+                              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                              <input type="hidden" name="customer_id" value="{{ user.user_id }}">
+                              <input type="hidden" name="duration" value="3">
+                              <button type="submit" class="dropdown-item">
+                                <i class="fas fa-crown"></i> Apply Premium (3 Months)
+                              </button>
+                            </form>
+                            {% if user.is_premium == "TRUE" %}
+                            <div class="dropdown-divider"></div>
+                            <form action="/admin/process/premium/revoke" method="POST" class="premium-form">
+                              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                              <input type="hidden" name="customer_id" value="{{ user.user_id }}">
+                              <button type="submit" class="dropdown-item danger">
+                                <i class="fas fa-times"></i> Remove Premium
+                              </button>
+                            </form>
+                            {% endif %}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
         </div>
-        <div class="table-responsive" style="overflow-y: hidden;">
-          <table id="user_list" class="table lynk-table">
-            <thead class="thead-primary text-white">
-              <tr>
-                
-                <th width="20%">Username</th>
-                <th width="20%">Email</th>                
-                <th width="15%">Phone</th>
-                <th width="20%">Premium Status</th>                                
-                <th width="15%">Action</th>
-
-              </tr>
-            </thead>
-            <tbody>
-              {% for user in data %}
-              <tr>             
-                <td>{{ user.username }}</td>
-                <td>
-                  {{ user.email }} 
-                  {% if user.verify_email %}
-                    <span class="badge badge-success">Verified</span>
-                  {% else %}
-                    <span class="badge badge-warning">Unverified</span>
-                  {% endif %}
-                </td>              
-                <td>{{ user.phone }}</td>
-                <td>
-                  {% if user.is_premium == "TRUE" and user.premium_expiry %}
-                    <span class="badge badge-primary">Premium</span><br>
-                    <span>{{ user.premium_expiry }}</span><br>
-                    <small class="text-muted">{{ user.premium_countdown }}</small>
-                  {% elif user.is_premium == "TRUE" %}
-                    <span class="badge badge-primary">Premium</span><br>
-                    <small class="text-muted">No expiry</small>
-                  {% else %}
-                    <span class="badge badge-secondary">Free </span><br>
-                    <small class="text-muted">{{user.subscription_type}}</small>
-                  {% endif %}
-                </td>                
-                <td class="text-center">
-                  <div class="dropdown">
-                    <button class="btn btn-success dropdown-toggle" type="button" data-toggle="dropdown">
-                      Actions
-                    </button>
-                    <div class="dropdown-menu">                      
-                      <form action="/admin/process/premium/apply" method="POST" class="px-3 py-2">
-                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                        <input type="hidden" name="customer_id" value="{{ user.user_id }}">
-                        <input type="hidden" name="duration" value="1">
-                        <button type="submit" class="dropdown-item text-primary">Apply Premium (1 Month)</button>
-                      </form>
-                      <form action="/admin/process/premium/apply" method="POST" class="px-3 py-2">
-                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                        <input type="hidden" name="customer_id" value="{{ user.user_id }}">
-                        <input type="hidden" name="duration" value="3">
-                        <button type="submit" class="dropdown-item text-primary">Apply Premium (3 Months)</button>
-                      </form>
-                      {% if user.is_premium == "TRUE" %}
-                      <form action="/admin/process/premium/revoke" method="POST" class="px-3 py-2">
-                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                        <input type="hidden" name="customer_id" value="{{ user.user_id }}">
-                        <button type="submit" class="dropdown-item text-danger">Remove Premium</button>
-                      </form>
-                      {% endif %}
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-          
-        </div>
-        </div>
       </div>
     </div>
-    {% if total_page > 1 %}
-    <nav aria-label="Page navigation" class="d-flex justify-content-end mt-3">
-      <ul class="pagination">
+  </div>
+</div>
+  {% if total_page > 1 %}
+  <div class="pagination-section">
+    <nav aria-label="Page navigation">
+      <ul class="modern-pagination">
         {% set keyword = request.args.get('keyword', '') %}
         {% set per_page = per_page|string %}
         {% set prev_page = page - 1 %}
@@ -225,7 +303,9 @@
 
         <!-- Previous -->
         <li class="page-item {% if page <= 1 %}disabled{% endif %}">
-          <a class="page-link" href="?page={{ prev_page }}&per_page={{ per_page }}&keyword={{ keyword }}&req_page={{ requests_page }}&req_per_page={{ requests_per_page }}">«</a>
+          <a class="page-link" href="?page={{ prev_page }}&per_page={{ per_page }}&keyword={{ keyword }}&req_page={{ requests_page }}&req_per_page={{ requests_per_page }}">
+            <i class="fas fa-chevron-left"></i>
+          </a>
         </li>
 
         <!-- First page -->
@@ -255,37 +335,660 @@
 
         <!-- Next -->
         <li class="page-item {% if page >= total_page %}disabled{% endif %}">
-          <a class="page-link" href="?page={{ next_page }}&per_page={{ per_page }}&keyword={{ keyword }}&req_page={{ requests_page }}&req_per_page={{ requests_per_page }}">»</a>
+          <a class="page-link" href="?page={{ next_page }}&per_page={{ per_page }}&keyword={{ keyword }}&req_page={{ requests_page }}&req_per_page={{ requests_per_page }}">
+            <i class="fas fa-chevron-right"></i>
+          </a>
         </li>
       </ul>
     </nav>
-    {% endif %}
-
-    
-    <!-- Delete User Modal -->
-    <div class="modal fade" id="deleteUserModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Confirm delete</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <form id="delete_user" action="/admin/process/user/delete" method="POST">
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-            <input type="hidden" class="form-control" name="delete_username" id="username">   
-          </form>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-danger" id="btn_save" form="delete_user">Delete</button>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
+  {% endif %}
 </div>
 {% endblock content %}
+
+{% block styles %}
+<style>
+/* Premium Container */
+.premium-container {
+  padding: 0;
+}
+
+/* Page Header */
+.premium-header {
+  margin-bottom: 30px;
+}
+
+.page-title {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.page-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  margin: 5px 0 0 0;
+}
+
+/* Modern Tabs */
+.premium-tabs {
+  margin-bottom: 30px;
+}
+
+.modern-tab-nav {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 5px;
+  gap: 5px;
+}
+
+.tab-item {
+  flex: 1;
+}
+
+.tab-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 20px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  gap: 8px;
+}
+
+.tab-link:hover {
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.tab-link.active {
+  background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+  color: #333;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(255, 222, 89, 0.3);
+}
+
+.tab-link i {
+  font-size: 1rem;
+}
+
+/* Section Cards */
+.section-card {
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.section-header {
+  padding: 20px 25px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.section-title {
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.section-title i {
+  margin-right: 10px;
+  color: #FFDE59;
+}
+
+.section-body {
+  padding: 0;
+}
+
+/* Modern Table */
+.modern-table {
+  width: 100%;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.modern-table thead {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modern-table th {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 20px 15px;
+  border: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modern-table td {
+  padding: 20px 15px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+}
+
+.table-row:hover {
+  background: rgba(255, 222, 89, 0.05);
+}
+
+/* Table Cell Styles */
+.date-cell {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.name-cell {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.username-text {
+  color: #FFDE59;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.email-text {
+  color: #ffffff;
+  font-size: 0.9rem;
+}
+
+.phone-cell {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.plan-badge {
+  background: rgba(255, 222, 89, 0.2);
+  color: #FFDE59;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Status Badges */
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.pending {
+  background: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.status-badge.approved {
+  background: rgba(40, 167, 69, 0.2);
+  color: #28a745;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.status-badge.rejected {
+  background: rgba(220, 53, 69, 0.2);
+  color: #dc3545;
+  border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.status-badge.unknown {
+  background: rgba(108, 117, 125, 0.2);
+  color: #6c757d;
+  border: 1px solid rgba(108, 117, 125, 0.3);
+}
+
+.status-badge.verified {
+  background: rgba(40, 167, 69, 0.2);
+  color: #28a745;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.status-badge.unverified {
+  background: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+/* Request Actions */
+.request-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.action-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.duration-select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #ffffff;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  min-width: 100px;
+}
+
+.duration-select:focus {
+  border-color: rgba(255, 222, 89, 0.5);
+  outline: none;
+}
+
+.duration-select option {
+  background: #1a1a2e;
+  color: #ffffff;
+}
+
+.action-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.action-btn.approve {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.action-btn.approve:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+.action-btn.reject {
+  background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+.action-btn.reject:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+.approved-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.approved-text {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+}
+
+/* Premium Status */
+.premium-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.premium-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.expiry-text {
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.countdown-text {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+}
+
+.no-expiry-text {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+}
+
+.subscription-type-text {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+}
+
+/* Subscription Badge */
+.subscription-badge {
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.subscription-badge.premium {
+  background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
+}
+
+.subscription-badge.free {
+  background: rgba(108, 117, 125, 0.2);
+  color: #6c757d;
+  border: 1px solid rgba(108, 117, 125, 0.3);
+}
+
+/* Actions Dropdown */
+.actions-dropdown {
+  position: relative;
+}
+
+.actions-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #ffffff;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.actions-btn:hover {
+  background: rgba(255, 222, 89, 0.1);
+  border-color: rgba(255, 222, 89, 0.3);
+  color: #FFDE59;
+}
+
+.dropdown-menu {
+  background: rgba(26, 26, 46, 0.95);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 10px 0;
+  min-width: 200px;
+}
+
+.dropdown-item {
+  color: #ffffff;
+  padding: 10px 15px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dropdown-item:hover {
+  background: rgba(255, 222, 89, 0.1);
+  color: #FFDE59;
+}
+
+.dropdown-item.danger:hover {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
+.dropdown-item i {
+  width: 16px;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 5px 0;
+}
+
+.premium-form {
+  margin: 0;
+  padding: 0;
+}
+
+/* Filters Card */
+.filters-card {
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 30px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.filter-select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #ffffff;
+  padding: 10px 15px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.filter-select:focus {
+  border-color: rgba(255, 222, 89, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 222, 89, 0.1);
+  outline: none;
+}
+
+.filter-select option {
+  background: #1a1a2e;
+  color: #ffffff;
+}
+
+/* Search Group */
+.search-group {
+  display: flex;
+  justify-content: center;
+}
+
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.6);
+  z-index: 2;
+}
+
+.search-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 25px;
+  color: #ffffff;
+  padding: 12px 50px 12px 45px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  border-color: rgba(255, 222, 89, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 222, 89, 0.1);
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.search-btn {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+  border: none;
+  border-radius: 20px;
+  color: #333;
+  padding: 8px 15px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.search-btn:hover {
+  transform: translateY(-50%) scale(1.05);
+}
+
+.total-info {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.total-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.total-text strong {
+  color: #FFDE59;
+}
+
+/* Pagination */
+.pagination-section {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+.modern-pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: 5px;
+}
+
+.page-item {
+  margin: 0;
+}
+
+.page-link {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #ffffff;
+  padding: 10px 15px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.page-link:hover {
+  background: rgba(255, 222, 89, 0.1);
+  border-color: rgba(255, 222, 89, 0.3);
+  color: #FFDE59;
+  text-decoration: none;
+}
+
+.page-item.active .page-link {
+  background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+  border-color: rgba(255, 222, 89, 0.5);
+  color: #333;
+  font-weight: 600;
+}
+
+.page-item.disabled .page-link {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.3);
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .premium-header {
+    margin-bottom: 20px;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .modern-tab-nav {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .tab-link {
+    justify-content: flex-start;
+  }
+  
+  .filters-card {
+    padding: 20px;
+  }
+  
+  .search-input-wrapper {
+    max-width: 100%;
+  }
+  
+  .modern-table th,
+  .modern-table td {
+    padding: 15px 10px;
+  }
+  
+  .action-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .duration-select {
+    min-width: auto;
+  }
+}
+</style>
+{% endblock %}
 
 {% block scripts %}
 <script>

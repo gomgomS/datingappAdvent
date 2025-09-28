@@ -1,0 +1,488 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+<div class="dashboard-container">
+  <div class="row">
+    <!-- Total Users Card -->
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-4">
+      <div class="stats-card">
+        <div class="stats-card-body">
+          <div class="stats-content">
+            <div class="stats-info">
+              <h6 class="stats-label">Total Users</h6>
+              <h3 class="stats-number">{{ stats.total_users }}</h3>
+            </div>
+            <div class="stats-icon">
+              <i class="fas fa-users"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verified Users Card -->
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-4">
+      <div class="stats-card">
+        <div class="stats-card-body">
+          <div class="stats-content">
+            <div class="stats-info">
+              <h6 class="stats-label">Verified Users</h6>
+              <h3 class="stats-number">{{ stats.verified_users }}</h3>
+              <small class="stats-percentage">{{ stats.verified_percentage }}% of total</small>
+            </div>
+            <div class="stats-icon verified">
+              <i class="fas fa-check-circle"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Not Verified Users Card -->
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-4">
+      <div class="stats-card">
+        <div class="stats-card-body">
+          <div class="stats-content">
+            <div class="stats-info">
+              <h6 class="stats-label">Not Verified</h6>
+              <h3 class="stats-number">{{ stats.not_verified_users }}</h3>
+              <small class="stats-percentage">{{ 100 - stats.verified_percentage }}% of total</small>
+            </div>
+            <div class="stats-icon warning">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Premium Users Card -->
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-4">
+      <div class="stats-card">
+        <div class="stats-card-body">
+          <div class="stats-content">
+            <div class="stats-info">
+              <h6 class="stats-label">Premium Users</h6>
+              <h3 class="stats-number">{{ stats.premium_users }}</h3>
+              <small class="stats-percentage">{{ stats.premium_percentage }}% of total</small>
+            </div>
+            <div class="stats-icon premium">
+              <i class="fas fa-crown"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Total Matches Card -->
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-4">
+      <div class="stats-card">
+        <div class="stats-card-body">
+          <div class="stats-content">
+            <div class="stats-info">
+              <h6 class="stats-label">Total Matches</h6>
+              <h3 class="stats-number">{{ stats.total_matches }}</h3>
+            </div>
+            <div class="stats-icon matches">
+              <i class="fas fa-heart"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mutual Matches Card -->
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-4">
+      <div class="stats-card">
+        <div class="stats-card-body">
+          <div class="stats-content">
+            <div class="stats-info">
+              <h6 class="stats-label">Mutual Matches</h6>
+              <h3 class="stats-number">{{ stats.mutual_matches }}</h3>
+              <small class="stats-percentage">{{ stats.mutual_percentage }}% of total</small>
+            </div>
+            <div class="stats-icon mutual">
+              <i class="fas fa-heart-broken"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Free Users Card -->
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-4">
+      <div class="stats-card">
+        <div class="stats-card-body">
+          <div class="stats-content">
+            <div class="stats-info">
+              <h6 class="stats-label">Free Users</h6>
+              <h3 class="stats-number">{{ stats.free_users }}</h3>
+              <small class="stats-percentage">{{ 100 - stats.premium_percentage }}% of total</small>
+            </div>
+            <div class="stats-icon free">
+              <i class="fas fa-user"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Non-Mutual Matches Card -->
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-4">
+      <div class="stats-card">
+        <div class="stats-card-body">
+          <div class="stats-content">
+            <div class="stats-info">
+              <h6 class="stats-label">Non-Mutual Matches</h6>
+              <h3 class="stats-number">{{ stats.non_mutual_matches }}</h3>
+              <small class="stats-percentage">{{ 100 - stats.mutual_percentage }}% of total</small>
+            </div>
+            <div class="stats-icon non-mutual">
+              <i class="fas fa-heart"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="info-card">
+        <div class="info-card-header">
+          <h5 class="info-card-title">
+            <i class="fas fa-chart-line"></i>
+            Recent Activity (Last 7 Days)
+          </h5>
+        </div>
+        <div class="info-card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="activity-item">
+                <div class="activity-icon">
+                  <i class="fas fa-user-plus"></i>
+                </div>
+                <div class="activity-info">
+                  <h6 class="activity-title">New Users</h6>
+                  <p class="activity-desc">{{ stats.recent_users }} users registered</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="activity-item">
+                <div class="activity-icon">
+                  <i class="fas fa-heart"></i>
+                </div>
+                <div class="activity-info">
+                  <h6 class="activity-title">New Matches</h6>
+                  <p class="activity-desc">{{ stats.recent_matches }} matches created</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions Section -->
+  <div class="row">
+    <div class="col-12">
+      <div class="info-card">
+        <div class="info-card-header">
+          <h5 class="info-card-title">
+            <i class="fas fa-bolt"></i>
+            Quick Actions
+          </h5>
+        </div>
+        <div class="info-card-body">
+          <div class="row">
+            <div class="col-md-3 col-sm-6 mb-3">
+              <a href="{{ url_for('admin_panel_customer') }}" class="action-btn">
+                <i class="fas fa-users"></i>
+                <span>Manage Users</span>
+              </a>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+              <a href="{{ url_for('admin_panel_matches') }}" class="action-btn">
+                <i class="fas fa-heart"></i>
+                <span>Manage Matches</span>
+              </a>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+              <a href="{{ url_for('admin_panel_premium_control') }}" class="action-btn">
+                <i class="fas fa-crown"></i>
+                <span>Premium Control</span>
+              </a>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+              <a href="{{ url_for('admin_panel_cities') }}" class="action-btn">
+                <i class="fas fa-city"></i>
+                <span>City Management</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+/* Dashboard Container */
+.dashboard-container {
+  padding: 0;
+}
+
+/* Stats Cards */
+.stats-card {
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.stats-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(255, 222, 89, 0.2);
+  border-color: rgba(255, 222, 89, 0.3);
+}
+
+.stats-card-body {
+  padding: 25px;
+}
+
+.stats-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stats-info {
+  flex: 1;
+}
+
+.stats-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stats-number {
+  color: #ffffff;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1;
+}
+
+.stats-percentage {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+  margin-top: 5px;
+  display: block;
+}
+
+.stats-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #ffffff;
+  background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+  box-shadow: 0 4px 15px rgba(255, 222, 89, 0.3);
+}
+
+.stats-icon.verified {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.stats-icon.warning {
+  background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+}
+
+.stats-icon.premium {
+  background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+  box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+}
+
+.stats-icon.matches {
+  background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.stats-icon.mutual {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.stats-icon.free {
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+  box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+.stats-icon.non-mutual {
+  background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+}
+
+/* Info Cards */
+.info-card {
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.info-card:hover {
+  border-color: rgba(255, 222, 89, 0.3);
+  box-shadow: 0 10px 30px rgba(255, 222, 89, 0.1);
+}
+
+.info-card-header {
+  padding: 20px 25px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.info-card-title {
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.info-card-title i {
+  margin-right: 10px;
+  color: #FFDE59;
+}
+
+.info-card-body {
+  padding: 25px;
+}
+
+/* Activity Items */
+.activity-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 0;
+}
+
+.activity-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  color: #ffffff;
+  font-size: 1.2rem;
+}
+
+.activity-info {
+  flex: 1;
+}
+
+.activity-title {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 5px 0;
+}
+
+.activity-desc {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Action Buttons */
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 25px 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  color: #ffffff;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  min-height: 120px;
+}
+
+.action-btn:hover {
+  background: rgba(255, 222, 89, 0.1);
+  border-color: rgba(255, 222, 89, 0.3);
+  transform: translateY(-3px);
+  color: #ffffff;
+  text-decoration: none;
+  box-shadow: 0 8px 25px rgba(255, 222, 89, 0.2);
+}
+
+.action-btn i {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  color: #FFDE59;
+}
+
+.action-btn span {
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .stats-card-body {
+    padding: 20px;
+  }
+  
+  .stats-number {
+    font-size: 2rem;
+  }
+  
+  .stats-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+  }
+  
+  .info-card-body {
+    padding: 20px;
+  }
+  
+  .action-btn {
+    min-height: 100px;
+    padding: 20px 10px;
+  }
+  
+  .action-btn i {
+    font-size: 1.5rem;
+  }
+}
+</style>
+{% endblock %}

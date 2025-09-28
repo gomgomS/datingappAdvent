@@ -1,76 +1,515 @@
 {% extends 'core/base.html' %}
-{% block page_title %}City List{% endblock %}
+{% block page_title %}City Management{% endblock %}
 {% block content %}
-<div class="content-body">
-  <div class="container pd-x-0 pd-b-100">
-    <div class="card main-table p-3">
-      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-        <h5 class="mb-2 mb-sm-0">Cities</h5>
-        <div class="d-flex align-items-center mb-2 mb-sm-0">
-          <div class="input-group mr-2">
-            <div class="input-group-prepend">
-              <span class="input-group-text"><i class="fas fa-search"></i></span>
-            </div>
-            <input type="text" id="filter_city" class="form-control" placeholder="Filter cities...">
-          </div>
-          <button type="button" class="btn btn-outline-secondary" id="clear_filter">Clear</button>
-        </div>
-        <form class="form-inline" action="/admin/process/cities/add" method="POST">
-          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-          <div class="input-group">
-            <input type="text" class="form-control" name="name" placeholder="Add city" required>
-            <div class="input-group-append">
-              <button class="btn btn-primary" type="submit">Add</button>
-            </div>
-          </div>
-        </form>
+<div class="cities-container">
+  <div class="cities-header">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="page-title">City Management</h2>
+        <p class="page-subtitle">Manage available cities for user registration</p>
       </div>
-      <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
-        <table class="table mb-0">
-          <thead class="thead-primary text-white">
-            <tr>
-              <th>Name</th>
-              <th style="width: 160px;">Action</th>
-            </tr>
-          </thead>
-          <tbody id="cities_tbody">
-            {% for c in cities %}
-            <tr>
-              <td>{{ c.name }}</td>
-              <td>
-                <form action="/admin/process/cities/delete" method="POST" class="d-inline">
-                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                  <input type="hidden" name="name" value="{{ c.name }}">
-                  <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                </form>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+    </div>
+  </div>
+
+  <div class="cities-section">
+    <div class="cities-card">
+      <div class="cities-header-card">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+          <h5 class="cities-title mb-2 mb-sm-0">
+            <i class="fas fa-city"></i>
+            Available Cities
+          </h5>
+          <div class="cities-controls">
+            <div class="search-group mb-2 mb-sm-0">
+              <div class="search-input-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="filter_city" class="search-input" placeholder="Filter cities...">
+                <button type="button" class="clear-btn" id="clear_filter">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+            <form class="add-city-form" action="/admin/process/cities/add" method="POST">
+              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+              <div class="add-city-group">
+                <input type="text" class="add-city-input" name="name" placeholder="Enter city name" required>
+                <button class="add-city-btn" type="submit">
+                  <i class="fas fa-plus"></i>
+                  Add City
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      
+      <div class="cities-body">
+        <div class="table-responsive cities-table-container">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>City Name</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="cities_tbody">
+              {% for c in cities %}
+              <tr class="table-row">
+                <td class="city-name-cell">
+                  <div class="city-info">
+                    <i class="fas fa-map-marker-alt city-icon"></i>
+                    <span class="city-name">{{ c.name }}</span>
+                  </div>
+                </td>
+                <td class="actions-cell">
+                  <form action="/admin/process/cities/delete" method="POST" class="delete-form">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="name" value="{{ c.name }}">
+                    <button type="submit" class="action-btn delete" onclick="return confirm('Are you sure you want to delete {{ c.name }}?')">
+                      <i class="fas fa-trash"></i>
+                      Delete
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 </div>
+{% endblock content %}
+
+{% block styles %}
+<style>
+/* Cities Container */
+.cities-container {
+  padding: 0;
+}
+
+/* Page Header */
+.cities-header {
+  margin-bottom: 30px;
+}
+
+.page-title {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.page-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  margin: 5px 0 0 0;
+}
+
+/* Cities Card */
+.cities-card {
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.cities-header-card {
+  padding: 20px 25px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.cities-title {
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.cities-title i {
+  margin-right: 10px;
+  color: #FFDE59;
+}
+
+.cities-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+/* Search Group */
+.search-group {
+  display: flex;
+  align-items: center;
+}
+
+.search-input-wrapper {
+  position: relative;
+  width: 300px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.6);
+  z-index: 2;
+}
+
+.search-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 25px;
+  color: #ffffff;
+  padding: 10px 50px 10px 45px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  border-color: rgba(255, 222, 89, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 222, 89, 0.1);
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.clear-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.6);
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.clear-btn:hover {
+  background: rgba(255, 222, 89, 0.2);
+  color: #FFDE59;
+}
+
+/* Add City Form */
+.add-city-form {
+  margin: 0;
+}
+
+.add-city-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.add-city-input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #ffffff;
+  padding: 10px 15px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  min-width: 200px;
+}
+
+.add-city-input:focus {
+  border-color: rgba(255, 222, 89, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 222, 89, 0.1);
+  outline: none;
+}
+
+.add-city-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.add-city-btn {
+  background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+  border: none;
+  border-radius: 10px;
+  color: #333;
+  padding: 10px 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 222, 89, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.add-city-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 222, 89, 0.4);
+  color: #333;
+}
+
+.add-city-btn i {
+  font-size: 0.8rem;
+}
+
+/* Cities Body */
+.cities-body {
+  padding: 0;
+}
+
+.cities-table-container {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+/* Modern Table */
+.modern-table {
+  width: 100%;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.modern-table thead {
+  background: rgba(255, 255, 255, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.modern-table th {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 20px 15px;
+  border: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modern-table td {
+  padding: 20px 15px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+}
+
+.table-row:hover {
+  background: rgba(255, 222, 89, 0.05);
+}
+
+/* City Info */
+.city-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.city-icon {
+  color: #FFDE59;
+  font-size: 1rem;
+}
+
+.city-name {
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+/* Action Button */
+.action-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 15px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-btn.delete {
+  background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+.action-btn.delete:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+.delete-form {
+  margin: 0;
+  padding: 0;
+}
+
+/* Scrollbar Styling */
+.cities-table-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cities-table-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.cities-table-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 222, 89, 0.5);
+  border-radius: 4px;
+}
+
+.cities-table-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 222, 89, 0.7);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .cities-header {
+    margin-bottom: 20px;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .cities-header-card {
+    padding: 15px 20px;
+  }
+  
+  .cities-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+  
+  .search-input-wrapper {
+    width: 100%;
+  }
+  
+  .add-city-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .add-city-input {
+    min-width: auto;
+  }
+  
+  .modern-table th,
+  .modern-table td {
+    padding: 15px 10px;
+  }
+  
+  .city-info {
+    gap: 8px;
+  }
+  
+  .city-name {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .cities-title {
+    font-size: 1rem;
+  }
+  
+  .search-input {
+    padding: 8px 40px 8px 35px;
+  }
+  
+  .add-city-input {
+    padding: 8px 12px;
+  }
+  
+  .add-city-btn {
+    padding: 8px 15px;
+    font-size: 0.8rem;
+  }
+}
+</style>
+{% endblock %}
 {% block scripts %}
 <script>
-  (function(){
-    const input = document.getElementById('filter_city');
-    const clearBtn = document.getElementById('clear_filter');
-    const tbody = document.getElementById('cities_tbody');
-    function filterRows() {
-      const q = (input.value || '').toLowerCase();
-      const rows = tbody.querySelectorAll('tr');
-      rows.forEach(row => {
-        const nameCell = row.cells[0];
-        const name = (nameCell && nameCell.textContent || '').toLowerCase();
-        row.style.display = name.indexOf(q) !== -1 ? '' : 'none';
-      });
+(function(){
+  const input = document.getElementById('filter_city');
+  const clearBtn = document.getElementById('clear_filter');
+  const tbody = document.getElementById('cities_tbody');
+  
+  function filterRows() {
+    const q = (input.value || '').toLowerCase();
+    const rows = tbody.querySelectorAll('tr');
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+      const nameCell = row.cells[0];
+      const name = (nameCell && nameCell.textContent || '').toLowerCase();
+      const isVisible = name.indexOf(q) !== -1;
+      
+      if (isVisible) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+    
+    // Add visual feedback for no results
+    if (visibleCount === 0 && q.length > 0) {
+      if (!document.getElementById('no-results-message')) {
+        const noResultsRow = document.createElement('tr');
+        noResultsRow.id = 'no-results-message';
+        noResultsRow.innerHTML = `
+          <td colspan="2" style="text-align: center; padding: 40px; color: rgba(255, 255, 255, 0.6);">
+            <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+            No cities found matching "${q}"
+          </td>
+        `;
+        tbody.appendChild(noResultsRow);
+      }
+    } else {
+      const noResultsMsg = document.getElementById('no-results-message');
+      if (noResultsMsg) {
+        noResultsMsg.remove();
+      }
     }
-    input.addEventListener('input', filterRows);
-    clearBtn.addEventListener('click', function(){ input.value=''; filterRows(); input.focus(); });
-  })();
+  }
+  
+  input.addEventListener('input', filterRows);
+  clearBtn.addEventListener('click', function(){ 
+    input.value=''; 
+    filterRows(); 
+    input.focus(); 
+  });
+  
+  // Add enter key support for adding cities
+  const addCityInput = document.querySelector('.add-city-input');
+  if (addCityInput) {
+    addCityInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const form = this.closest('form');
+        if (form && this.value.trim()) {
+          form.submit();
+        }
+      }
+    });
+  }
+})();
 </script>
 {% endblock scripts %}
-{% endblock %}
 

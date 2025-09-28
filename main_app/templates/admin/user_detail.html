@@ -1,0 +1,1199 @@
+{% extends 'core/base.html' %}
+{% block page_title %}User Detail{% endblock %}
+{% block content %}
+<div class="user-detail-container">
+  <div class="user-detail-header">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <nav aria-label="breadcrumb" class="breadcrumb-nav">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+              <a href="/admin/panel/matches" class="breadcrumb-link">Match Admin</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">User Detail</li>
+          </ol>
+        </nav>
+        <h2 class="page-title">User Detail</h2>
+        <p class="page-subtitle">Comprehensive user profile and activity overview</p>
+      </div>
+      <a href="/admin/panel/matches" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Matches
+      </a>
+    </div>
+  </div>
+  {% if error %}
+    <div class="error-alert">
+      <div class="error-content">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>{{ error }}</span>
+      </div>
+    </div>
+  {% elif user_data %}
+    <div class="user-detail-content">
+      <div class="row">
+        <!-- Profile Card -->
+        <div class="col-md-4">
+          <div class="profile-card">
+            <div class="profile-header">
+              <div class="profile-photo-container">
+                {% if user_data.profile_photo %}
+                  <img src="{{ image_base_url }}{{ user_data.profile_photo }}" 
+                       alt="Profile Photo" 
+                       class="profile-photo">
+                {% else %}
+                  <div class="profile-photo-placeholder">
+                    <i class="fas fa-user"></i>
+                  </div>
+                {% endif %}
+              </div>
+              
+              <div class="profile-info">
+                <h4 class="profile-name">{{ user_data.name or 'N/A' }}</h4>
+                <p class="profile-username">@{{ user_data.username or 'N/A' }}</p>
+                
+                <div class="profile-badges">
+                  {% if user_data.is_premium %}
+                    <span class="status-badge premium">
+                      <i class="fas fa-crown"></i>Premium
+                    </span>
+                  {% endif %}
+                  {% if user_data.verify_email %}
+                    <span class="status-badge verified">
+                      <i class="fas fa-check-circle"></i>Verified
+                    </span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            
+            <div class="profile-stats">
+              <div class="stat-item">
+                <div class="stat-number">{{ user_data.matches_count }}</div>
+                <div class="stat-label">Matches</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">{{ user_data.likes_given }}</div>
+                <div class="stat-label">Likes Given</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">{{ user_data.likes_received }}</div>
+                <div class="stat-label">Likes Received</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- User Matches -->
+          {% if user_data.matches and user_data.matches|length > 0 %}
+          <div class="info-card">
+            <div class="info-card-header">
+              <h5 class="info-card-title">
+                <i class="fas fa-heart"></i>
+                User Matches ({{ user_data.matches|length }})
+              </h5>
+            </div>
+            <div class="info-card-body">
+              <div class="table-responsive">
+                <table class="modern-table">
+                  <thead>
+                    <tr>
+                      <th>Matched User</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for match in user_data.matches %}
+                    <tr class="table-row">
+                      <td class="matched-user-cell">
+                        <div class="matched-user-info">
+                          <div class="matched-user-name">{{ match.matched_user.name or 'N/A' }}</div>
+                          {% if match.matched_user.username %}
+                            <a href="/admin/user-detail/{{ match.matched_user.user_id }}" class="matched-user-link">
+                              @{{ match.matched_user.username }}
+                            </a>
+                          {% else %}
+                            <span class="matched-user-disabled">N/A</span>
+                          {% endif %}
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          {% else %}
+          <div class="info-card">
+            <div class="info-card-body">
+              <div class="no-data-content">
+                <i class="fas fa-heart"></i>
+                <h6>No Matches Found</h6>
+                <p>This user hasn't matched with anyone yet.</p>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          
+          <!-- Likes Received -->
+          {% if user_data.likes_received_users and user_data.likes_received_users|length > 0 %}
+          <div class="info-card">
+            <div class="info-card-header">
+              <h5 class="info-card-title">
+                <i class="fas fa-heart"></i>
+                People Who Liked This User ({{ user_data.likes_received_users|length }})
+              </h5>
+            </div>
+            <div class="info-card-body">
+              <div class="table-responsive">
+                <table class="modern-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Username</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for like in user_data.likes_received_users %}
+                    <tr class="table-row">
+                      <td class="liker-name-cell">{{ like.liker.name or 'N/A' }}</td>
+                      <td class="liker-username-cell">
+                        {% if like.liker.username %}
+                          <a href="/admin/user-detail/{{ like.liker.user_id }}" class="liker-link">
+                            @{{ like.liker.username }}
+                          </a>
+                        {% else %}
+                          <span class="liker-disabled">N/A</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          {% else %}
+          <div class="info-card">
+            <div class="info-card-body">
+              <div class="no-data-content">
+                <i class="fas fa-heart"></i>
+                <h6>No Likes Received</h6>
+                <p>No one has liked this user yet.</p>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          
+          <!-- Likes Given -->
+          {% if user_data.likes_given_users and user_data.likes_given_users|length > 0 %}
+          <div class="info-card">
+            <div class="info-card-header">
+              <h5 class="info-card-title">
+                <i class="fas fa-heart"></i>
+                People This User Has Liked ({{ user_data.likes_given_users|length }})
+              </h5>
+            </div>
+            <div class="info-card-body">
+              <div class="table-responsive">
+                <table class="modern-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Username</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for like in user_data.likes_given_users %}
+                    <tr class="table-row">
+                      <td class="liked-name-cell">{{ like.liked_user.name or 'N/A' }}</td>
+                      <td class="liked-username-cell">
+                        {% if like.liked_user.username %}
+                          <a href="/admin/user-detail/{{ like.liked_user.user_id }}" class="liked-link">
+                            @{{ like.liked_user.username }}
+                          </a>
+                        {% else %}
+                          <span class="liked-disabled">N/A</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          {% else %}
+          <div class="info-card">
+            <div class="info-card-body">
+              <div class="no-data-content">
+                <i class="fas fa-heart"></i>
+                <h6>No Likes Given</h6>
+                <p>This user hasn't liked anyone yet.</p>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        
+        <!-- User Information -->
+        <div class="col-md-8">
+          <div class="info-card">
+            <div class="info-card-header">
+              <h5 class="info-card-title">
+                <i class="fas fa-user"></i>
+                User Information
+              </h5>
+            </div>
+            <div class="info-card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="info-table">
+                    <div class="info-row">
+                      <span class="info-label">User ID:</span>
+                      <span class="info-value code">{{ user_data.user_id }}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Username:</span>
+                      <span class="info-value">{{ user_data.username or 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Full Name:</span>
+                      <span class="info-value">{{ user_data.name or 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Email:</span>
+                      <span class="info-value">{{ user_data.email or 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Phone:</span>
+                      <span class="info-value">{{ user_data.phone or 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Date of Birth:</span>
+                      <span class="info-value">{{ user_data.dob or 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Age:</span>
+                      <span class="info-value">{{ user_data.age or 'N/A' }} years old</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Gender:</span>
+                      <span class="info-value">{{ user_data.sex or 'N/A' }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-table">
+                    <div class="info-row">
+                      <span class="info-label">City:</span>
+                      <span class="info-value">{{ user_data.city or 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Job:</span>
+                      <span class="info-value">{{ user_data.job or 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Hobbies:</span>
+                      <span class="info-value">{{ user_data.hobbies or 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Tribe:</span>
+                      <span class="info-value">{{ user_data.tribe or 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Marital Status:</span>
+                      <span class="info-value">{{ user_data.marital_status or 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Congregation:</span>
+                      <span class="info-value">{{ user_data.congregation or 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">OTP Number:</span>
+                      <span class="info-value">{{ user_data.otp_4_number or 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">PKey:</span>
+                      <span class="info-value code">{{ user_data.pkey }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {% if user_data.about %}
+              <div class="about-section">
+                <h6 class="about-title">About:</h6>
+                <p class="about-text">{{ user_data.about }}</p>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          
+          <!-- Photo Gallery -->
+          {% if user_data.images and user_data.images|length > 0 %}
+          <div class="info-card">
+            <div class="info-card-header">
+              <h5 class="info-card-title">
+                <i class="fas fa-images"></i>
+                Photo Gallery
+              </h5>
+            </div>
+            <div class="info-card-body">
+              <div class="gallery-grid">
+                {% for image in user_data.images %}
+                <div class="gallery-item">
+                  <img src="{{ image_base_url }}{{ image }}" 
+                       alt="Gallery Image" 
+                       class="gallery-image"
+                       onclick="openFullImageModal('{{ image_base_url }}{{ image }}')">
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          
+          <!-- Account Information -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <h5 class="info-card-title">
+                <i class="fas fa-info-circle"></i>
+                Account Information
+              </h5>
+            </div>
+            <div class="info-card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="info-table">
+                    <div class="info-row">
+                      <span class="info-label">Registration Date:</span>
+                      <span class="info-value">{{ user_data.rec_timestamp or 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Last Login:</span>
+                      <span class="info-value">{{ user_data.last_login or 'N/A' }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-table">
+                    <div class="info-row">
+                      <span class="info-label">Premium Status:</span>
+                      <span class="info-value">
+                        {% if user_data.is_premium %}
+                          <span class="status-badge premium">Premium Member</span>
+                        {% else %}
+                          <span class="status-badge free">Free Member</span>
+                        {% endif %}
+                      </span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Email Verified:</span>
+                      <span class="info-value">
+                        {% if user_data.verify_email %}
+                          <span class="status-badge verified">Verified</span>
+                        {% else %}
+                          <span class="status-badge unverified">Not Verified</span>
+                        {% endif %}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {% if user_data.location %}
+              <div class="location-section">
+                <h6 class="location-title">Location Data:</h6>
+                <div class="location-data">
+                  <pre><code>{{ user_data.location | tojson(indent=2) }}</code></pre>
+                </div>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Full Image Modal -->
+<div class="modal fade" id="fullImageModal" tabindex="-1" role="dialog" aria-labelledby="fullImageModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+    <div class="modal-content modern-modal image-modal">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <img id="full-image" class="full-image" src="" alt="Full Image">
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block styles %}
+<style>
+/* User Detail Container */
+.user-detail-container {
+  padding: 0;
+}
+
+/* Page Header */
+.user-detail-header {
+  margin-bottom: 30px;
+}
+
+.page-title {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.page-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  margin: 5px 0 0 0;
+}
+
+/* Breadcrumb */
+.breadcrumb-nav {
+  margin-bottom: 15px;
+}
+
+.breadcrumb {
+  background: transparent;
+  padding: 0;
+  margin: 0;
+}
+
+.breadcrumb-item {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+}
+
+.breadcrumb-item.active {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.breadcrumb-link {
+  color: #FFDE59;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.breadcrumb-link:hover {
+  color: #FFB347;
+  text-decoration: none;
+}
+
+/* Back Button */
+.back-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #ffffff;
+  padding: 12px 20px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.back-btn:hover {
+  background: rgba(255, 222, 89, 0.1);
+  border-color: rgba(255, 222, 89, 0.3);
+  color: #FFDE59;
+  text-decoration: none;
+}
+
+.back-btn i {
+  font-size: 0.8rem;
+}
+
+/* Error Alert */
+.error-alert {
+  background: rgba(220, 53, 69, 0.1);
+  border: 2px solid rgba(220, 53, 69, 0.3);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.error-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #dc3545;
+  font-weight: 500;
+}
+
+.error-content i {
+  font-size: 1.2rem;
+}
+
+/* Profile Card */
+.profile-card {
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 25px;
+}
+
+.profile-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.profile-photo-container {
+  margin-bottom: 20px;
+}
+
+.profile-photo {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid rgba(255, 222, 89, 0.3);
+  transition: all 0.3s ease;
+}
+
+.profile-photo:hover {
+  border-color: rgba(255, 222, 89, 0.6);
+  transform: scale(1.05);
+}
+
+.profile-photo-placeholder {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  font-size: 4rem;
+  margin: 0 auto;
+  border: 4px solid rgba(255, 222, 89, 0.3);
+}
+
+.profile-name {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.profile-username {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  margin-bottom: 15px;
+}
+
+.profile-badges {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-badge.premium {
+  background: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.status-badge.verified {
+  background: rgba(40, 167, 69, 0.2);
+  color: #28a745;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.status-badge.free {
+  background: rgba(108, 117, 125, 0.2);
+  color: #6c757d;
+  border: 1px solid rgba(108, 117, 125, 0.3);
+}
+
+.status-badge.unverified {
+  background: rgba(220, 53, 69, 0.2);
+  color: #dc3545;
+  border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+/* Profile Stats */
+.profile-stats {
+  display: flex;
+  justify-content: space-around;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  color: #FFDE59;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Info Cards */
+.info-card {
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  margin-bottom: 25px;
+  overflow: hidden;
+}
+
+.info-card-header {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px 25px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-card-title {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.info-card-title i {
+  color: #FFDE59;
+  font-size: 1rem;
+}
+
+.info-card-body {
+  padding: 25px;
+}
+
+/* Modern Table */
+.modern-table {
+  width: 100%;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.modern-table thead {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.modern-table th {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 15px;
+  border: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modern-table td {
+  padding: 15px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+}
+
+.table-row:hover {
+  background: rgba(255, 222, 89, 0.05);
+}
+
+/* Table Cell Styles */
+.matched-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.matched-user-name {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.matched-user-link {
+  color: #FFDE59;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.matched-user-link:hover {
+  color: #FFB347;
+  text-decoration: none;
+}
+
+.matched-user-disabled {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+}
+
+.liker-name-cell,
+.liked-name-cell {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.liker-link,
+.liked-link {
+  color: #FFDE59;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.liker-link:hover,
+.liked-link:hover {
+  color: #FFB347;
+  text-decoration: none;
+}
+
+.liker-disabled,
+.liked-disabled {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Info Table */
+.info-table {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.info-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-width: 120px;
+}
+
+.info-value {
+  color: #ffffff;
+  font-size: 0.9rem;
+  text-align: right;
+  flex: 1;
+}
+
+.info-value.code {
+  font-family: monospace;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 0.8rem;
+}
+
+/* About Section */
+.about-section {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.about-title {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.about-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Gallery */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.gallery-item {
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.gallery-item:hover {
+  transform: scale(1.05);
+}
+
+.gallery-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.gallery-image:hover {
+  filter: brightness(1.1);
+}
+
+/* Location Section */
+.location-section {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.location-title {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.location-data {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 15px;
+  overflow-x: auto;
+}
+
+.location-data pre {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.location-data code {
+  color: #FFDE59;
+  font-family: monospace;
+}
+
+/* No Data Content */
+.no-data-content {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.no-data-content i {
+  font-size: 3rem;
+  margin-bottom: 15px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.no-data-content h6 {
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 8px;
+}
+
+.no-data-content p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Modal Styles */
+.modern-modal {
+  background: rgba(26, 26, 46, 0.95);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  color: #ffffff;
+}
+
+.image-modal .modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 15px 20px;
+}
+
+.image-modal .modal-body {
+  padding: 0;
+  text-align: center;
+}
+
+.full-image {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+.close {
+  color: #ffffff;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.close:hover {
+  opacity: 1;
+  color: #FFDE59;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .user-detail-header {
+    margin-bottom: 20px;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .back-btn {
+    padding: 10px 15px;
+    font-size: 0.8rem;
+  }
+  
+  .profile-card {
+    padding: 20px;
+  }
+  
+  .profile-photo,
+  .profile-photo-placeholder {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .profile-photo-placeholder {
+    font-size: 3rem;
+  }
+  
+  .profile-name {
+    font-size: 1.3rem;
+  }
+  
+  .profile-stats {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .info-card-header,
+  .info-card-body {
+    padding: 20px;
+  }
+  
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .info-label {
+    min-width: auto;
+  }
+  
+  .info-value {
+    text-align: left;
+  }
+  
+  .gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+  }
+  
+  .gallery-image {
+    height: 120px;
+  }
+  
+  .modal-body {
+    padding: 15px;
+  }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openFullImageModal(imageUrl) {
+  const fullImageElement = document.getElementById('full-image');
+  if (fullImageElement) {
+    fullImageElement.src = imageUrl;
+  }
+  $('#fullImageModal').modal('show');
+}
+
+function viewMatchDetails(matchId) {
+  // Load match details via AJAX
+  $.get('/admin/match-details/' + matchId)
+    .done(function(data) {
+      // Create a modal to show match details
+      const modalHtml = `
+        <div class="modal fade" id="matchDetailsModal" tabindex="-1" role="dialog" aria-labelledby="matchDetailsModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="matchDetailsModalLabel">Match Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                ${data}
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Remove existing modal if any
+      $('#matchDetailsModal').remove();
+      
+      // Add new modal to body
+      $('body').append(modalHtml);
+      
+      // Show modal
+      $('#matchDetailsModal').modal('show');
+    })
+    .fail(function() {
+      alert('Failed to load match details');
+    });
+}
+
+async function showFutureWifeId(futureId) {
+  if (!futureId) {
+    alert('No profile selected.');
+    return;
+  }
+  
+  try {
+    const res = await fetch(`/api/detail/match?future_soulmate_id=${encodeURIComponent(futureId)}`, {
+      method: 'GET'
+    });
+
+    const json = await res.json();
+    if (json.status === 'success') {
+      const data = json.data;
+
+      // Create modal HTML similar to swipe.html
+      const modalHtml = `
+        <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content bumble-profile">
+              <div class="modal-body">
+                <!-- Large responsive image -->
+                <div class="modal-profile-cover">
+                  <img id="profile-photo" class="modal-profile-photo" src="${data.profile_photo ? '{{ image_base_url }}' + data.profile_photo : 'default-profile.jpg'}" alt="Profile Photo">
+                </div>
+
+                <!-- Basic Info -->
+                <div class="basic-info mb-2">
+                  <h3 id="name">${data.name || 'N/A'}</h3>
+                  <div class="text-muted" style="font-size: 14px;">
+                    <span id="age">${data.age || 'N/A'}</span>
+                    <span class="mx-1">•</span>
+                    <span id="job">${data.job || 'N/A'}</span>
+                    <span class="mx-1">•</span>
+                    <span id="city">${data.city || 'N/A'}</span>
+                  </div>
+                </div>
+
+                <!-- Info Grid -->
+                <div class="profile-info-grid mb-3">
+                  <div class="info-item">
+                    <i class="fas fa-heartbeat"></i>
+                    <span id="hobbies">${data.hobbies || 'N/A'}</span>
+                  </div>
+                  <div class="info-item">
+                    <i class="fas fa-people-arrows"></i>
+                    <span id="tribe">${data.tribe || 'N/A'}</span>
+                  </div>
+                  <div class="info-item">
+                    <i class="fas fa-ring"></i>
+                    <span id="marital-status">${data.marital_status || 'N/A'}</span>
+                  </div>
+                  <div class="info-item">
+                    <i class="fas fa-church"></i>
+                    <span id="congregation">${data.congregation || 'Tidak diisi'}</span>
+                  </div>
+                  <div class="info-item wide">
+                    <i class="fas fa-comment-dots"></i>
+                    <span id="about">${data.about || 'N/A'}</span>
+                  </div>
+                </div>
+
+                <!-- Gallery -->
+                <div id="album" class="mb-2">
+                  <h6 class="section-title">Photo Gallery</h6>
+                  <div class="row row-cols-2 row-cols-md-3 g-3" id="album-photos">
+                    ${data.image && data.image.length > 0 ? 
+                      data.image.map(photo => 
+                        `<img src="{{ image_base_url }}${photo}" alt="Album Photo" class="col-4 mb-2 img-fluid rounded" style="cursor: pointer;" onclick="openFullImageModal('{{ image_base_url }}${photo}')">`
+                      ).join('') : 
+                      '<p class="text-muted">No photos available</p>'
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-dismiss="modal">
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Remove existing modal if any
+      $('#profileModal').remove();
+      
+      // Add new modal to body
+      $('body').append(modalHtml);
+      
+      // Show modal
+      $('#profileModal').modal('show');
+    } else {
+      alert('Failed to fetch profile detail.');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Something went wrong.');
+  }
+}
+</script>
+{% endblock %}
