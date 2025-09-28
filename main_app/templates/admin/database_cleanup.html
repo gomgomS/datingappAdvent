@@ -1,0 +1,872 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Database Cleanup{% endblock %}
+{% block content %}
+<div class="cleanup-container">
+  <div class="cleanup-header">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="page-title">
+          <i class="fas fa-exclamation-triangle text-warning"></i>
+          Database Cleanup
+        </h2>
+        <p class="page-subtitle">⚠️ DANGER ZONE - These operations are irreversible!</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cleanup-content">
+    <!-- Warning Alert -->
+    <div class="warning-alert">
+      <div class="warning-content">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div class="warning-text">
+          <h6>⚠️ Critical Warning</h6>
+          <p>All operations in this section will permanently delete data from the database. These actions cannot be undone. Please proceed with extreme caution.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Current Database Status -->
+    <div class="status-card">
+      <div class="status-header">
+        <h5 class="status-title">
+          <i class="fas fa-database"></i>
+          Current Database Status
+        </h5>
+      </div>
+      <div class="status-body">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="stat-item">
+              <div class="stat-icon">
+                <i class="fas fa-users"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-number">{{ data.users_count or 0 }}</div>
+                <div class="stat-label">Total Users</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-item">
+              <div class="stat-icon">
+                <i class="fas fa-heart"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-number">{{ data.matches_count or 0 }}</div>
+                <div class="stat-label">Total Matches</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-item">
+              <div class="stat-icon">
+                <i class="fas fa-comments"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-number">{{ data.chat_count or 0 }}</div>
+                <div class="stat-label">Chat Messages</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-item">
+              <div class="stat-icon">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-number">{{ data.swipe_logs_count or 0 }}</div>
+                <div class="stat-label">Swipe Logs</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="row mt-3">
+          <div class="col-md-6">
+            <div class="stat-item">
+              <div class="stat-icon">
+                <i class="fas fa-thumbs-up"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-number">{{ data.users_with_likes or 0 }}</div>
+                <div class="stat-label">Users with Likes</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="stat-item">
+              <div class="stat-icon">
+                <i class="fas fa-thumbs-down"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-number">{{ data.users_with_dislikes or 0 }}</div>
+                <div class="stat-label">Users with Dislikes</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cleanup Operations -->
+    <div class="cleanup-operations">
+      <div class="operations-header">
+        <h5 class="operations-title">
+          <i class="fas fa-tools"></i>
+          Cleanup Operations
+        </h5>
+        <p class="operations-subtitle">Select specific operations or clear all data at once</p>
+      </div>
+
+      <div class="row">
+        <!-- Clear User Likes/Dislikes -->
+        <div class="col-md-6 mb-4">
+          <div class="operation-card">
+            <div class="operation-header">
+              <div class="operation-icon">
+                <i class="fas fa-heart-broken"></i>
+              </div>
+              <div class="operation-info">
+                <h6 class="operation-title">Clear User Likes & Dislikes</h6>
+                <p class="operation-description">Remove all likes and dislikes from user profiles</p>
+              </div>
+            </div>
+            <div class="operation-body">
+              <div class="operation-details">
+                <div class="detail-item">
+                  <i class="fas fa-code"></i>
+                  <span>Query: <code>db.db_users.updateMany({}, { $set: { fk_user_id_like: [], fk_user_id_dislike: [] } })</code></span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-users"></i>
+                  <span>Affects: All users with likes/dislikes</span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-info-circle"></i>
+                  <span>Impact: Resets user preferences, preserves user accounts</span>
+                </div>
+              </div>
+              <form method="POST" action="/admin/process/database/clear-likes" style="display: inline;">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+                <button type="submit" class="operation-btn clear-likes" onclick="return confirm('Are you sure you want to clear all user likes and dislikes?')">
+                  <i class="fas fa-trash"></i>
+                  Clear Likes & Dislikes
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clear All Matches -->
+        <div class="col-md-6 mb-4">
+          <div class="operation-card">
+            <div class="operation-header">
+              <div class="operation-icon">
+                <i class="fas fa-heart"></i>
+              </div>
+              <div class="operation-info">
+                <h6 class="operation-title">Clear All Matches</h6>
+                <p class="operation-description">Delete all match records from the database</p>
+              </div>
+            </div>
+            <div class="operation-body">
+              <div class="operation-details">
+                <div class="detail-item">
+                  <i class="fas fa-code"></i>
+                  <span>Query: <code>db.db_matches.deleteMany({})</code></span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-database"></i>
+                  <span>Collection: db_matches</span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-info-circle"></i>
+                  <span>Impact: Removes all user matches permanently</span>
+                </div>
+              </div>
+              <form method="POST" action="/admin/process/database/clear-matches" style="display: inline;">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+                <button type="submit" class="operation-btn clear-matches" onclick="return confirm('Are you sure you want to delete all matches?')">
+                  <i class="fas fa-trash"></i>
+                  Clear All Matches
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clear All Chats -->
+        <div class="col-md-6 mb-4">
+          <div class="operation-card">
+            <div class="operation-header">
+              <div class="operation-icon">
+                <i class="fas fa-comments"></i>
+              </div>
+              <div class="operation-info">
+                <h6 class="operation-title">Clear All Chat Messages</h6>
+                <p class="operation-description">Delete all chat conversation history</p>
+              </div>
+            </div>
+            <div class="operation-body">
+              <div class="operation-details">
+                <div class="detail-item">
+                  <i class="fas fa-code"></i>
+                  <span>Query: <code>db.db_chat.deleteMany({})</code></span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-database"></i>
+                  <span>Collection: db_chat</span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-info-circle"></i>
+                  <span>Impact: Removes all chat history permanently</span>
+                </div>
+              </div>
+              <form method="POST" action="/admin/process/database/clear-chats" style="display: inline;">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+                <button type="submit" class="operation-btn clear-chats" onclick="return confirm('Are you sure you want to delete all chat messages?')">
+                  <i class="fas fa-trash"></i>
+                  Clear All Chats
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clear Swipe Logs -->
+        <div class="col-md-6 mb-4">
+          <div class="operation-card">
+            <div class="operation-header">
+              <div class="operation-icon">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <div class="operation-info">
+                <h6 class="operation-title">Clear Daily Swipe Logs</h6>
+                <p class="operation-description">Delete all daily swipe activity logs</p>
+              </div>
+            </div>
+            <div class="operation-body">
+              <div class="operation-details">
+                <div class="detail-item">
+                  <i class="fas fa-code"></i>
+                  <span>Query: <code>db.db_swipe_logs_daily.deleteMany({})</code></span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-database"></i>
+                  <span>Collection: db_swipe_logs_daily</span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-info-circle"></i>
+                  <span>Impact: Removes swipe analytics data</span>
+                </div>
+              </div>
+              <form method="POST" action="/admin/process/database/clear-logs" style="display: inline;">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+                <button type="submit" class="operation-btn clear-logs" onclick="return confirm('Are you sure you want to delete all swipe logs?')">
+                  <i class="fas fa-trash"></i>
+                  Clear Swipe Logs
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Clear All Data -->
+      <div class="clear-all-section">
+        <div class="clear-all-card">
+          <div class="clear-all-header">
+            <div class="clear-all-icon">
+              <i class="fas fa-bomb"></i>
+            </div>
+            <div class="clear-all-info">
+              <h5 class="clear-all-title">Clear All Data</h5>
+              <p class="clear-all-description">Execute all cleanup operations at once</p>
+            </div>
+          </div>
+          <div class="clear-all-body">
+            <div class="clear-all-warning">
+              <i class="fas fa-exclamation-triangle"></i>
+              <span>This will execute all four operations above simultaneously!</span>
+            </div>
+            <form method="POST" action="/admin/process/database/clear-all" style="display: inline;">
+              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+              <button type="submit" class="operation-btn clear-all" onclick="return confirm('⚠️ CRITICAL WARNING ⚠️\n\nAre you absolutely sure you want to clear ALL data?\n\nThis will:\n- Clear likes & dislikes from {{ data.users_count or 0 }} users\n- Delete {{ data.matches_count or 0 }} matches\n- Delete {{ data.chat_count or 0 }} chat messages\n- Delete {{ data.swipe_logs_count or 0 }} swipe logs\n\nThis action cannot be undone!')">
+                <i class="fas fa-bomb"></i>
+                Clear All Data
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block styles %}
+<style>
+/* Cleanup Container */
+.cleanup-container {
+  padding: 0;
+}
+
+/* Page Header */
+.cleanup-header {
+  margin-bottom: 30px;
+}
+
+.page-title {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.page-title i {
+  font-size: 1.8rem;
+}
+
+.page-subtitle {
+  color: #dc3545;
+  font-size: 1rem;
+  margin: 10px 0 0 0;
+  font-weight: 600;
+}
+
+/* Warning Alert */
+.warning-alert {
+  background: rgba(220, 53, 69, 0.1);
+  border: 2px solid rgba(220, 53, 69, 0.3);
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 30px;
+}
+
+.warning-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.warning-content i {
+  color: #dc3545;
+  font-size: 2rem;
+  margin-top: 5px;
+}
+
+.warning-text h6 {
+  color: #dc3545;
+  font-weight: 700;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.warning-text p {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Status Card */
+.status-card {
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  margin-bottom: 30px;
+  overflow: hidden;
+}
+
+.status-header {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px 25px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.status-title {
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-title i {
+  color: #FFDE59;
+  font-size: 1.1rem;
+}
+
+.status-body {
+  padding: 25px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+  background: rgba(255, 222, 89, 0.1);
+  transform: translateY(-2px);
+}
+
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-number {
+  color: #FFDE59;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Cleanup Operations */
+.cleanup-operations {
+  margin-top: 30px;
+}
+
+.operations-header {
+  margin-bottom: 25px;
+}
+
+.operations-title {
+  color: #ffffff;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.operations-title i {
+  color: #FFDE59;
+  font-size: 1.1rem;
+}
+
+.operations-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Operation Cards */
+.operation-card {
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.operation-card:hover {
+  border-color: rgba(255, 222, 89, 0.3);
+  transform: translateY(-5px);
+}
+
+.operation-header {
+  padding: 20px 25px;
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.operation-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.2rem;
+}
+
+.operation-info {
+  flex: 1;
+}
+
+.operation-title {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.operation-description {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.operation-body {
+  padding: 25px;
+}
+
+.operation-details {
+  margin-bottom: 20px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.detail-item i {
+  color: #FFDE59;
+  width: 16px;
+  text-align: center;
+}
+
+.detail-item code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #FFDE59;
+  font-family: monospace;
+}
+
+.operation-btn {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.operation-btn.clear-likes {
+  background: linear-gradient(135deg, #ffc107 0%, #ff8c00 100%);
+  color: #333;
+  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+}
+
+.operation-btn.clear-matches {
+  background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.operation-btn.clear-chats {
+  background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+}
+
+.operation-btn.clear-logs {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.operation-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Clear All Section */
+.clear-all-section {
+  margin-top: 40px;
+}
+
+.clear-all-card {
+  background: rgba(220, 53, 69, 0.1);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(220, 53, 69, 0.3);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.clear-all-header {
+  padding: 25px;
+  background: rgba(220, 53, 69, 0.1);
+  border-bottom: 1px solid rgba(220, 53, 69, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.clear-all-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.5rem;
+}
+
+.clear-all-info {
+  flex: 1;
+}
+
+.clear-all-title {
+  color: #dc3545;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.clear-all-description {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.clear-all-body {
+  padding: 25px;
+}
+
+.clear-all-warning {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(220, 53, 69, 0.1);
+  border-radius: 10px;
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.clear-all-warning i {
+  font-size: 1.2rem;
+}
+
+.operation-btn.clear-all {
+  background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+  font-size: 1rem;
+  padding: 15px 25px;
+}
+
+/* Modal Styles */
+.modern-modal {
+  background: rgba(26, 26, 46, 0.95);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  color: #ffffff;
+}
+
+.modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px 25px;
+}
+
+.modal-title {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-title i {
+  font-size: 1.1rem;
+}
+
+.modal-body {
+  padding: 25px;
+}
+
+.modal-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px 25px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modern-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modern-btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.modern-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.modern-btn.danger {
+  background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.modern-btn.danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+  color: #ffffff;
+}
+
+.modern-btn.primary {
+  background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+  color: #333;
+  box-shadow: 0 4px 15px rgba(255, 222, 89, 0.3);
+}
+
+.modern-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 222, 89, 0.4);
+  color: #333;
+}
+
+.confirmation-content,
+.success-content {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.confirmation-icon,
+.success-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+}
+
+.confirmation-icon i {
+  color: #dc3545;
+}
+
+.success-icon i {
+  color: #28a745;
+}
+
+.confirmation-text h6,
+.success-text h6 {
+  color: #ffffff;
+  font-weight: 600;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.confirmation-text p,
+.success-text p {
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 15px;
+}
+
+.confirmation-details,
+.success-details {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 15px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .cleanup-header {
+    margin-bottom: 20px;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .warning-alert {
+    padding: 20px;
+  }
+  
+  .status-body {
+    padding: 20px;
+  }
+  
+  .stat-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .operation-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .clear-all-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+  
+  .modal-body {
+    padding: 20px;
+  }
+  
+  .modal-footer {
+    padding: 15px 20px;
+  }
+}
+</style>
+{% endblock %}

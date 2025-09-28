@@ -39,6 +39,7 @@ sys.path.append("pytavia_modules/view")
 ##########################################################
 from pytavia_core       import database
 from pytavia_core       import config
+from pytavia_core       import helper
 
 from pytavia_stdlib     import utils
 from pytavia_stdlib     import cfs_lib
@@ -128,6 +129,7 @@ from view               import view_admin_panel_premium_control
 from view               import view_admin_panel_matches
 from view               import view_admin_user_detail
 from view               import view_admin_dashboard
+from view               import view_admin_database_cleanup
 
 from admin              import admin_proc
 
@@ -1014,3 +1016,112 @@ def premium_request_reject():
     else:
         flash(resp.get('desc','Reject failed'), 'danger')
     return redirect(url_for('admin_panel_premium_control'))
+
+# Database Cleanup Routes
+@app.route("/admin/database-cleanup")
+def admin_database_cleanup():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    html = view_admin_database_cleanup.view_admin_database_cleanup(app).html(params)
+    return html
+
+@app.route('/admin/process/database/clear-likes', methods=["POST"])
+def admin_process_clear_likes():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    
+    try:
+        # Clear user likes/dislikes
+        result = mgdDB.db_users.update_many(
+            {},
+            {"$set": {"fk_user_id_like": [], "fk_user_id_dislike": []}}
+        )
+        flash(f'Successfully cleared likes and dislikes from {result.modified_count} users', 'success')
+    except Exception as e:
+        flash(f'Error clearing likes/dislikes: {str(e)}', 'danger')
+    
+    return redirect(url_for('admin_database_cleanup'))
+
+@app.route('/admin/process/database/clear-matches', methods=["POST"])
+def admin_process_clear_matches():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    
+    try:
+        # Count and delete matches
+        matches_count = mgdDB.db_matches.count_documents({})
+        mgdDB.db_matches.delete_many({})
+        flash(f'Successfully deleted {matches_count} matches', 'success')
+    except Exception as e:
+        flash(f'Error clearing matches: {str(e)}', 'danger')
+    
+    return redirect(url_for('admin_database_cleanup'))
+
+@app.route('/admin/process/database/clear-chats', methods=["POST"])
+def admin_process_clear_chats():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    
+    try:
+        # Count and delete chats
+        chat_count = mgdDB.db_chat.count_documents({})
+        mgdDB.db_chat.delete_many({})
+        flash(f'Successfully deleted {chat_count} chat messages', 'success')
+    except Exception as e:
+        flash(f'Error clearing chats: {str(e)}', 'danger')
+    
+    return redirect(url_for('admin_database_cleanup'))
+
+@app.route('/admin/process/database/clear-logs', methods=["POST"])
+def admin_process_clear_logs():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    
+    try:
+        # Count and delete swipe logs
+        logs_count = mgdDB.db_swipe_logs_daily.count_documents({})
+        mgdDB.db_swipe_logs_daily.delete_many({})
+        flash(f'Successfully deleted {logs_count} swipe logs', 'success')
+    except Exception as e:
+        flash(f'Error clearing swipe logs: {str(e)}', 'danger')
+    
+    return redirect(url_for('admin_database_cleanup'))
+
+@app.route('/admin/process/database/clear-all', methods=["POST"])
+def admin_process_clear_all():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    
+    try:
+        # Clear user likes/dislikes
+        likes_result = mgdDB.db_users.update_many(
+            {},
+            {"$set": {"fk_user_id_like": [], "fk_user_id_dislike": []}}
+        )
+        
+        # Clear matches
+        matches_count = mgdDB.db_matches.count_documents({})
+        mgdDB.db_matches.delete_many({})
+        
+        # Clear chats
+        chat_count = mgdDB.db_chat.count_documents({})
+        mgdDB.db_chat.delete_many({})
+        
+        # Clear swipe logs
+        logs_count = mgdDB.db_swipe_logs_daily.count_documents({})
+        mgdDB.db_swipe_logs_daily.delete_many({})
+        
+        total_operations = likes_result.modified_count + matches_count + chat_count + logs_count
+        flash(f'Successfully cleared all data: {total_operations} total operations completed', 'success')
+    except Exception as e:
+        flash(f'Error clearing all data: {str(e)}', 'danger')
+    
+    return redirect(url_for('admin_database_cleanup'))

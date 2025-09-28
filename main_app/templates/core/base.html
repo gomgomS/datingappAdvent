@@ -251,6 +251,14 @@
             <span>Match Admin</span>
           </a>
         </li>
+
+        <!-- Database Cleanup -->
+        <li class="nav-item {% if active_endpoint == 'admin_database_cleanup' %}nav-item-active{% endif %}">
+          <a href="{{ url_for('admin_database_cleanup') }}" class="nav-link {% if active_endpoint == 'admin_database_cleanup' %}nav-link-active{% endif %}">
+            <i class="fas fa-exclamation-triangle text-warning"></i>
+            <span>Database Cleanup</span>
+          </a>
+        </li>
       
         <!-- Logout -->
         <li class="nav-item" style="margin-top: auto;">
