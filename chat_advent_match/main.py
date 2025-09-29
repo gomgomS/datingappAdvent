@@ -36,7 +36,12 @@ def build_main_url() -> str:
     host_only = host_header.split(":")[0]
     main_port = os.environ.get("MAIN_APP_PORT", "50011")
     path = os.environ.get("MAIN_APP_PATH", "/chat")
-    return f"{scheme}://{host_only}:{main_port}{path}"
+    
+    # If main_port is 80 (HTTP) or 443 (HTTPS), don't include port in URL
+    if main_port in ["80", "443"]:
+        return f"{scheme}://{host_only}{path}"
+    else:
+        return f"{scheme}://{host_only}:{main_port}{path}"
 
 def build_chat_dispatch_url() -> str:
     """Build the chat server base URL dynamically.
