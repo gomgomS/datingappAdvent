@@ -256,6 +256,12 @@
             justify-content: center;
             margin-bottom: 12px;
         }
+
+        /* Ensure modal content is scrollable */
+        .bumble-profile {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
         .modal-profile-photo {
             max-width: 100%;
             max-height: 50vh;
@@ -535,6 +541,15 @@
                 $('#fullImageModal').modal('show');
                 }
             });
+
+        // Fix scroll issue when closing full image modal
+        $('#fullImageModal').on('hidden.bs.modal', function () {
+          // Restore scroll to the profile modal
+          $('body').removeClass('modal-open');
+          $('.modal-backdrop').remove();
+          // Re-enable scrolling on the profile modal
+          $('#profileModal').css('overflow-y', 'auto');
+        });
         async function showFutureWifeId(match_id) {
         if (!match_id) {
           alert('No profile selected.');
@@ -588,6 +603,11 @@
             // Open the modal using Bootstrap's modal methods
             const modal = new bootstrap.Modal(document.getElementById('profileModal'));
             modal.show();
+            
+            // Ensure proper scroll behavior
+            $('#profileModal').on('shown.bs.modal', function () {
+              $(this).css('overflow-y', 'auto');
+            });
           } else {
             alert('Failed to fetch profile detail.');
           }

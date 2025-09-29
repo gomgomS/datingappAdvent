@@ -576,6 +576,8 @@
         border: none;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         backdrop-filter: blur(10px);
+        max-height: 90vh;
+        overflow-y: auto;
       }
 
       /* Redesigned Filter Modal */
@@ -1643,6 +1645,20 @@
         $('#profileModal').css('overflow-y', 'auto');
       });
 
+      // Fix scroll issue when closing confirmation modal
+      $('#confirmFilterModal').on('hidden.bs.modal', function () {
+        // Restore scroll to the filter modal
+        $('body').removeClass('modal-open');
+        $('.modal-backdrop').remove();
+        // Re-enable scrolling on the filter modal
+        $('#filterModal').css('overflow-y', 'auto');
+      });
+
+      // Ensure proper scroll behavior when filter modal opens
+      $('#filterModal').on('shown.bs.modal', function () {
+        $(this).css('overflow-y', 'auto');
+      });
+
       function openModal() {
         const modal = document.getElementById('modal'); // Assuming you have a modal element with id "modal"
         if (modal) {
@@ -2147,6 +2163,7 @@
             confirmBtn.addEventListener('click', function() {
               console.log('confirm-apply-btn clicked');
               try { $('#confirmFilterModal').modal('hide'); } catch (_) {}
+              try { $('#filterModal').modal('hide'); } catch (_) {}
               if (isPremium === 'TRUE') {
                 applyFilters();
               } else {
@@ -2181,6 +2198,7 @@
       function onConfirmApplyFilters() {
         console.log('onConfirmApplyFilters()');
         try { $('#confirmFilterModal').modal('hide'); } catch(_) {}
+        try { $('#filterModal').modal('hide'); } catch(_) {}
         const isPremium = document.body.getAttribute('data-is-premium');
         if (isPremium === 'TRUE') {
           applyFilters();
@@ -2201,6 +2219,7 @@
           console.log('confirm-apply-btn delegated click');
           e.preventDefault();
           try { $('#confirmFilterModal').modal('hide'); } catch (_) {}
+          try { $('#filterModal').modal('hide'); } catch (_) {}
           const isPremium = document.body.getAttribute('data-is-premium');
           if (isPremium === 'TRUE') {
             applyFilters();
