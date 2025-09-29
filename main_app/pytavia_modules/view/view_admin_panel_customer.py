@@ -42,8 +42,12 @@ class view_admin_panel_customer:
         page = int(params.get('page', 1))
         per_page = int(params.get('per_page', 10))
         keyword = params.get('keyword')
+        verification = params.get('verification')
+        subscription = params.get('subscription')
+        gender = params.get('gender')
         query = {}
 
+        # Handle keyword search
         if keyword:
             rgx = re.compile(f'.*{keyword}.*', re.IGNORECASE)
             query['$or'] = [
@@ -51,6 +55,28 @@ class view_admin_panel_customer:
                 {'name': rgx},
                 {'email': rgx}
             ]
+
+        # Handle verification filter
+        if verification and verification != 'all':
+            if verification == 'verified':
+                query['verify_email'] = 'TRUE'
+            elif verification == 'unverified':
+                query['verify_email'] = {'$ne': 'TRUE'}
+
+        # Handle subscription filter
+        if subscription and subscription != 'all':
+            if subscription == 'premium':
+                query['is_premium'] = 'TRUE'
+            elif subscription == 'free':
+                query['is_premium'] = {'$ne': 'TRUE'}
+
+        # Handle gender filter
+        if gender and gender != 'all':
+            query['sex'] = gender
+
+        # Debug: Print the query being used
+        print(f"DEBUG - Filter parameters: verification={verification}, subscription={subscription}, gender={gender}")
+        print(f"DEBUG - MongoDB query: {query}")
 
         exec_command = self.mgdDB.db_users.find(query)
         numb_recs = exec_command.count()
@@ -83,6 +109,11 @@ class view_admin_panel_customer:
             page=page,
             per_page=per_page,
             total_page=total_page,
+            total_users=numb_recs,
+            keyword=keyword,
+            verification=verification,
+            subscription=subscription,
+            gender=gender,
             image_base_url=config.G_IMAGE_URL_DISPATCH
         )             
     # end def   

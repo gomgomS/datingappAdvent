@@ -263,6 +263,112 @@ class admin_proc:
             response["desc"] = "Internal error"
             return response
 
+    def _delete_user_admin(self, params):
+        response = {
+            "status": "FAILED",
+            "desc": "",
+            "data": {}
+        }
+        try:
+            username = (params.get("username") or "").strip()
+            user_id = (params.get("user_id") or "").strip()
+
+            if not username and not user_id:
+                response["desc"] = "Missing username or user_id"
+                return response
+
+            # Find the user first
+            query = {"user_id": user_id} if user_id else {"username": username}
+            user_to_delete = self.mgdDB.db_users.find_one(query)
+            
+            if not user_to_delete:
+                response["desc"] = "User not found"
+                return response
+
+            # Delete the user
+            delete_result = self.mgdDB.db_users.delete_one(query)
+            
+            if delete_result.deleted_count > 0:
+                response["status"] = "SUCCESS"
+                response["desc"] = "User deleted successfully"
+                response["data"] = {"deleted_user": username or user_id}
+            else:
+                response["desc"] = "Failed to delete user"
+            
+            return response
+        except Exception:
+            trace_back_msg = traceback.format_exc()
+            self.webapp.logger.debug(trace_back_msg)
+            response["desc"] = "Internal error"
+            return response
+
+    def _bulk_delete_users_admin(self, params):
+        response = {
+            "status": "FAILED",
+            "desc": "",
+            "data": {}
+        }
+        try:
+            print(f"DEBUG - Bulk delete params: {params}")
+            
+            # Handle both 'usernames' and 'usernames[]' keys
+            usernames = params.get('usernames', [])
+            if not usernames:
+                usernames = params.get('usernames[]', [])
+            
+            print(f"DEBUG - Usernames received: {usernames}")
+            if not usernames:
+                response["desc"] = "No users selected for deletion"
+                return response
+
+            # Convert to list if it's a single value
+            if isinstance(usernames, str):
+                usernames = [usernames]
+
+            deleted_count = 0
+            failed_deletions = []
+
+            for username in usernames:
+                if not username.strip():
+                    continue
+                    
+                # Find and delete the user
+                query = {"username": username.strip()}
+                user_to_delete = self.mgdDB.db_users.find_one(query)
+                
+                print(f"DEBUG - Deleting user: {username.strip()}")
+                print(f"DEBUG - User found: {user_to_delete is not None}")
+                
+                if user_to_delete:
+                    delete_result = self.mgdDB.db_users.delete_one(query)
+                    print(f"DEBUG - Delete result: {delete_result.deleted_count}")
+                    if delete_result.deleted_count > 0:
+                        deleted_count += 1
+                        print(f"DEBUG - Successfully deleted: {username.strip()}")
+                    else:
+                        failed_deletions.append(username)
+                        print(f"DEBUG - Failed to delete: {username.strip()}")
+                else:
+                    failed_deletions.append(username)
+                    print(f"DEBUG - User not found: {username.strip()}")
+
+            if deleted_count > 0:
+                response["status"] = "SUCCESS"
+                response["desc"] = f"Successfully deleted {deleted_count} user(s)"
+                response["data"] = {
+                    "deleted_count": deleted_count,
+                    "failed_deletions": failed_deletions
+                }
+            else:
+                response["desc"] = "No users were deleted"
+            
+            return response
+        except Exception:
+            trace_back_msg = traceback.format_exc()
+            self.webapp.logger.debug(trace_back_msg)
+            response["desc"] = "Internal error"
+            return response
+
     def _generate_user_otp(self, params):
         response = {"status": "FAILED", "desc": "", "data": {}}
         try:

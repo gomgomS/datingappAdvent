@@ -743,6 +743,9 @@ def admin_panel_customer():
     params['per_page'   ] = request.args.get('per_page', 10)
     params['page'       ] = request.args.get('page', 1)
     params['keyword'    ] = request.args.get('keyword', '')
+    params['verification'] = request.args.get('verification', '')
+    params['subscription'] = request.args.get('subscription', '')
+    params['gender'     ] = request.args.get('gender', '')
 
     html   = view_admin_panel_customer.view_admin_panel_customer(app).html( params )
     return html
@@ -761,6 +764,62 @@ def admin_user_update():
     else:
         flash(response.get('desc', 'Failed to update user'), 'danger')
     return redirect(url_for('admin_panel_customer'))
+
+@app.route('/admin/process/user/delete', methods=["POST"])
+def admin_user_delete():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    params['admin_username'] = session.get('username')
+    response = admin_proc.admin_proc(app)._delete_user_admin(params)
+    if response.get('status') == 'SUCCESS':
+        flash('User deleted successfully', 'success')
+    else:
+        flash(response.get('desc', 'Failed to delete user'), 'danger')
+    return redirect(url_for('admin_panel_customer'))
+
+@app.route('/admin/process/user/bulk-delete', methods=["POST"])
+def admin_user_bulk_delete():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    params['admin_username'] = session.get('username')
+    
+    # Handle usernames array properly
+    if 'usernames[]' in params:
+        # Convert single usernames[] to list format
+        usernames_value = params['usernames[]']
+        if isinstance(usernames_value, str):
+            params['usernames'] = [usernames_value]
+        else:
+            params['usernames'] = usernames_value
+        del params['usernames[]']
+    
+    print(f"DEBUG - Bulk delete request params: {params}")
+    
+    response = admin_proc.admin_proc(app)._bulk_delete_users_admin(params)
+    
+    print(f"DEBUG - Bulk delete response: {response}")
+    
+    if response.get('status') == 'SUCCESS':
+        deleted_count = response.get('data', {}).get('deleted_count', 0)
+        flash(f'{deleted_count} user(s) deleted successfully', 'success')
+    else:
+        flash(response.get('desc', 'Failed to delete users'), 'danger')
+    
+    # Preserve current filter parameters in redirect
+    redirect_url = url_for('admin_panel_customer')
+    current_params = request.args.to_dict()
+    if current_params:
+        param_string = '&'.join([f'{k}={v}' for k, v in current_params.items()])
+        redirect_url = f"{redirect_url}?{param_string}"
+    
+    print(f"DEBUG - Redirecting to: {redirect_url}")
+    return redirect(redirect_url)
 
 @app.route('/admin/process/user/create', methods=["POST"])
 def admin_user_create():
