@@ -20,28 +20,8 @@ db_chat = db["db_chat"]
 
 # --- Dynamic base URL helpers ---
 def build_main_url() -> str:
-    """Build the main app URL dynamically.
-
-    Defaults to same host as this request, port from MAIN_APP_PORT (default 50011),
-    and path '/chat'. You can override FULL_MAIN_URL to set a complete URL.
-    """
-    full_override = os.environ.get("FULL_MAIN_URL")
-    if full_override:
-        return full_override.rstrip("/")
-
-    scheme = request.headers.get("X-Forwarded-Proto", request.scheme)
-    host_header = request.headers.get("X-Forwarded-Host", request.host)
-
-    # Extract hostname without port
-    host_only = host_header.split(":")[0]
-    main_port = os.environ.get("MAIN_APP_PORT", "50011")
-    path = os.environ.get("MAIN_APP_PATH", "/chat")
-    
-    # If main_port is 80 (HTTP) or 443 (HTTPS), don't include port in URL
-    if main_port in ["80", "443"]:
-        return f"{scheme}://{host_only}{path}"
-    else:
-        return f"{scheme}://{host_only}:{main_port}{path}"
+    """Build the main app URL - redirects to comes.id/chat"""
+    return "http://comes.id/chat"
 
 def build_chat_dispatch_url() -> str:
     """Build the chat server base URL dynamically.
