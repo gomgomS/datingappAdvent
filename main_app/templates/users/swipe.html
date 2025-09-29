@@ -280,6 +280,12 @@
             pointer-events: none;
             font-weight: bold;
             transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 16px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         /* Icon Styling */
@@ -411,6 +417,8 @@
           box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
           font-family: 'Segoe UI', sans-serif;
           backdrop-filter: blur(10px);
+          max-height: 90vh;
+          overflow-y: auto;
         }
 
         /* Header Section */
@@ -829,27 +837,35 @@
             <div class="profile-info-grid mb-4">
               <div class="info-item d-none">
                 <i class="fas fa-user-circle"></i>
-                <span id="username">Username</span>
+                <span><strong>Username:</strong> <span id="username">Username</span></span>
               </div>
               <div class="info-item d-none">
                 <i class="fas fa-envelope"></i>
-                <span id="email">Email</span>
+                <span><strong>Email:</strong> <span id="email">Email</span></span>
+              </div>
+              <div class="info-item">
+                <i class="fas fa-church"></i>
+                <span><strong>Congregation:</strong> <span id="congregation">Registered Congregation</span></span>
+              </div>
+              <div class="info-item">
+                <i class="fas fa-cross"></i>
+                <span><strong>Advent Status:</strong> <span id="advent-status">Advent Status</span></span>
               </div>
               <div class="info-item">
                 <i class="fas fa-heartbeat"></i>
-                <span id="hobbies">Hobbies</span>
+                <span><strong>Hobbies:</strong> <span id="hobbies">Hobbies</span></span>
               </div>
               <div class="info-item">
                 <i class="fas fa-people-arrows"></i>
-                <span id="tribe">Tribe</span>
+                <span><strong>Tribe:</strong> <span id="tribe">Tribe</span></span>
               </div>
               <div class="info-item">
                 <i class="fas fa-ring"></i>
-                <span id="marital-status">Marital Status</span>
+                <span><strong>Marital Status:</strong> <span id="marital-status">Marital Status</span></span>
               </div>
               <div class="info-item wide">
                 <i class="fas fa-comment-dots"></i>
-                <span id="about">About</span>
+                <span><strong>About:</strong> <span id="about">About</span></span>
               </div>
             </div>
 
@@ -1536,6 +1552,8 @@
 
           const json = await res.json();
            console.log('[MyProfile] response json:', json);
+           console.log('[MyProfile] congregation field:', json.data?.congregation);
+           console.log('[MyProfile] advent_status field:', json.data?.advent_status);
           if (json.status === 'success') {
             const data = json.data;
 
@@ -1564,6 +1582,8 @@
             document.getElementById('city').textContent = data.city;
             document.getElementById('username').textContent = data.username;
             document.getElementById('email').textContent = data.email;
+            document.getElementById('congregation').textContent = data.congregation;
+            document.getElementById('advent-status').textContent = data.advent_status;
             document.getElementById('hobbies').textContent = data.hobbies;
             document.getElementById('tribe').textContent = data.tribe;
             document.getElementById('marital-status').textContent = data.marital_status;
@@ -1591,6 +1611,11 @@
 
             // Open the modal using Bootstrap's modal methods
              $('#profileModal').modal('show');
+             
+             // Ensure proper scroll behavior
+             $('#profileModal').on('shown.bs.modal', function () {
+               $(this).css('overflow-y', 'auto');
+             });
           } else {
             alert('Failed to fetch profile detail.');
           }
@@ -1608,6 +1633,15 @@
         }
         $('#fullImageModal').modal('show');
       }
+
+      // Fix scroll issue when closing full image modal
+      $('#fullImageModal').on('hidden.bs.modal', function () {
+        // Restore scroll to the profile modal
+        $('body').removeClass('modal-open');
+        $('.modal-backdrop').remove();
+        // Re-enable scrolling on the profile modal
+        $('#profileModal').css('overflow-y', 'auto');
+      });
 
       function openModal() {
         const modal = document.getElementById('modal'); // Assuming you have a modal element with id "modal"

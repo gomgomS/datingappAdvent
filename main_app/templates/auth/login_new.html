@@ -314,12 +314,75 @@ h6 span{
 	width: auto;
 	display: block;
 }
+
+.logo-container {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 20px;
+	background: rgba(255, 255, 255, 0.9);
+	border-radius: 25px;
+	box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+	backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	transition: all 300ms ease;
+}
+
+.heart-logo {
+	font-size: 32px;
+	background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	animation: heartbeat 2s ease-in-out infinite;
+	display: inline-block;
+}
+
+.logo-text {
+	font-weight: 700;
+	font-size: 22px;
+	color: #333;
+	transition: all 250ms linear;
+}
+
+.logo:hover .logo-container {
+	background: rgba(255, 255, 255, 0.95);
+	box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+	transform: translateY(-2px);
+}
+
+.logo:hover .logo-text {
+	color: #FFDE59;
+}
+
+.logo:hover .heart-logo {
+	background: linear-gradient(135deg, #FFB347 0%, #FF8C00 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	transform: scale(1.1);
+}
+
+@keyframes heartbeat {
+	0% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.1);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
 </style>
 
 <body>  
 
 	<a href="/" class="logo" target="_blank">
-		comes.id
+		<div class="logo-container">
+			<div class="heart-logo">❤️</div>
+			<span class="logo-text">comes.id</span>
+		</div>
 	</a>
 
 	<div class="section">
