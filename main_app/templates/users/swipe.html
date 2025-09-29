@@ -225,7 +225,7 @@
         }
 
         .frame::before {
-            content: "comes.id 💛  Find Your Soulmate";
+            content: "comes.id 💛  Find Your Partner";
             font-size: 18px;
             color: #333;
             position: absolute;
@@ -766,10 +766,13 @@
 <body data-is-premium="{{ is_premium }}" data-user-id="{{ user_rec.user_id }}">
     <!-- Top Menu -->
     <div class="menu-top">
-      <!-- Left controls: Filter + My Profile -->
+      <!-- Left controls: Filter + Info + My Profile -->
       <div style="display:flex; align-items:center; gap:14px; z-index:22; position:relative;">
         <button type="button" class="menu-icon" data-toggle="modal" data-target="#filterModal" style="background:none;border:0;cursor:pointer;">
           <i class="fas fa-search"></i> 
+        </button>
+        <button type="button" class="menu-icon" onclick="showPlatformGuidelines()" style="background:none;border:0;cursor:pointer;" title="Platform Guidelines">
+          <i class="fas fa-info-circle"></i> 
         </button>
       </div>
     
@@ -1172,6 +1175,47 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
             <button type="button" id="confirm-apply-btn" class="btn btn-primary" onclick="onConfirmApplyFilters()">Mulai Pencarian</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Platform Guidelines -->
+    <div class="modal fade" id="platformGuidelinesModal" tabindex="-1" role="dialog" aria-labelledby="platformGuidelinesModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header bg-warning text-white">
+            <h5 class="modal-title" id="platformGuidelinesModalLabel">
+              <i class="fas fa-heart mr-2"></i>Panduan Platform
+            </h5>
+            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-info" role="alert">
+              <i class="fas fa-lightbulb mr-2"></i>
+              <strong>Cara terbaik menggunakan platform ini:</strong>
+            </div>
+            <p class="text-justify">
+              Cara terbaik menggunakan platform ini adalah dengan tidak melakukan swipe secara sembarangan. 
+              Ingat, ini bukan aplikasi seperti Tinder, Bumble, atau aplikasi sejenis yang berfokus pada 
+              interaksi santai atau sekadar hiburan. Setiap orang yang ada di sini pasti bergabung dengan 
+              tujuan yang serius—mencari hubungan yang bermakna, bukan untuk main-main. Karena itu, 
+              gunakanlah aplikasi ini dengan bijak dan selaras dengan tujuanmu, sehingga pengalamanmu di 
+              sini juga akan lebih bermanfaat dan tepat sasaran.
+            </p>
+            <div class="text-center mt-3">
+              <small class="text-muted">
+                <i class="fas fa-calendar-check mr-1"></i>
+                baca dengan seksama
+              </small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-dismiss="modal">
+              <i class="fas fa-check mr-1"></i>Mengerti
+            </button>
           </div>
         </div>
       </div>
@@ -2353,6 +2397,32 @@
           t.addEventListener('change', renderChips);
         });
       })();
+
+      // Platform Guidelines Modal Functions
+      function showPlatformGuidelines() {
+        $('#platformGuidelinesModal').modal('show');
+      }
+
+      // Check if platform guidelines should be shown on page load
+      function checkPlatformGuidelinesOnLoad() {
+        const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+        const lastShownDate = localStorage.getItem('platformGuidelinesLastShown');
+        
+        // If never shown before or last shown on a different day, show the modal
+        if (!lastShownDate || lastShownDate !== today) {
+          // Small delay to ensure page is fully loaded
+          setTimeout(() => {
+            $('#platformGuidelinesModal').modal('show');
+            // Update localStorage with today's date
+            localStorage.setItem('platformGuidelinesLastShown', today);
+          }, 1000); // 1 second delay
+        }
+      }
+
+      // Initialize platform guidelines check when page loads
+      document.addEventListener('DOMContentLoaded', function() {
+        checkPlatformGuidelinesOnLoad();
+      });
    </script>
 
 </body>

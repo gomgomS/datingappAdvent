@@ -54,11 +54,48 @@
         color: var(--bumble-yellow);
     }
 
+    /* Guidelines Banner */
+    .guidelines-banner {
+        margin: 0 auto 20px;
+        max-width: 600px;
+        padding: 0 16px;
+    }
+
+    .guidelines-content {
+        display: flex;
+        align-items: flex-start;
+        background: rgba(255, 193, 7, 0.1);
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        border-radius: 12px;
+        padding: 12px 16px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .guidelines-icon {
+        color: #ffc107;
+        font-size: 18px;
+        margin-right: 12px;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .guidelines-text {
+        font-size: 13px;
+        line-height: 1.4;
+        color: var(--bumble-dark);
+        flex: 1;
+    }
+
+    .guidelines-text strong {
+        color: #856404;
+    }
+
     /* Chat List Container */
     .chat-list-container {
         margin: 0 auto;
         max-width: 600px;
-        padding: 80px 16px 100px; /* Top and bottom nav spacing */
+        padding: 0 16px 100px; /* Reduced top padding since banner is above */
     }
 
     .chat-item {
@@ -181,6 +218,24 @@
 
     /* Responsive */
     @media (max-width: 768px) {
+        .guidelines-banner {
+            padding: 0 12px;
+            margin-bottom: 16px;
+        }
+
+        .guidelines-content {
+            padding: 10px 12px;
+        }
+
+        .guidelines-icon {
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        .guidelines-text {
+            font-size: 12px;
+        }
+
         .chat-info p {
             max-width: 200px;
             font-size: 12px;
@@ -213,10 +268,21 @@
         </div>
     </div>     
     <div class="container py-3">
+        <!-- Platform Guidelines Banner -->
+        <div class="guidelines-banner">
+            <div class="guidelines-content">
+                <i class="fas fa-shield-alt guidelines-icon"></i>
+                <div class="guidelines-text">
+                    <strong>Penting:</strong> Jangan bagikan informasi pribadi seperti alamat, nomor telepon, atau detail keuangan. 
+                    Selalu jaga sikap yang baik dan sopan dalam berkomunikasi. Platform ini untuk mencari hubungan yang bermakna.
+                </div>
+            </div>
+        </div>
+        
         <div class="chat-list-container">
             {% if find_chat.chats %}
             {% for chat in find_chat.chats %}            
-            <div class="chat-item" onclick="openChat('{{ chat.match_id }}', '{{ chat.user_id }}')">
+            <div class="chat-item" onclick="openChat('{{ chat.match_id }}', '{{ sender_id }}')">
                     <img src="{{ img_dispatch_url }}{{ chat.img }}" alt="User">
                     <div class="chat-info">
                         <h5>{{ chat.sender_name }}</h5>

@@ -70,26 +70,36 @@ class view_chat:
     def _find_chat(self, params):
         user_id = params["user_id"]
 
-        # Find all chats where the user is the receiver (opponent's messages)
-        chats = list(self.mgdDB.db_chat.find({"receiver_user_id": user_id}).sort("timestamp", -1))
+        # Find all chats where the user is either sender or receiver
+        chats = list(self.mgdDB.db_chat.find({
+            "$or": [
+                {"receiver_user_id": user_id},  # Messages received by user
+                {"sender_user_id": user_id}     # Messages sent by user
+            ]
+        }).sort("timestamp", -1))
 
         match_data = {}
 
         for chat in chats:
             match_id = chat["match_id"]
             sender_id = chat["sender_user_id"]
+            receiver_id = chat["receiver_user_id"]
 
-            # Fetch sender name from db_users
-            sender = self.mgdDB.db_users.find_one({"user_id": sender_id}, {"name": 1,"_id":0,"profile_photo":1})
-            sender_name = sender["name"] if sender else "Unknown"            
-            print(sender)
+            # Determine the opponent (the other person in the chat)
+            opponent_id = receiver_id if sender_id == user_id else sender_id
+
+            # Fetch opponent's info from db_users
+            opponent = self.mgdDB.db_users.find_one({"user_id": opponent_id}, {"name": 1, "_id": 0, "profile_photo": 1})
+            opponent_name = opponent["name"] if opponent else "Unknown"
+            opponent_photo = opponent["profile_photo"] if opponent else None
+            
             # If match_id not in match_data, store the latest message
             if match_id not in match_data:
                 match_data[match_id] = {
                     "match_id": match_id,
-                    "user_id": user_id,  # Opponent's ID
-                    "sender_name": sender_name,  # Opponent's name
-                    "img": sender['profile_photo'],  # Opponent's name
+                    "user_id": opponent_id,  # Opponent's ID
+                    "sender_name": opponent_name,  # Opponent's name
+                    "img": opponent_photo,  # Opponent's photo
                     "is_read": chat["is_read"],
                     "latest_message": chat["message"],
                     "latest_timestamp": chat["timestamp"],
@@ -97,7 +107,8 @@ class view_chat:
                 }
 
             # Count unread messages (is_read: False) per match
-            if not chat["is_read"]:
+            # Only count unread messages received by the current user
+            if not chat["is_read"] and receiver_id == user_id:
                 match_data[match_id]["unread_count"] += 1
 
         response = {"chats": list(match_data.values())}  # Convert dict to list

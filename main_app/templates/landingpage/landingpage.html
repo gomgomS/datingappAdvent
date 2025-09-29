@@ -415,18 +415,20 @@
 					</div>
 				</div>
 				<div class="contact-form">
-					<form id="contact-form" action="" method="POST">
+					<form id="contact-form" onsubmit="sendToWhatsApp(event)">
 						<div class="form-group">
-							<input type="text" name="name" placeholder="Your Name" required />
+							<input type="text" name="name" id="contact-name" placeholder="Your Name" required />
 						</div>
 						<div class="form-group">
-							<input type="email" name="email" placeholder="Your Email" required />
+							<input type="email" name="email" id="contact-email" placeholder="Your Email" required />
 						</div>
 						<div class="form-group">
-							<textarea name="message" rows="4" placeholder="Your Message" required></textarea>
+							<textarea name="message" id="contact-message" rows="4" placeholder="Your Message" required></textarea>
 						</div>
 						<div class="form-group">
-							<button type="submit">Send Message</button>
+							<button type="submit">
+								<i class="fab fa-whatsapp"></i> Kirim via WhatsApp
+							</button>
 						</div>
 					</form>
 				</div>
@@ -473,6 +475,47 @@
 				  gallery: { enabled: true }
 			});
 		});
+
+		// WhatsApp Contact Function
+		function sendToWhatsApp(event) {
+			event.preventDefault(); // Prevent form submission
+			
+			// Get form values
+			const name = document.getElementById('contact-name').value;
+			const email = document.getElementById('contact-email').value;
+			const message = document.getElementById('contact-message').value;
+			
+			// WhatsApp number (remove any spaces or special characters)
+			const whatsappNumber = '629512345592'; // Indonesian format
+			
+			// Create the message
+			const whatsappMessage = `Halo! Saya ingin menghubungi comes.id
+
+*Informasi Kontak:*
+Nama: ${name}
+Email: ${email}
+
+*Pesan:*
+${message}
+
+---
+Pesan ini dikirim melalui website comes.id`;
+
+			// Encode the message for URL
+			const encodedMessage = encodeURIComponent(whatsappMessage);
+			
+			// Create WhatsApp URL
+			const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+			
+			// Open WhatsApp in new tab
+			window.open(whatsappURL, '_blank');
+			
+			// Optional: Show success message
+			alert('Membuka WhatsApp... Silakan kirim pesan Anda!');
+			
+			// Optional: Clear form after sending
+			document.getElementById('contact-form').reset();
+		}
 	</script>
 </body>
 </html>

@@ -1964,6 +1964,82 @@
           }
         }); 
 
+        // Auto-prefix "jemaat " for congregation input
+        document.addEventListener('DOMContentLoaded', function() {
+          const congregationInput = document.getElementById('congregation');
+          if (congregationInput) {
+            const prefix = 'jemaat ';
+            
+            // Set initial value if empty
+            if (!congregationInput.value || congregationInput.value.trim() === '') {
+              congregationInput.value = prefix;
+            } else if (!congregationInput.value.toLowerCase().startsWith(prefix)) {
+              // If existing value doesn't start with "jemaat ", add it
+              congregationInput.value = prefix + congregationInput.value;
+            }
+            
+            // Handle focus event
+            congregationInput.addEventListener('focus', function() {
+              if (!this.value.toLowerCase().startsWith(prefix)) {
+                this.value = prefix + this.value;
+              }
+              // Position cursor after the prefix
+              const cursorPosition = prefix.length;
+              this.setSelectionRange(cursorPosition, cursorPosition);
+            });
+            
+            // Handle input event to prevent deletion of prefix
+            congregationInput.addEventListener('input', function() {
+              const currentValue = this.value;
+              if (!currentValue.toLowerCase().startsWith(prefix)) {
+                // If user tries to delete the prefix, restore it
+                this.value = prefix + currentValue;
+                // Position cursor at the end
+                this.setSelectionRange(this.value.length, this.value.length);
+              }
+            });
+            
+            // Handle keydown to prevent deletion of prefix with backspace
+            congregationInput.addEventListener('keydown', function(e) {
+              const cursorPosition = this.selectionStart;
+              const currentValue = this.value;
+              
+              // If cursor is at the beginning of prefix and user presses backspace
+              if (e.key === 'Backspace' && cursorPosition <= prefix.length) {
+                e.preventDefault();
+                return false;
+              }
+              
+              // If user tries to select and delete the prefix
+              if (e.key === 'Delete' && this.selectionStart < prefix.length) {
+                e.preventDefault();
+                return false;
+              }
+            });
+            
+            // Handle paste event
+            congregationInput.addEventListener('paste', function(e) {
+              e.preventDefault();
+              const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+              const cursorPosition = this.selectionStart;
+              
+              if (cursorPosition <= prefix.length) {
+                // If pasting at the beginning, add prefix
+                this.value = prefix + pastedText;
+              } else {
+                // If pasting elsewhere, insert normally
+                const beforeCursor = this.value.substring(0, cursorPosition);
+                const afterCursor = this.value.substring(this.selectionEnd);
+                this.value = beforeCursor + pastedText + afterCursor;
+              }
+              
+              // Position cursor after pasted text
+              const newCursorPosition = cursorPosition + pastedText.length;
+              this.setSelectionRange(newCursorPosition, newCursorPosition);
+            });
+          }
+        });
+
          
     
   </script>
