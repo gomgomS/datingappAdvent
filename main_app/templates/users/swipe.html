@@ -77,6 +77,34 @@
           background-repeat: no-repeat;
           background-position: center;
           touch-action: none;
+          z-index: 1;
+          transition: transform 0.3s ease, z-index 0.3s ease;
+        }
+
+        /* Stack cards with proper z-index - only top card visible */
+        .card_swipe:nth-child(1) { z-index: 1; }
+        .card_swipe:nth-child(2) { z-index: 2; }
+        .card_swipe:nth-child(3) { z-index: 3; }
+        .card_swipe:nth-child(4) { z-index: 4; }
+        .card_swipe:nth-child(5) { z-index: 5; }
+
+        /* When swiping, bring current card to front */
+        .card_swipe.swiping {
+          z-index: 10;
+        }
+
+        /* Hide all cards except the top one */
+        .card_swipe:not(:last-child) {
+          opacity: 0;
+          transform: scale(0.95);
+          pointer-events: none;
+        }
+
+        /* Show only the top card */
+        .card_swipe:last-child {
+          opacity: 1;
+          transform: scale(1);
+          pointer-events: auto;
         }
 
         .card_swipe .is-like {
@@ -194,6 +222,17 @@
             justify-content: center;
             /* background: url('your-image.jpg') no-repeat center center; */
             background-size: cover;
+        }
+
+        .frame::before {
+            content: "comes.id 💛  Find Your Soulmate";
+            font-size: 18px;
+            color: #333;
+            position: absolute;
+            top: 10px;       /* jarak dari atas */
+            left: 50%;
+            transform: translateX(-50%); /* biar center secara horizontal */
+            text-align: center;
         }
 
         /* Bumble-inspired Menu Styling */
@@ -1279,8 +1318,13 @@
           }));
 
           if (resp.length === 0 ) {
-            // Jika data kosong, tampilkan card placeholder
-            appendcard_swipe_empty({});
+            // Jika data kosong dan sudah ada skipCount, berarti tidak ada lagi rekomendasi
+            if (skipCount > 0) {
+              showNoMoreRecommendations();
+            } else {
+              // Jika data kosong dari awal, tampilkan card placeholder filter
+              appendcard_swipe_empty({});
+            }
           } else {
             // Kalau ada data, append semua card
             data.forEach(item => appendcard_swipe(item));
@@ -1394,6 +1438,29 @@
         frame.appendChild(newcard_swipe);
       }
 
+      function showNoMoreRecommendations() {
+        const newcard_swipe = document.createElement('div');
+        newcard_swipe.className = 'card_swipe no-data';
+        newcard_swipe.style.backgroundImage = 'none';
+        newcard_swipe.innerHTML = `
+          <div class="no-more-recommendations" style="padding: 40px 20px; text-align: center; color: #666; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+            <div style="font-size: 48px; margin-bottom: 20px;">😢</div>
+            <h3 style="color: #333; margin-bottom: 15px; font-weight: 600;">Tidak Ada Rekomendasi Pasangan</h3>
+            <p style="margin-bottom: 20px; line-height: 1.5;">Semua profil yang sesuai dengan kriteria Anda sudah Anda lihat. Coba lagi besok untuk menemukan profil baru!</p>
+            <div style="display: flex; gap: 15px; margin-top: 20px;">
+              <button onclick="location.reload()" style="background: var(--bumble-yellow); color: var(--bumble-dark); border: none; padding: 12px 24px; border-radius: 25px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                  🔄 Refresh
+                </button>
+                <button onclick="$('#filterModal').modal('show')" style="background: var(--bumble-dark); color: var(--bumble-yellow); border: none; padding: 12px 24px; border-radius: 25px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                  ⚙️ Ubah Filter
+                </button>
+            </div>
+          </div>
+        `;
+
+        frame.appendChild(newcard_swipe);
+      }
+
 
       function initcard_swipe(card_swipe) {
         if (!card_swipe || card_swipe.classList.contains('no-data')) return;
@@ -1420,6 +1487,10 @@
         if (!current || current.classList.contains('no-data')) return;
         startX = clientX;
         startY = clientY;
+        
+        // Add swiping class to current card
+        current.classList.add('swiping');
+        
         current.addEventListener('pointermove', onPointerMove);
         current.addEventListener('pointerup', onPointerUp);
         current.addEventListener('pointerleave', onPointerUp);
@@ -1459,6 +1530,9 @@
         const prev = current;
         const next = current.previousElementSibling;
 
+        // Remove swiping class from current card
+        current.classList.remove('swiping');
+
         if (next) {
           current = next;
           likeText = current.children[0];
@@ -1482,6 +1556,9 @@
             if (current) {
               likeText = current.children[0];
               initcard_swipe(current);
+            } else {
+              // No more cards available, show "no recommendations" message
+              showNoMoreRecommendations();
             }
           }
         }, innerWidth); // Wait for animation duration
@@ -1489,6 +1566,10 @@
 
       function cancel() {
         setTransform(0, 0, 0, 100);
+        
+        // Remove swiping class
+        current.classList.remove('swiping');
+        
         setTimeout(() => current.style.transition = '', 100);
       }
 
@@ -2032,8 +2113,8 @@
             }));
                     
             if (resp.length === 0 ) {
-              // Jika data kosong, tampilkan card placeholder dengan state TERBARU dari UI
-              appendcard_swipe_empty(filterData);
+              // Jika data kosong setelah filter, tampilkan "no recommendations" message
+              showNoMoreRecommendations();
             } else {
               // Kalau ada data, append semua card
               data.forEach(item => appendcard_swipe(item));
