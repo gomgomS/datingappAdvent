@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Chat - {{ receiver_name }}</title>
+    
+    <!-- Vendor CSS -->
+    <link href="../../static/lib/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="../../static/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Socket.IO -->
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #root {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* Main container */
+        #room-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Header */
+        #home-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #fff;
+            font-size: 24px;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.15);
+            width: 100%;
+            padding: 15px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        #room-code-display {
+            font-size: 16px;
+            color: #fff;
+            font-weight: 500;
+            flex-grow: 1;
+            text-align: center;
+            margin: 0 15px;
+        }
+
+        .admin-badge {
+            background: rgba(255, 193, 7, 0.9);
+            color: #333;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        /* Leave button */
+        #leave-chat-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            text-decoration: none;
+            border: none;
+            transition: background-color 0.3s ease-in-out;
+            white-space: nowrap;
+        }
+
+        #leave-chat-btn:hover {
+            background-color: rgba(255, 255, 255, 1);
+            text-decoration: none;
+            color: #333;
+        }
+
+        /* Chat container */
+        #chat-room-widget {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            margin: 0 12px;
+            margin-top: 80px;
+            padding: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Messages area */
+        #msgs-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 14px;
+            margin-bottom: 90px;
+        }
+
+        #messages {
+            list-style: none;
+        }
+
+        /* Message bubbles */
+        .message-item {
+            padding: 14px 18px;
+            border-radius: 24px;
+            max-width: 80%;
+            font-size: 16px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            position: relative;
+            margin: 12px 0;
+            transition: all 0.2s ease;
+        }
+
+        /* Admin message (right side - like self messages) */
+        .admin-message-item {
+            background: rgba(102, 126, 234, 0.2);
+            color: #333;
+            margin-left: auto;
+            margin-right: 0;
+            border-bottom-right-radius: 0;
+            text-align: right;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+        }
+
+        /* User message (left side - like peer messages) */
+        .user-message-item {
+            background: rgba(118, 75, 162, 0.2);
+            color: #333;
+            border-bottom-left-radius: 0;
+            text-align: left;
+            border: 2px solid rgba(118, 75, 162, 0.3);
+        }
+
+        .admin-message-item .muted-text {
+            text-align: right;
+            margin-right: 5px;
+        }
+
+        .user-message-item .muted-text {
+            text-align: left;
+            margin-left: 5px;
+        }
+
+        .muted-text {
+            font-size: 12px;
+            color: #666;
+            display: block;
+            margin-bottom: 3px;
+            text-align: left;
+        }
+
+        /* Message input bar */
+        #message-box {
+            display: flex;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.95);
+            border-top: 1px solid rgba(102, 126, 234, 0.3);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        #message-input {
+            flex-grow: 1;
+            padding: 16px 20px;
+            border-radius: 28px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            font-size: 18px;
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        #send-btn {
+            background-color: #667eea;
+            color: #fff;
+            padding: 16px 20px;
+            border-radius: 28px;
+            margin-left: 12px;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #send-btn:hover {
+            background-color: #5a6fd8;
+        }
+
+        /* Responsive styles */
+        @media screen and (max-width: 480px) {
+            #home-header {
+                font-size: 18px;
+                padding: 12px 15px;
+            }
+
+            #room-code-display {
+                font-size: 14px;
+                margin: 0 10px;
+            }
+
+            #leave-chat-btn {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+
+            .message-item {
+                font-size: 16px;
+                max-width: 90%;
+            }
+
+            #message-input {
+                font-size: 16px;
+                padding: 14px 18px;
+            }
+
+            #send-btn {
+                font-size: 16px;
+                padding: 14px 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="room-container">
+        <div id="home-header">
+            <span>Admin Panel 💬</span>
+            <span id="room-code-display">
+                Chat with: <strong>{{ receiver_name }}</strong>
+                <span class="admin-badge">ADMIN CHAT</span>
+            </span>
+            <span id="latest-sequence" style="display: none;">{{ latest_sequence }}</span>
+            <a href="{{ main_url }}" id="leave-chat-btn">Back to Admin</a>
+        </div>
+        
+        <div id="chat-room-widget">
+            <div id="msgs-container">
+                <ul id="messages">
+                    {% for msg in chat_messages %}
+                        <li id="msg-seq-{{ msg.sequence }}" class="message-item {% if msg.sender_user_id == sender %}admin-message-item{% else %}user-message-item{% endif %}">
+                            <small class="muted-text">
+                                <span class="smart-date" data-timestamp="{{ msg.timestamp }}">{{ msg.timestamp }}</span>
+                                {% if msg.is_read %} ✅ {% endif %}
+                            </small>
+                            <p>{{ msg.message }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>  
+        
+        <div id="message-box">
+            <input type="text" placeholder="Enter your message as admin..." id="message-input" name="message" />
+            <button type="submit" id="send-btn" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // Function to format date smartly
+        function formatSmartDate(timestamp) {
+            const now = new Date();
+            const messageDate = new Date(timestamp);
+            
+            const diffTime = now - messageDate;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            const timeStr = messageDate.toLocaleTimeString('en-GB', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+            
+            if (diffDays === 0) {
+                return timeStr;
+            } else if (diffDays === 1) {
+                return `Yesterday ${timeStr}`;
+            } else if (diffDays < 7) {
+                return `${diffDays} days ago ${timeStr}`;
+            } else {
+                return messageDate.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: '2-digit'
+                }) + ' ' + timeStr;
+            }
+        }
+
+        // Initialize Socket.IO
+        var socketio = io("{{ chat_dispatch_url }}", { transports: ["polling"] });
+
+        const match_id = "{{ match_id }}";
+        const sender_id = "{{ sender }}";
+
+        // Emit join when connected
+        socketio.on("connect", function () {
+            socketio.emit("join", { room: match_id });
+            socketio.emit("chat_opened", { match_id: match_id, receiver_id: sender_id });
+        });
+
+        socketio.on("connect_error", function (err) {
+            console.error("Socket connect_error:", err);
+        });
+
+        // Function to scroll to bottom
+        function scrollToBottom() {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+        }
+
+        // Get latest sequence from database
+        let latest_sequence = parseInt(document.getElementById("latest-sequence")?.innerText || "0", 10);
+
+        function appendNewMessage(data) {
+            console.log("New message data:", data);
+
+            const messages = document.getElementById("messages");
+            const isAdmin = data.sender_user_id === sender_id;
+
+            // Check if message already exists
+            if (document.getElementById(`msg-seq-${data.sequence}`)) {
+                console.log(`Skipping duplicate message with sequence: ${data.sequence}`);
+                return;
+            }
+
+            // Add message if sequence is higher
+            if (data.sequence > latest_sequence) {
+                const newMessage = document.createElement("li");
+                newMessage.className = `message-item ${isAdmin ? "admin-message-item" : "user-message-item"}`;
+                newMessage.id = `msg-seq-${data.sequence}`;
+
+                const formattedTime = data.timestamp ? formatSmartDate(data.timestamp) : "Just now";
+
+                newMessage.innerHTML = `
+                    <small class="muted-text">${formattedTime}</small>
+                    <p>${data.message}</p>
+                `;
+
+                messages.appendChild(newMessage);
+                latest_sequence = data.sequence;
+                document.getElementById("latest-sequence").innerText = latest_sequence;
+            }
+
+            scrollToBottom();
+        }
+
+        // Load previous messages
+        socketio.on("load_previous_messages", function (messages) {
+            console.log("Loaded previous messages:", messages);
+            messages.forEach(appendNewMessage);
+            scrollToBottom();
+        });
+
+        // Receive new messages
+        socketio.on("message", function (data) {
+            appendNewMessage(data);
+            setTimeout(scrollToBottom, 500);
+        });
+
+        // Function to send message
+        function sendMessage() {
+            const msgInput = document.getElementById("message-input");
+            const message = msgInput.value.trim();
+
+            if (!message) return;
+
+            let new_sequence = latest_sequence + 1;
+
+            // Send message to server
+            socketio.emit("message", {
+                message: message,
+                sender: sender_id,
+                match_id: match_id,
+                room: match_id,
+                sequence: new_sequence
+            });
+
+            // Add to UI immediately
+            appendNewMessage({
+                message: message,
+                sender_user_id: sender_id,
+                sequence: new_sequence,
+                timestamp: new Date().toISOString()
+            });
+
+            latest_sequence = new_sequence;
+            document.getElementById("latest-sequence").innerText = latest_sequence;
+
+            msgInput.value = "";
+            scrollToBottom();
+        }
+
+        // Send message with Enter key
+        document.getElementById("message-input").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Send button event listener
+        document.getElementById("send-btn").addEventListener("click", sendMessage);
+
+        // Function to leave chat
+        function leaveChat() {
+            socketio.emit("leave", { room: match_id, sender: sender_id });
+            socketio.disconnect();
+            window.location.href = "{{ main_url }}";
+        }
+
+        // Leave button event listener
+        document.getElementById("leave-chat-btn").addEventListener("click", function (event) {
+            event.preventDefault();
+            leaveChat();
+        });
+
+        // Format existing messages on page load
+        document.addEventListener("DOMContentLoaded", function() {
+            const smartDateElements = document.querySelectorAll('.smart-date');
+            smartDateElements.forEach(element => {
+                const timestamp = element.getAttribute('data-timestamp');
+                if (timestamp) {
+                    element.textContent = formatSmartDate(timestamp);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

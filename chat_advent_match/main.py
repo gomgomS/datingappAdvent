@@ -98,6 +98,9 @@ def chat():
     last_sequence = last_message["sequence"] if last_message else 0
     latest_sequence = last_sequence
 
+    # Check if this is an admin-user chat
+    is_admin_chat = match.get("type") == "admin_user_chat"
+
     return render_template(
         "room.html",
         match_id=match_id,
@@ -109,7 +112,8 @@ def chat():
         main_url=build_main_url(),
         chat_dispatch_url=build_chat_dispatch_url(),
         chat_messages=chat_messages,
-        latest_sequence=latest_sequence
+        latest_sequence=latest_sequence,
+        is_admin_chat=is_admin_chat
     )
 
 @socketio.on("join")
@@ -159,12 +163,22 @@ def handle_message(data):
     if not match:
         return
 
-    if sender == match["user_id_1"]:
-        receiver = match["user_id_2"]
-    elif sender == match["user_id_2"]:
-        receiver = match["user_id_1"]
+    # Handle admin-user chat
+    if match.get("type") == "admin_user_chat":
+        if sender == match["user_id_1"]:
+            receiver = match["user_id_2"]
+        elif sender == match["user_id_2"]:
+            receiver = match["user_id_1"]
+        else:
+            return
     else:
-        return
+        # Handle regular user-user chat
+        if sender == match["user_id_1"]:
+            receiver = match["user_id_2"]
+        elif sender == match["user_id_2"]:
+            receiver = match["user_id_1"]
+        else:
+            return
 
     message_data = {
         "message": message,
@@ -183,7 +197,7 @@ def handle_message(data):
         "is_deleted": False,
     })
 
-    # Kirim pesan ke semua user di room (termasuk pengirim)
+    # Send message to all users in room (including sender)
     emit("message", message_data, room=room)
 
 @socketio.on("leave")

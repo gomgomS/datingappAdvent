@@ -81,7 +81,8 @@ class view_match:
                     '$or': [
                         {'user_id_1': user_id},
                         {'user_id_2': user_id}
-                    ]
+                    ],
+                    'type': {'$ne': 'admin_user_chat'}  # Exclude admin-user chats
                 }
             },
             {

@@ -88,10 +88,20 @@ class view_chat:
             # Determine the opponent (the other person in the chat)
             opponent_id = receiver_id if sender_id == user_id else sender_id
 
+            # Check if this is an admin chat by looking at the match
+            match_info = self.mgdDB.db_matches.find_one({"match_id": match_id})
+            is_admin_chat = match_info and match_info.get("type") == "admin_user_chat"
+
             # Fetch opponent's info from db_users
             opponent = self.mgdDB.db_users.find_one({"user_id": opponent_id}, {"name": 1, "_id": 0, "profile_photo": 1})
-            opponent_name = opponent["name"] if opponent else "Unknown"
-            opponent_photo = opponent["profile_photo"] if opponent else None
+            
+            if is_admin_chat:
+                # For admin chats, show "Admin" as the sender name
+                opponent_name = "Admin"
+                opponent_photo = None  # Use default admin avatar or none
+            else:
+                opponent_name = opponent["name"] if opponent else "Unknown"
+                opponent_photo = opponent["profile_photo"] if opponent else None
             
             # If match_id not in match_data, store the latest message
             if match_id not in match_data:
@@ -103,7 +113,8 @@ class view_chat:
                     "is_read": chat["is_read"],
                     "latest_message": chat["message"],
                     "latest_timestamp": chat["timestamp"],
-                    "unread_count": 0  # Initialize unread count
+                    "unread_count": 0,  # Initialize unread count
+                    "is_admin_chat": is_admin_chat  # Add admin chat flag
                 }
 
             # Count unread messages (is_read: False) per match

@@ -124,6 +124,28 @@
         border: 2px solid var(--bumble-yellow);
     }
 
+    .admin-avatar, .default-avatar {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        margin-right: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        border: 2px solid var(--bumble-yellow);
+    }
+
+    .admin-avatar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+    }
+
+    .default-avatar {
+        background: var(--bumble-light);
+        color: var(--bumble-dark);
+    }
+
     .chat-info {
         flex: 1;
     }
@@ -160,6 +182,18 @@
         border-radius: 50px;
         margin-top: 6px;
         display: inline-block;
+    }
+
+    .admin-chat-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 8px;
+        margin-left: 8px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
     /* Bottom Menu */
@@ -283,9 +317,23 @@
             {% if find_chat.chats %}
             {% for chat in find_chat.chats %}            
             <div class="chat-item" onclick="openChat('{{ chat.match_id }}', '{{ sender_id }}')">
-                    <img src="{{ img_dispatch_url }}{{ chat.img }}" alt="User">
+                    {% if chat.img %}
+                        <img src="{{ img_dispatch_url }}{{ chat.img }}" alt="User">
+                    {% elif chat.is_admin_chat %}
+                        <div class="admin-avatar">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                    {% else %}
+                        <div class="default-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    {% endif %}
                     <div class="chat-info">
-                        <h5>{{ chat.sender_name }}</h5>
+                        <h5>{{ chat.sender_name }}
+                            {% if chat.is_admin_chat %}
+                                <span class="admin-chat-badge">COMES.ID TEAMS</span>
+                            {% endif %}
+                        </h5>
                         <p>{{ chat.latest_message }}</p>
                     </div>
                     <div class="chat-meta">

@@ -134,6 +134,52 @@ body {
   text-align: right;
 }
 
+/* Admin chat styles */
+body.admin-chat {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.admin-chat #home-header {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.admin-chat #room-code-display {
+  color: #fff;
+}
+
+.admin-chat .admin-message-item {
+  background: rgba(102, 126, 234, 0.2);
+  border: 2px solid rgba(102, 126, 234, 0.3);
+  color: #333;
+  border-bottom-left-radius: 0;
+  text-align: left;
+}
+
+.admin-chat .user-message-item {
+  background: rgba(118, 75, 162, 0.2);
+  border: 2px solid rgba(118, 75, 162, 0.3);
+  color: #333;
+  margin-left: auto;
+  margin-right: 0;
+  border-bottom-right-radius: 0;
+  text-align: right;
+}
+
+.admin-chat #message-input {
+  border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+.admin-chat #send-btn {
+  background-color: #667eea;
+  color: #fff;
+}
+
+.admin-chat #send-btn:hover {
+  background-color: #5a6fd8;
+}
+
 .peer-message-item .muted-text {
   text-align: left;
   margin-left: 5px;
@@ -227,10 +273,10 @@ body {
 </style>
   {% extends 'base.html' %}
   {% block content %}
-  <div id="room-container">
+  <div id="room-container" {% if is_admin_chat %}class="admin-chat-mode"{% endif %}>
     <div id="home-header">
       <span>comes.id 💬</span>
-      <span id="room-code-display">Chat with: <strong>{{ receiver_name }}</strong></span>
+      <span id="room-code-display">Chat with: <strong>{{ receiver_name }}</strong></span>xx{{is_admin_chat}}
       <span id="latest-sequence" style="display: none;">{{ latest_sequence }}</span>
       <a href="{{main_url}}" id="leave-chat-btn">Leave the Chat</a>
     </div>
@@ -335,14 +381,26 @@ body {
       // Jika sequence dari pesan baru lebih besar dari latest_sequence, tambahkan ke UI
       if (data.sequence > latest_sequence) {
         const newMessage = document.createElement("li");
-        newMessage.className = `message-item ${isSender ? "self-message-item" : "peer-message-item"}`;
+        
+        // Check if this is admin chat mode
+        const isAdminChat = document.body.classList.contains('admin-chat') || 
+                           document.getElementById('room-container').classList.contains('admin-chat-mode');
+        
+        if (isAdminChat) {
+          // For admin chat, use admin-specific message classes
+          newMessage.className = `message-item ${isSender ? "admin-message-item" : "user-message-item"}`;
+        } else {
+          // For regular chat, use normal message classes
+          newMessage.className = `message-item ${isSender ? "self-message-item" : "peer-message-item"}`;
+        }
+        
         newMessage.id = `msg-seq-${data.sequence}`; // ID unik berdasarkan sequence
 
         const formattedTime = data.timestamp ? formatSmartDate(data.timestamp) : "Just now";
 
         // Tambahkan pesan baru ke chat
         newMessage.innerHTML = `
-            <p><strong> ${data.message}</p>
+            <p>${data.message}</p>
             <small class="muted-text">${formattedTime}</small>
         `;
 
@@ -443,7 +501,7 @@ body {
         leaveChat();
     });
 
-    // Format existing messages on page load
+    // Format existing messages on page load and apply admin chat styling
     document.addEventListener("DOMContentLoaded", function() {
         const smartDateElements = document.querySelectorAll('.smart-date');
         smartDateElements.forEach(element => {
@@ -452,6 +510,11 @@ body {
                 element.textContent = formatSmartDate(timestamp);
             }
         });
+        
+        // Apply admin chat styling if this is an admin chat
+        {% if is_admin_chat %}
+        document.body.classList.add('admin-chat');
+        {% endif %}
     });
 
   </script>

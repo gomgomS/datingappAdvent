@@ -11,6 +11,7 @@ import html as html_unescape
 import random
 from typing import List
 from string import ascii_letters
+from datetime import datetime
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -1143,6 +1144,73 @@ def admin_chat_messages(match_id):
             "message": f"Error fetching chat messages: {str(e)}"
         }
         return json.dumps(response)
+# end def
+
+@app.route('/admin/chat-with-user/<user_id>', methods=["GET"])
+def admin_chat_with_user(user_id):
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    
+    try:
+        # Get database connection
+        mgd = database.get_db_conn(config.mainDB)
+        
+        # Get user data
+        user = mgd.db_users.find_one({"user_id": user_id})
+        if not user:
+            return jsonify({"status": "error", "message": "User not found"}), 404
+        
+        # Create admin-user match ID (unique identifier for admin-user chat)
+        admin_user_id = session.get("user_id")  # Admin user ID
+        admin_user_match_id = f"admin_{admin_user_id}_{user_id}"
+        
+        # Check if admin-user match exists, if not create it
+        admin_match = mgd.db_matches.find_one({"match_id": admin_user_match_id})
+        if not admin_match:
+            # Create admin-user match record
+            mgd.db_matches.insert_one({
+                "match_id": admin_user_match_id,
+                "user_id_1": admin_user_id,
+                "user_id_2": user_id,
+                "type": "admin_user_chat",
+                "created_at": datetime.now().isoformat(),
+                "is_active": True
+            })
+        
+        # Fetch previous messages from MongoDB
+        chat_messages = list(mgd.db_chat.find({"match_id": admin_user_match_id}).sort("timestamp", 1))
+        
+        # Convert MongoDB ObjectId to string & format timestamps
+        for msg in chat_messages:
+            msg["_id"] = str(msg["_id"])
+            msg["timestamp"] = msg["timestamp"] if isinstance(msg["timestamp"], str) else msg["timestamp"].isoformat()
+        
+        # Get last sequence number
+        last_message = mgd.db_chat.find_one({"match_id": admin_user_match_id}, sort=[("sequence", -1)])
+        latest_sequence = last_message["sequence"] if last_message else 0
+        
+        # Get admin user data
+        admin_user = mgd.db_users.find_one({"user_id": admin_user_id})
+        admin_name = admin_user.get("name", "Admin") if admin_user else "Admin"
+        
+        return render_template(
+            "admin/admin_chat_room.html",
+            match_id=admin_user_match_id,
+            sender=admin_user_id,
+            receiver=user_id,
+            sender_name=admin_name,
+            sender_username=admin_user.get("username", "admin") if admin_user else "admin",
+            receiver_name=user.get("name", "User"),
+            main_url="/admin/panel/matches",
+            chat_dispatch_url=config.G_CHAT_URL_DISPATCH,
+            chat_messages=chat_messages,
+            latest_sequence=latest_sequence,
+            is_admin_chat=True
+        )
+    except Exception as e:
+        print(f"Error in admin chat: {e}")
+        return jsonify({"status": "error", "message": "Failed to open chat"}), 500
 # end def
 
 @app.route('/admin/process/premium/apply', methods=["POST"])

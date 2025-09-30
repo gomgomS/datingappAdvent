@@ -30,10 +30,28 @@
       </div>
     </div>
   {% elif user_data %}
-    <div class="user-detail-content">
+        <div class="user-detail-content">
       <div class="row">
         <!-- Profile Card -->
         <div class="col-md-4">
+          <!-- Admin Chat Button -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <h5 class="info-card-title">
+                <i class="fas fa-comments"></i>
+                Admin Communication
+              </h5>
+            </div>
+            <div class="info-card-body">
+              <button class="admin-chat-btn" onclick="openAdminChat('{{ user_data.user_id }}', '{{ user_data.name or 'User' }}')">
+                <i class="fas fa-comment-dots"></i>
+                Chat with User
+              </button>
+              <p class="admin-chat-description">
+                Start a conversation with this user for support or assistance.
+              </p>
+            </div>
+          </div>
           <div class="profile-card">
             <div class="profile-header">
               <div class="profile-photo-container">
@@ -1046,6 +1064,44 @@
   font-size: 0.7rem;
 }
 
+/* Admin Chat Button */
+.admin-chat-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 12px;
+  color: #ffffff;
+  padding: 15px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.admin-chat-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+.admin-chat-btn i {
+  font-size: 1.1rem;
+}
+
+.admin-chat-description {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  text-align: center;
+  margin: 0;
+  line-height: 1.4;
+}
+
 /* Chat Modal Styles */
 .chat-modal {
   max-height: 80vh;
@@ -1280,6 +1336,12 @@ function openFullImageModal(imageUrl) {
     fullImageElement.src = imageUrl;
   }
   $('#fullImageModal').modal('show');
+}
+
+function openAdminChat(userId, userName) {
+  // Open admin chat in a new window/tab
+  const chatUrl = `/admin/chat-with-user/${userId}`;
+  window.open(chatUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
 }
 
 function viewChat(matchId, user1Name, user2Name) {
