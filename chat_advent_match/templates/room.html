@@ -153,18 +153,18 @@ body.admin-chat {
   background: rgba(102, 126, 234, 0.2);
   border: 2px solid rgba(102, 126, 234, 0.3);
   color: #333;
-  border-bottom-left-radius: 0;
-  text-align: left;
+  margin-left: auto;
+  margin-right: 0;
+  border-bottom-right-radius: 0;
+  text-align: right;
 }
 
 .admin-chat .user-message-item {
   background: rgba(118, 75, 162, 0.2);
   border: 2px solid rgba(118, 75, 162, 0.3);
   color: #333;
-  margin-left: auto;
-  margin-right: 0;
-  border-bottom-right-radius: 0;
-  text-align: right;
+  border-bottom-left-radius: 0;
+  text-align: left;
 }
 
 .admin-chat #message-input {
@@ -276,7 +276,7 @@ body.admin-chat {
   <div id="room-container" {% if is_admin_chat %}class="admin-chat-mode"{% endif %}>
     <div id="home-header">
       <span>comes.id 💬</span>
-      <span id="room-code-display">Chat with: <strong>{{ receiver_name }}</strong></span>xx{{is_admin_chat}}
+      <span id="room-code-display">Chat with: <strong>{% if is_admin_chat %}comes teams{% else %}{{ receiver_name }}{% endif %}</strong></span>
       <span id="latest-sequence" style="display: none;">{{ latest_sequence }}</span>
       <a href="{{main_url}}" id="leave-chat-btn">Leave the Chat</a>
     </div>
@@ -284,7 +284,7 @@ body.admin-chat {
       <div id="msgs-container">
         <ul id="messages">
           {% for msg in chat_messages %}
-            <li id="msg-seq-{{ msg.sequence }}" class="message-item {% if msg.sender_user_id == sender %}self-message-item{% else %}peer-message-item{% endif %}">
+            <li id="msg-seq-{{ msg.sequence }}" class="message-item {% if is_admin_chat %}{% if msg.sender_user_id == sender %}admin-message-item{% else %}user-message-item{% endif %}{% else %}{% if msg.sender_user_id == sender %}self-message-item{% else %}peer-message-item{% endif %}{% endif %}">
               <small class="muted-text"><span class="smart-date" data-timestamp="{{ msg.timestamp }}">{{ msg.timestamp }}</span>{% if msg.is_read %} ✅ {% endif %}</small>
               <p>{{ msg.message }}</p>
             </li>

@@ -116,6 +116,106 @@ def chat():
         is_admin_chat=is_admin_chat
     )
 
+@app.route("/admin/chat-with-user/<user_id>", methods=["GET", "POST"])
+def admin_chat(user_id):
+    """Admin chat route that renders admin_room.html template"""
+    # Get sender_id from form data or query params
+    sender_id = request.form.get("sender") or request.args.get("sender")
+    
+    if not sender_id:
+        return "Error: sender is required", 400
+
+    # Check if this is a user_id (for admin-user chat) or match_id (for existing match)
+    # If it's a user_id, we need to create or find an admin-user match
+    if len(user_id) > 20:  # Assuming user_id is longer than match_id
+        # This is a user_id, create admin-user match
+        admin_user = db_users.find_one({"user_id": sender_id})
+        if not admin_user:
+            return "Error: admin user not found", 404
+            
+        target_user = db_users.find_one({"user_id": user_id})
+        if not target_user:
+            return "Error: target user not found", 404
+        
+        # Create or find admin-user match
+        admin_match_id = f"admin_{sender_id}_{user_id}"
+        match = db_matches.find_one({"match_id": admin_match_id})
+        
+        if not match:
+            # Create new admin-user match
+            match_data = {
+                "match_id": admin_match_id,
+                "user_id_1": sender_id,  # Admin user
+                "user_id_2": user_id,    # Target user
+                "type": "admin_user_chat",
+                "created_at": datetime.utcnow().isoformat(),
+                "status": "active"
+            }
+            db_matches.insert_one(match_data)
+            match = match_data
+    else:
+        # This is a match_id, find existing match
+        match = db_matches.find_one({"match_id": user_id})
+        if not match:
+            return "Error: match not found", 404
+
+    # For admin chat, determine receiver based on match structure
+    if sender_id == match["user_id_1"]:
+        receiver_id = match["user_id_2"]
+    elif sender_id == match["user_id_2"]:
+        receiver_id = match["user_id_1"]
+    else:
+        return "Error: sender is not part of this match", 400
+
+    sender = db_users.find_one({"user_id": sender_id})
+    if not sender:
+        return "Error: sender user not found", 404
+
+    receiver = db_users.find_one({"user_id": receiver_id})
+    if not receiver:
+        return "Error: receiver user not found", 404
+
+    # Use the match_id from the match object
+    match_id = match["match_id"]
+
+    # Fetch previous messages from MongoDB
+    chat_messages = list(db_chat.find({"match_id": match_id}).sort("timestamp", 1))
+
+    # Convert MongoDB ObjectId to string & format timestamps
+    for msg in chat_messages:
+        msg["_id"] = str(msg["_id"])
+        msg["timestamp"] = msg["timestamp"] if isinstance(msg["timestamp"], str) else msg["timestamp"].isoformat()
+
+    # Store messages in memory for quick access
+    room_messages[match_id] = chat_messages
+
+    # Mark unread messages as read
+    db_chat.update_many(
+        {"match_id": match_id, "receiver_user_id": sender_id, "is_read": False},
+        {"$set": {"is_read": True}}
+    )
+
+    # Notify sender that messages have been read
+    socketio.emit("messages_read", {"match_id": match_id, "receiver_id": sender_id}, room=match_id)
+
+    last_message = db_chat.find_one({"match_id": match_id}, sort=[("sequence", -1)])
+    last_sequence = last_message["sequence"] if last_message else 0
+    latest_sequence = last_sequence
+
+    return render_template(
+        "admin_room.html",
+        match_id=match_id,
+        sender=sender_id,
+        receiver=receiver_id,
+        sender_name=sender["name"],
+        sender_username=sender["username"],
+        receiver_name=receiver["name"],
+        main_url=build_main_url(),
+        chat_dispatch_url=build_chat_dispatch_url(),
+        chat_messages=chat_messages,
+        latest_sequence=latest_sequence
+    )
+
 @socketio.on("join")
 def handle_join(data):
     room = data["room"]

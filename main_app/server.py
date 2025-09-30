@@ -1146,6 +1146,42 @@ def admin_chat_messages(match_id):
         return json.dumps(response)
 # end def
 
+@app.route('/admin/get-admin-user', methods=["GET"])
+def get_admin_user():
+    """Get the admin user ID for chat functionality"""
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    
+    try:
+        # Get database connection
+        mgd = database.get_db_conn(config.mainDB)
+        
+        # Find admin user with sex='superadmin'
+        admin_user = mgd.db_users.find_one({"sex": "superadmin"})
+        
+        if admin_user:
+            response = {
+                "status": "success",
+                "admin_user_id": admin_user["user_id"],
+                "admin_name": admin_user.get("name", "Admin")
+            }
+        else:
+            response = {
+                "status": "error",
+                "message": "Admin user not found"
+            }
+        
+        return jsonify(response)
+        
+    except Exception as e:
+        response = {
+            "status": "error",
+            "message": f"Error fetching admin user: {str(e)}"
+        }
+        return jsonify(response)
+# end def
+
 @app.route('/admin/chat-with-user/<user_id>', methods=["GET"])
 def admin_chat_with_user(user_id):
     redirect_return = login_admin_precheck({})

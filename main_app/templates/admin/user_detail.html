@@ -1339,9 +1339,24 @@ function openFullImageModal(imageUrl) {
 }
 
 function openAdminChat(userId, userName) {
-  // Open admin chat in a new window/tab
-  const chatUrl = `/admin/chat-with-user/${userId}`;
-  window.open(chatUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+  // First, get the admin user ID from the database
+  fetch('/admin/get-admin-user')
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success' && data.admin_user_id) {
+        // Open admin chat in a new window/tab - redirect to chat server (port 50012)
+        const chatUrl = `http://chat.comes.id/admin/chat-with-user/${userId}?sender=${data.admin_user_id}`;
+        console.log('Opening admin chat:', chatUrl);
+        window.open(chatUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+      } else {
+        console.error('Admin user response:', data);
+        alert('Admin user not found. Please contact system administrator.');
+      }
+    })
+    .catch(error => {
+      console.error('Error getting admin user:', error);
+      alert('Error connecting to chat server. Please try again.');
+    });
 }
 
 function viewChat(matchId, user1Name, user2Name) {
