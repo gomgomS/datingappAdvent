@@ -1,0 +1,1078 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Premium Requests{% endblock %}
+{% block content %}
+<div class="premium-container">
+  <div class="premium-header">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="page-title">Premium Requests</h2>
+        <p class="page-subtitle">Manage premium subscription requests</p>
+      </div>
+      <div class="header-actions">
+        <a href="/admin/panel/manual-control" class="btn btn-outline-light">
+          <i class="fas fa-user-cog"></i>
+          Manual Control
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Filter Buttons -->
+  <div class="quick-filters">
+    <div class="filters-card">
+      <div class="row">
+        <div class="col-12">
+          <div class="filter-buttons">
+            <div class="filter-group">
+              <label class="filter-label">Plan:</label>
+              <button class="filter-btn active" data-filter="all" data-type="plan">
+                <i class="fas fa-users"></i> All Plans
+              </button>
+              <button class="filter-btn" data-filter="1_month" data-type="plan">
+                <i class="fas fa-calendar text-info"></i> 1 Month
+              </button>
+              <button class="filter-btn" data-filter="3_months" data-type="plan">
+                <i class="fas fa-calendar-alt text-warning"></i> 3 Months
+              </button>
+              <button class="filter-btn" data-filter="6_months" data-type="plan">
+                <i class="fas fa-calendar-check text-success"></i> 6 Months
+              </button>
+              <button class="filter-btn" data-filter="12_months" data-type="plan">
+                <i class="fas fa-crown text-warning"></i> 12 Months
+              </button>
+            </div>
+            
+            <div class="filter-group">
+              <label class="filter-label">Status:</label>
+              <button class="filter-btn active" data-filter="all" data-type="status">
+                <i class="fas fa-users"></i> All Status
+              </button>
+              <button class="filter-btn" data-filter="pending" data-type="status">
+                <i class="fas fa-clock text-warning"></i> Pending
+              </button>
+              <button class="filter-btn" data-filter="approved" data-type="status">
+                <i class="fas fa-check-circle text-success"></i> Approved
+              </button>
+              <button class="filter-btn" data-filter="rejected" data-type="status">
+                <i class="fas fa-times-circle text-danger"></i> Rejected
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="requests-section">
+    <div class="section-card">
+      <div class="section-header">
+        <h5 class="section-title">
+          <i class="fas fa-list-alt"></i>
+          Premium Requests
+        </h5>
+        <div class="section-info">
+          <span class="total-text">Total Requests: <strong>{{ total_requests or 0 }}</strong></span>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="table-responsive">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Created</th>
+                <th>Name</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Plan</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in requests %}
+              <tr class="table-row">
+                <td class="date-cell">{{ r.created_at }}</td>
+                <td class="name-cell">{{ r.name }}</td>
+                <td class="username-cell">
+                  <span class="username-text">{{ r.username }}</span>
+                </td>
+                <td class="email-cell">{{ r.email }}</td>
+                <td class="phone-cell">{{ r.phone }}</td>
+                <td class="plan-cell">
+                  <span class="plan-badge">{{ r.plan }}</span>
+                </td>
+                <td class="status-cell">
+                  {% if r.status == 'pending' %}
+                    <span class="status-badge pending">Pending</span>
+                  {% elif r.status == 'approved' %}
+                    <span class="status-badge approved">Approved</span>
+                  {% elif r.status == 'rejected' %}
+                    <span class="status-badge rejected">Rejected</span>
+                  {% else %}
+                    <span class="status-badge unknown">{{ r.status }}</span>
+                  {% endif %}
+                </td>
+                <td class="actions-cell">
+                  {% if r.status == 'pending' %}
+                    <div class="request-actions">
+                      <div class="action-group">
+                        <select name="duration" class="duration-select" id="duration_{{ loop.index }}" required>
+                          <option value="1">1 Month</option>
+                          <option value="3">3 Months</option>
+                          <option value="6">6 Months</option>
+                          <option value="12">12 Months</option>
+                        </select>
+                        <button type="button" class="action-btn approve" onclick="openApprovalModal('{{ r.request_id }}', '{{ r.username }}', '{{ r.name }}', '{{ r.email }}', '{{ r.plan }}', {{ loop.index }})">
+                          <i class="fas fa-check"></i>
+                          Approve
+                        </button>
+                      </div>
+                      <form action="/admin/process/premium/request/reject" method="POST" class="reject-form">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="request_id" value="{{ r.request_id }}">
+                        <button type="submit" class="action-btn reject">
+                          <i class="fas fa-times"></i>
+                          Reject
+                        </button>
+                      </form>
+                    </div>
+                  {% else %}
+                    {% if r.status == 'approved' %}
+                      <div class="approved-info">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <small class="approved-text">Approved {{ r.approved_at }}</small>
+                      </div>
+                    {% endif %}
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if requests_total_page > 1 %}
+  <div class="pagination-section">
+    <nav aria-label="Page navigation">
+      <ul class="modern-pagination">
+        {% set req_prev_page = requests_page - 1 %}
+        {% set req_next_page = requests_page + 1 %}
+        {% set plan_filter = request.args.get('plan', '') %}
+        {% set status_filter = request.args.get('status', '') %}
+        
+        <li class="page-item {% if requests_page <= 1 %}disabled{% endif %}">
+          <a class="page-link" href="?req_page={{ req_prev_page }}&req_per_page={{ requests_per_page }}{% if plan_filter %}&plan={{ plan_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+            <i class="fas fa-chevron-left"></i>
+          </a>
+        </li>
+        {% if requests_page > 3 %}
+          <li class="page-item"><a class="page-link" href="?req_page=1&req_per_page={{ requests_per_page }}{% if plan_filter %}&plan={{ plan_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">1</a></li>
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+        {% for p in range(requests_page-1, requests_page+2) %}
+          {% if 1 <= p <= requests_total_page %}
+            <li class="page-item {% if p == requests_page %}active{% endif %}"><a class="page-link" href="?req_page={{ p }}&req_per_page={{ requests_per_page }}{% if plan_filter %}&plan={{ plan_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ p }}</a></li>
+          {% endif %}
+        {% endfor %}
+        {% if requests_page < requests_total_page - 2 %}
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+          <li class="page-item"><a class="page-link" href="?req_page={{ requests_total_page }}&req_per_page={{ requests_per_page }}{% if plan_filter %}&plan={{ plan_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ requests_total_page }}</a></li>
+        {% endif %}
+        <li class="page-item {% if requests_page >= requests_total_page %}disabled{% endif %}">
+          <a class="page-link" href="?req_page={{ req_next_page }}&req_per_page={{ requests_per_page }}{% if plan_filter %}&plan={{ plan_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Premium Approval Modal -->
+<div class="modal fade" id="premiumApprovalModal" tabindex="-1" role="dialog" aria-labelledby="premiumApprovalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content modern-modal">
+      <div class="modal-header">
+        <h5 class="modal-title" id="premiumApprovalLabel">
+          <i class="fas fa-check-circle"></i>
+          Approve Premium Request
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="premium_approval_form" action="/admin/process/premium/request/approve-with-price" method="POST">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+        <input type="hidden" name="request_id" id="approval_request_id" />
+        <input type="hidden" name="duration" id="approval_duration" />
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">
+              <span class="customer-badge">
+                <i class="fas fa-user"></i> Customer
+              </span>
+            </label>
+            <input type="text" class="form-control modern-input" id="approval_customer_name" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label">
+              <span class="email-badge">
+                <i class="fas fa-envelope"></i> Email
+              </span>
+            </label>
+            <input type="text" class="form-control modern-input" id="approval_customer_email" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label">
+              <span class="plan-badge">
+                <i class="fas fa-crown"></i> Requested Plan
+              </span>
+            </label>
+            <input type="text" class="form-control modern-input" id="approval_requested_plan" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label">
+              <span class="duration-badge">
+                <i class="fas fa-clock"></i> Approval Duration
+              </span>
+            </label>
+            <input type="text" class="form-control modern-input" id="approval_duration_text" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label">
+              <span class="price-badge">
+                <i class="fas fa-dollar-sign"></i> Price <span class="text-danger">*</span>
+              </span>
+            </label>
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Rp</span>
+              </div>
+              <input type="number" class="form-control modern-input" name="price" id="approval_price" required placeholder="Enter price" min="0">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">
+              <span class="payment-badge">
+                <i class="fas fa-credit-card"></i> Payment Method
+              </span>
+            </label>
+            <select class="form-control modern-select" name="payment_method" required>
+              <option value="">Select Payment Method</option>
+              <option value="cash">Cash</option>
+              <option value="transfer">Bank Transfer</option>
+              <option value="credit_card">Credit Card</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">
+              <span class="notes-badge">
+                <i class="fas fa-sticky-note"></i> Notes (Optional)
+              </span>
+            </label>
+            <textarea class="form-control modern-input" name="notes" rows="3" placeholder="Additional notes about this approval"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modern-btn" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary modern-btn primary">
+            <i class="fas fa-check-circle"></i> Approve Request
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block styles %}
+<style>
+/* Premium Container */
+.premium-container {
+  padding: 0;
+}
+
+/* Page Header */
+.premium-header {
+  margin-bottom: 30px;
+}
+
+.page-title {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.page-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  margin: 5px 0 0 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-outline-light {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: #ffffff;
+  padding: 10px 20px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-outline-light:hover {
+  background: rgba(255, 222, 89, 0.1);
+  border-color: rgba(255, 222, 89, 0.3);
+  color: #FFDE59;
+  text-decoration: none;
+}
+
+/* Quick Filter Buttons */
+.quick-filters {
+  margin-bottom: 20px;
+}
+
+.filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+}
+
+.filter-buttons .filter-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-buttons .filter-label {
+  margin-bottom: 0;
+  margin-right: 8px;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.filter-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.filter-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.filter-btn.active {
+  background: rgba(74, 144, 226, 0.3);
+  border-color: rgba(74, 144, 226, 0.5);
+  color: white;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2);
+}
+
+.filter-btn i {
+  font-size: 0.9rem;
+}
+
+/* Section Cards */
+.section-card {
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.section-header {
+  padding: 20px 25px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-title {
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.section-title i {
+  margin-right: 10px;
+  color: #FFDE59;
+}
+
+.section-info {
+  display: flex;
+  align-items: center;
+}
+
+.total-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.total-text strong {
+  color: #FFDE59;
+}
+
+.section-body {
+  padding: 0;
+}
+
+/* Modern Table */
+.modern-table {
+  width: 100%;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.modern-table thead {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modern-table th {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 20px 15px;
+  border: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modern-table td {
+  padding: 20px 15px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+}
+
+.table-row:hover {
+  background: rgba(255, 222, 89, 0.05);
+}
+
+/* Table Cell Styles */
+.date-cell {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.name-cell {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.username-text {
+  color: #FFDE59;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.email-text {
+  color: #ffffff;
+  font-size: 0.9rem;
+}
+
+.phone-cell {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.plan-badge {
+  background: rgba(255, 222, 89, 0.2);
+  color: #FFDE59;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Status Badges */
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.pending {
+  background: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.status-badge.approved {
+  background: rgba(40, 167, 69, 0.2);
+  color: #28a745;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.status-badge.rejected {
+  background: rgba(220, 53, 69, 0.2);
+  color: #dc3545;
+  border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.status-badge.unknown {
+  background: rgba(108, 117, 125, 0.2);
+  color: #6c757d;
+  border: 1px solid rgba(108, 117, 125, 0.3);
+}
+
+/* Request Actions */
+.request-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.action-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.duration-select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #ffffff;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  min-width: 100px;
+}
+
+.duration-select:focus {
+  border-color: rgba(255, 222, 89, 0.5);
+  outline: none;
+}
+
+.duration-select option {
+  background: #1a1a2e;
+  color: #ffffff;
+}
+
+.action-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.action-btn.approve {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.action-btn.approve:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+.action-btn.reject {
+  background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+.action-btn.reject:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+.approved-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.approved-text {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+}
+
+/* Pagination */
+.pagination-section {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+.modern-pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: 5px;
+}
+
+.page-item {
+  margin: 0;
+}
+
+.page-link {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #ffffff;
+  padding: 10px 15px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.page-link:hover {
+  background: rgba(255, 222, 89, 0.1);
+  border-color: rgba(255, 222, 89, 0.3);
+  color: #FFDE59;
+  text-decoration: none;
+}
+
+.page-item.active .page-link {
+  background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+  border-color: rgba(255, 222, 89, 0.5);
+  color: #333;
+  font-weight: 600;
+}
+
+.page-item.disabled .page-link {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.3);
+  cursor: not-allowed;
+}
+
+/* Modal Styles */
+.modern-modal {
+  background: rgba(26, 26, 46, 0.95);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  color: #ffffff;
+}
+
+.modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px 25px;
+}
+
+.modal-title {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+}
+
+.modal-title i {
+  margin-right: 10px;
+  color: #FFDE59;
+}
+
+.modal-body {
+  padding: 25px;
+}
+
+.form-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+/* Label Badges */
+.customer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(52, 144, 220, 0.2);
+  border: 1px solid rgba(52, 144, 220, 0.3);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #3490dc;
+  transition: all 0.3s ease;
+}
+
+.customer-badge i {
+  font-size: 0.8rem;
+  color: #3490dc;
+}
+
+.email-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(111, 66, 193, 0.2);
+  border: 1px solid rgba(111, 66, 193, 0.3);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6f42c1;
+  transition: all 0.3s ease;
+}
+
+.email-badge i {
+  font-size: 0.8rem;
+  color: #6f42c1;
+}
+
+.plan-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 193, 7, 0.2);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ffc107;
+  transition: all 0.3s ease;
+}
+
+.plan-badge i {
+  font-size: 0.8rem;
+  color: #ffc107;
+}
+
+.duration-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 193, 7, 0.2);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ffc107;
+  transition: all 0.3s ease;
+}
+
+.duration-badge i {
+  font-size: 0.8rem;
+  color: #ffc107;
+}
+
+.price-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(40, 167, 69, 0.2);
+  border: 1px solid rgba(40, 167, 69, 0.3);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #28a745;
+  transition: all 0.3s ease;
+}
+
+.price-badge i {
+  font-size: 0.8rem;
+  color: #28a745;
+}
+
+.payment-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(220, 53, 69, 0.2);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #dc3545;
+  transition: all 0.3s ease;
+}
+
+.payment-badge i {
+  font-size: 0.8rem;
+  color: #dc3545;
+}
+
+.notes-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(108, 117, 125, 0.2);
+  border: 1px solid rgba(108, 117, 125, 0.3);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6c757d;
+  transition: all 0.3s ease;
+}
+
+.notes-badge i {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.modern-input,
+.modern-select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #ffffff;
+  padding: 12px 15px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.modern-input:focus,
+.modern-select:focus {
+  border-color: rgba(255, 222, 89, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 222, 89, 0.1);
+  outline: none;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.modern-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.modern-input[readonly] {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.input-group-prepend .input-group-text {
+  background: rgba(255, 222, 89, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-right: none;
+  color: #FFDE59;
+  font-weight: 600;
+}
+
+.input-group .modern-input {
+  border-left: none;
+}
+
+.modern-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.modern-btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.modern-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.modern-btn.primary {
+  background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+  color: #333;
+  box-shadow: 0 4px 15px rgba(255, 222, 89, 0.3);
+}
+
+.modern-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 222, 89, 0.4);
+  color: #333;
+}
+
+.modal-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px 25px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .premium-header {
+    margin-bottom: 20px;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+  
+  .modern-table th,
+  .modern-table td {
+    padding: 15px 10px;
+  }
+  
+  .action-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .duration-select {
+    min-width: auto;
+  }
+
+  /* Quick Filter Buttons Mobile */
+  .filter-buttons {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  .filter-buttons .filter-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .filter-buttons .filter-label {
+    margin-right: 0;
+    margin-bottom: 5px;
+    text-align: center;
+  }
+
+  .filter-btn {
+    justify-content: center;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // Quick Filter Buttons Functionality
+  let currentFilters = {
+    plan: 'all',
+    status: 'all'
+  };
+
+  // Initialize filter buttons based on URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  const plan = urlParams.get('plan') || 'all';
+  const status = urlParams.get('status') || 'all';
+
+  // Set active states
+  document.querySelectorAll('[data-type="plan"]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === plan);
+  });
+  document.querySelectorAll('[data-type="status"]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === status);
+  });
+
+  // Handle filter button clicks
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const filterType = this.dataset.type;
+      const filterValue = this.dataset.filter;
+
+      // Update active state for this filter type
+      document.querySelectorAll(`[data-type="${filterType}"]`).forEach(b => {
+        b.classList.remove('active');
+      });
+      this.classList.add('active');
+
+      // Update current filters
+      currentFilters[filterType] = filterValue;
+
+      // Build new URL with filters
+      const params = new URLSearchParams(window.location.search);
+      params.set(filterType, filterValue);
+      
+      // Remove filter if it's 'all'
+      if (filterValue === 'all') {
+        params.delete(filterType);
+      }
+
+      // Redirect to filtered page
+      window.location.href = `/admin/panel/premium-requests?${params.toString()}`;
+    });
+  });
+});
+
+// Premium Approval Modal Function
+function openApprovalModal(requestId, username, name, email, requestedPlan, rowIndex) {
+  // Get selected duration from the dropdown
+  const durationSelect = document.getElementById(`duration_${rowIndex}`);
+  const selectedDuration = durationSelect.value;
+  const durationText = durationSelect.options[durationSelect.selectedIndex].text;
+  
+  // Populate modal fields
+  document.getElementById('approval_request_id').value = requestId;
+  document.getElementById('approval_duration').value = selectedDuration;
+  document.getElementById('approval_customer_name').value = `${name} (${username})`;
+  document.getElementById('approval_customer_email').value = email;
+  document.getElementById('approval_requested_plan').value = requestedPlan;
+  document.getElementById('approval_duration_text').value = durationText;
+  
+  // Clear previous values
+  document.getElementById('approval_price').value = '';
+  document.querySelector('select[name="payment_method"]').value = '';
+  document.querySelector('textarea[name="notes"]').value = '';
+  
+  $('#premiumApprovalModal').modal('show');
+}
+</script>
+{% endblock scripts %}

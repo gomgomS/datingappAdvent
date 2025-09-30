@@ -126,6 +126,7 @@ from view               import view_chat
 
 from view               import view_admin_panel_customer
 from view               import view_admin_panel_premium_control
+from view               import view_admin_panel_transactions
 from view               import view_admin_panel_matches
 from view               import view_admin_user_detail
 from view               import view_admin_dashboard
@@ -859,6 +860,42 @@ def admin_user_otp_set():
     else:
         flash(resp.get('desc','Failed to update OTP'), 'danger')
     return redirect(url_for('admin_panel_customer'))
+@app.route("/admin/panel/premium-requests")
+def admin_panel_premium_requests():    
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    # end if
+   
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    params['per_page'   ] = request.args.get('per_page', 10)
+    params['page'       ] = request.args.get('page', 1)
+    params['keyword'    ] = request.args.get('keyword', '')
+    params['requests_per_page'] = request.args.get('req_per_page', 10)
+    params['requests_page'] = request.args.get('req_page', 1)
+    params['plan'] = request.args.get('plan', '')
+    params['status'] = request.args.get('status', '')
+
+    html   = view_admin_panel_premium_control.view_admin_panel_premium_control(app).html_premium_requests( params )
+    return html
+
+@app.route("/admin/panel/manual-control")
+def admin_panel_manual_control():    
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    # end if
+   
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    params['per_page'   ] = request.args.get('per_page', 10)
+    params['page'       ] = request.args.get('page', 1)
+    params['keyword'    ] = request.args.get('keyword', '')
+    params['requests_per_page'] = request.args.get('req_per_page', 10)
+    params['requests_page'] = request.args.get('req_page', 1)
+
+    html   = view_admin_panel_premium_control.view_admin_panel_premium_control(app).html_manual_control( params )
+    return html
+
 @app.route("/admin/panel/premiumcontrol")
 def admin_panel_premium_control():    
     redirect_return = login_admin_precheck({})
@@ -1117,6 +1154,29 @@ def premium_apply():
     flash("premium success!!", "success")
     return redirect(url_for("admin_panel_premium_control"))
 
+@app.route("/admin/process/premium/apply-with-price", methods=["POST"])
+def admin_premium_apply_with_price():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    # end if
+   
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    params['admin_username'] = session.get('username')
+    
+    print(f"DEBUG - Premium apply with price params: {params}")
+    
+    response = admin_proc.admin_proc(app)._apply_premium_with_transaction_admin(params)
+    
+    print(f"DEBUG - Premium apply response: {response}")
+    
+    if response.get('status') == 'SUCCESS':
+        flash('Premium applied successfully with transaction recorded', 'success')
+    else:
+        flash(response.get('desc','Failed to apply premium'), 'danger')
+    
+    return redirect(url_for('admin_panel_manual_control'))
+
 @app.route('/admin/process/premium/request/approve', methods=["POST"])
 def premium_request_approve():
     redirect_return = login_admin_precheck({})
@@ -1130,6 +1190,42 @@ def premium_request_approve():
     else:
         flash(resp.get('desc','Approve failed'), 'danger')
     return redirect(url_for('admin_panel_premium_control'))
+
+@app.route("/admin/process/premium/request/approve-with-price", methods=["POST"])
+def admin_premium_request_approve_with_price():
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    # end if
+   
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    params['admin_username'] = session.get('username')
+    
+    print(f"DEBUG - Premium request approve with price params: {params}")
+    
+    response = admin_proc.admin_proc(app)._approve_premium_request_with_transaction_admin(params)
+    
+    print(f"DEBUG - Premium request approve response: {response}")
+    
+    if response.get('status') == 'SUCCESS':
+        flash('Premium request approved successfully with transaction recorded', 'success')
+    else:
+        flash(response.get('desc','Failed to approve premium request'), 'danger')
+    
+    return redirect(url_for('admin_panel_premium_requests'))
+
+@app.route("/admin/panel/transactions")
+def admin_panel_transactions():    
+    redirect_return = login_admin_precheck({})
+    if redirect_return:
+        return redirect_return
+    params = sanitize.clean_html_dic(request.form.to_dict())
+    params['per_page'] = request.args.get('per_page', 10)
+    params['page'] = request.args.get('page', 1)
+    params['transaction_type'] = request.args.get('transaction_type', '')
+    params['payment_method'] = request.args.get('payment_method', '')
+    html = view_admin_panel_transactions.view_admin_panel_transactions(app).html(params)
+    return html
 
 @app.route('/admin/process/premium/request/reject', methods=["POST"])
 def premium_request_reject():

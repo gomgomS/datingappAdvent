@@ -252,6 +252,14 @@
           </a>
         </li>
 
+        <!-- Transaction Data -->
+        <li class="nav-item {% if active_endpoint == 'admin_panel_transactions' %}nav-item-active{% endif %}">
+          <a href="{{ url_for('admin_panel_transactions') }}" class="nav-link {% if active_endpoint == 'admin_panel_transactions' %}nav-link-active{% endif %}">
+            <i class="fas fa-receipt"></i>
+            <span>Transaction Data</span>
+          </a>
+        </li>
+
         <!-- Database Cleanup -->
         <li class="nav-item {% if active_endpoint == 'admin_database_cleanup' %}nav-item-active{% endif %}">
           <a href="{{ url_for('admin_database_cleanup') }}" class="nav-link {% if active_endpoint == 'admin_database_cleanup' %}nav-link-active{% endif %}">

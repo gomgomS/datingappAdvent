@@ -596,4 +596,223 @@ class admin_proc:
             response["desc"] = "Internal error"
             return response
 
+    def _apply_premium_with_transaction_admin(self, params):
+        response = {
+            "status": "FAILED",
+            "desc": "",
+            "data": {}
+        }
+        try:
+            import time
+            from datetime import datetime, timedelta
+            
+            customer_id = (params.get("customer_id") or "").strip()
+            duration = int(params.get("duration", 1))
+            price = float(params.get("price", 0))
+            payment_method = (params.get("payment_method") or "").strip()
+            notes = (params.get("notes") or "").strip()
+            admin_username = (params.get("admin_username") or "").strip()
+
+            if not customer_id:
+                response["desc"] = "Missing customer_id"
+                return response
+
+            if price <= 0:
+                response["desc"] = "Price must be greater than 0"
+                return response
+
+            if not payment_method:
+                response["desc"] = "Payment method is required"
+                return response
+
+            # Find the user first
+            user = self.mgdDB.db_users.find_one({"user_id": customer_id})
+            if not user:
+                response["desc"] = "User not found"
+                return response
+
+            # Calculate premium expiry date
+            now = datetime.now()
+            expiry_date = now + timedelta(days=duration * 30)  # Assuming 30 days per month
+            expiry_str = expiry_date.strftime("%Y-%m-%d %H:%M:%S")
+
+            # Update user premium status
+            update_result = self.mgdDB.db_users.update_one(
+                {"user_id": customer_id},
+                {
+                    "$set": {
+                        "is_premium": "TRUE",
+                        "premium_expiry": expiry_str,
+                        "subscription_type": f"{duration}_months",
+                        "updated_at": now.strftime("%Y-%m-%d %H:%M:%S")
+                    }
+                }
+            )
+
+            if update_result.modified_count == 0:
+                response["desc"] = "Failed to update user premium status"
+                return response
+
+            # Create transaction record
+            transaction_data = {
+                "transaction_id": f"TXN_{int(time.time() * 1000)}",
+                "user_id": customer_id,
+                "username": user.get("username", ""),
+                "email": user.get("email", ""),
+                "transaction_type": "premium_subscription",
+                "premium_type": f"{duration}_months",
+                "duration_months": duration,
+                "price": price,
+                "payment_method": payment_method,
+                "notes": notes,
+                "admin_username": admin_username,
+                "status": "completed",
+                "created_at": now.strftime("%Y-%m-%d %H:%M:%S"),
+                "expiry_date": expiry_str
+            }
+
+            # Insert transaction record
+            transaction_result = self.mgdDB.db_trx.insert_one(transaction_data)
+
+            if transaction_result.inserted_id:
+                response["status"] = "SUCCESS"
+                response["desc"] = f"Premium applied successfully for {duration} month(s)"
+                response["data"] = {
+                    "transaction_id": transaction_data["transaction_id"],
+                    "user_id": customer_id,
+                    "username": user.get("username", ""),
+                    "duration": duration,
+                    "price": price,
+                    "expiry_date": expiry_str
+                }
+            else:
+                response["desc"] = "Failed to record transaction"
+                
+            return response
+        except Exception:
+            trace_back_msg = traceback.format_exc()
+            self.webapp.logger.debug(trace_back_msg)
+            response["desc"] = "Internal error"
+            return response
+
+    def _approve_premium_request_with_transaction_admin(self, params):
+        response = {
+            "status": "FAILED",
+            "desc": "",
+            "data": {}
+        }
+        try:
+            import time
+            from datetime import datetime, timedelta
+            
+            request_id = (params.get("request_id") or "").strip()
+            duration = int(params.get("duration", 1))
+            price = float(params.get("price", 0))
+            payment_method = (params.get("payment_method") or "").strip()
+            notes = (params.get("notes") or "").strip()
+            admin_username = (params.get("admin_username") or "").strip()
+
+            if not request_id:
+                response["desc"] = "Missing request_id"
+                return response
+
+            if price <= 0:
+                response["desc"] = "Price must be greater than 0"
+                return response
+
+            if not payment_method:
+                response["desc"] = "Payment method is required"
+                return response
+
+            # Find the premium request first
+            premium_request = self.mgdDB.db_premium_requests.find_one({"request_id": request_id})
+            if not premium_request:
+                response["desc"] = "Premium request not found"
+                return response
+
+            # Find the user
+            user = self.mgdDB.db_users.find_one({"user_id": premium_request.get("user_id")})
+            if not user:
+                response["desc"] = "User not found"
+                return response
+
+            # Calculate premium expiry date
+            now = datetime.now()
+            expiry_date = now + timedelta(days=duration * 30)  # Assuming 30 days per month
+            expiry_str = expiry_date.strftime("%Y-%m-%d %H:%M:%S")
+
+            # Update user premium status
+            update_result = self.mgdDB.db_users.update_one(
+                {"user_id": premium_request.get("user_id")},
+                {
+                    "$set": {
+                        "is_premium": "TRUE",
+                        "premium_expiry": expiry_str,
+                        "subscription_type": f"{duration}_months",
+                        "updated_at": now.strftime("%Y-%m-%d %H:%M:%S")
+                    }
+                }
+            )
+
+            if update_result.modified_count == 0:
+                response["desc"] = "Failed to update user premium status"
+                return response
+
+            # Update premium request status
+            self.mgdDB.db_premium_requests.update_one(
+                {"request_id": request_id},
+                {
+                    "$set": {
+                        "status": "approved",
+                        "approved_at": now.strftime("%Y-%m-%d %H:%M:%S"),
+                        "approved_by": admin_username,
+                        "approved_duration": duration
+                    }
+                }
+            )
+
+            # Create transaction record
+            transaction_data = {
+                "transaction_id": f"TXN_{int(time.time() * 1000)}",
+                "request_id": request_id,
+                "user_id": premium_request.get("user_id"),
+                "username": user.get("username", ""),
+                "email": user.get("email", ""),
+                "transaction_type": "premium_request_approval",
+                "premium_type": f"{duration}_months",
+                "duration_months": duration,
+                "price": price,
+                "payment_method": payment_method,
+                "notes": notes,
+                "admin_username": admin_username,
+                "status": "completed",
+                "created_at": now.strftime("%Y-%m-%d %H:%M:%S"),
+                "expiry_date": expiry_str
+            }
+
+            # Insert transaction record
+            transaction_result = self.mgdDB.db_trx.insert_one(transaction_data)
+
+            if transaction_result.inserted_id:
+                response["status"] = "SUCCESS"
+                response["desc"] = f"Premium request approved successfully for {duration} month(s)"
+                response["data"] = {
+                    "transaction_id": transaction_data["transaction_id"],
+                    "request_id": request_id,
+                    "user_id": premium_request.get("user_id"),
+                    "username": user.get("username", ""),
+                    "duration": duration,
+                    "price": price,
+                    "expiry_date": expiry_str
+                }
+            else:
+                response["desc"] = "Failed to record transaction"
+                
+            return response
+        except Exception:
+            trace_back_msg = traceback.format_exc()
+            self.webapp.logger.debug(trace_back_msg)
+            response["desc"] = "Internal error"
+            return response
+
 

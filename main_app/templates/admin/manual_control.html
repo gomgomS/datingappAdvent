@@ -1,0 +1,948 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Manual Control{% endblock %}
+{% block content %}
+<div class="premium-container">
+  <div class="premium-header">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="page-title">Manual Control</h2>
+        <p class="page-subtitle">Manually manage user premium subscriptions</p>
+      </div>
+      <div class="header-actions">
+        <a href="/admin/panel/premium-requests" class="btn btn-outline-light">
+          <i class="fas fa-clock"></i>
+          Premium Requests
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="manual-filters">
+    <div class="filters-card">
+      <div class="row align-items-center">
+        <div class="col-md-3">
+          <div class="filter-group">
+            <label class="filter-label">Show</label>
+            <select class="filter-select" id="custom_select">
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="search-group">
+            <div class="search-input-wrapper">
+              <i class="fas fa-search search-icon"></i>
+              <input type="text" id="custom_search" class="search-input" placeholder="Search by username, email..." aria-label="Search">
+              <button class="search-btn" type="button" id="button_search">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 text-right">
+          <div class="total-info">
+            <span class="total-text">Total Users: <strong>{{ total_users or 0 }}</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="manual-table">
+    <div class="table-card">
+      <div class="table-responsive">
+        <table id="user_list" class="modern-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Premium Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in data %}
+            <tr class="table-row">
+              <td class="username-cell">
+                <span class="username-text">{{ user.username }}</span>
+              </td>
+              <td class="email-cell">
+                <div class="email-info">
+                  <span class="email-text">{{ user.email }}</span>
+                </div>
+              </td>
+              <td class="phone-cell">{{ user.phone }}</td>
+              <td class="premium-status-cell">
+                {% if user.is_premium == "TRUE" and user.premium_expiry %}
+                  <div class="premium-info">
+                    <span class="subscription-badge premium">Premium</span>
+                    <div class="premium-details">
+                      <span class="expiry-text">{{ user.premium_expiry }}</span>
+                      <small class="countdown-text">{{ user.premium_countdown }}</small>
+                    </div>
+                  </div>
+                {% elif user.is_premium == "TRUE" %}
+                  <div class="premium-info">
+                    <span class="subscription-badge premium">Premium</span>
+                    <small class="no-expiry-text">No expiry</small>
+                  </div>
+                {% else %}
+                  <div class="premium-info">
+                    <span class="subscription-badge free">Free</span>
+                    <small class="subscription-type-text">{{user.subscription_type}}</small>
+                  </div>
+                {% endif %}
+              </td>
+              <td class="actions-cell">
+                <div class="actions-dropdown">
+                  <button class="actions-btn" type="button" data-toggle="dropdown">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                  <div class="dropdown-menu">
+                    <button type="button" class="dropdown-item" onclick="openPremiumModal('{{ user.user_id }}', '{{ user.username }}', 1, '1 Month')">
+                      <i class="fas fa-crown"></i> Apply Premium (1 Month)
+                    </button>
+                    <button type="button" class="dropdown-item" onclick="openPremiumModal('{{ user.user_id }}', '{{ user.username }}', 3, '3 Months')">
+                      <i class="fas fa-crown"></i> Apply Premium (3 Months)
+                    </button>
+                    {% if user.is_premium == "TRUE" %}
+                    <div class="dropdown-divider"></div>
+                    <form action="/admin/process/premium/revoke" method="POST" class="premium-form">
+                      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                      <input type="hidden" name="customer_id" value="{{ user.user_id }}">
+                      <button type="submit" class="dropdown-item danger">
+                        <i class="fas fa-times"></i> Remove Premium
+                      </button>
+                    </form>
+                    {% endif %}
+                  </div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  {% if total_page > 1 %}
+  <div class="pagination-section">
+    <nav aria-label="Page navigation">
+      <ul class="modern-pagination">
+        {% set keyword = request.args.get('keyword', '') %}
+        {% set per_page = per_page|string %}
+        {% set prev_page = page - 1 %}
+        {% set next_page = page + 1 %}
+
+        <!-- Previous -->
+        <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+          <a class="page-link" href="?page={{ prev_page }}&per_page={{ per_page }}&keyword={{ keyword }}">
+            <i class="fas fa-chevron-left"></i>
+          </a>
+        </li>
+
+        <!-- First page -->
+        {% if page > 3 %}
+          <li class="page-item">
+            <a class="page-link" href="?page=1&per_page={{ per_page }}&keyword={{ keyword }}">1</a>
+          </li>
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+
+        <!-- Middle pages -->
+        {% for p in range(page-1, page+2) %}
+          {% if 1 <= p <= total_page %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+              <a class="page-link" href="?page={{ p }}&per_page={{ per_page }}&keyword={{ keyword }}">{{ p }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+
+        <!-- Last page -->
+        {% if page < total_page - 2 %}
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ total_page }}&per_page={{ per_page }}&keyword={{ keyword }}">{{ total_page }}</a>
+          </li>
+        {% endif %}
+
+        <!-- Next -->
+        <li class="page-item {% if page >= total_page %}disabled{% endif %}">
+          <a class="page-link" href="?page={{ next_page }}&per_page={{ per_page }}&keyword={{ keyword }}">
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Premium Price Modal -->
+<div class="modal fade" id="premiumPriceModal" tabindex="-1" role="dialog" aria-labelledby="premiumPriceLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content modern-modal">
+      <div class="modal-header">
+        <h5 class="modal-title" id="premiumPriceLabel">
+          <i class="fas fa-crown"></i>
+          Apply Premium Subscription
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="premium_price_form" action="/admin/process/premium/apply-with-price" method="POST">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+        <input type="hidden" name="customer_id" id="premium_customer_id" />
+        <input type="hidden" name="duration" id="premium_duration" />
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">
+              <span class=" customer-badge">
+                <i class="fas fa-user"></i> Customer
+              </span>
+            </label>
+            <input type="text" class="form-control modern-input" id="premium_customer_name" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label">
+              <span class=" duration-badge">
+                <i class="fas fa-clock"></i> Subscription Duration
+              </span>
+            </label>
+            <input type="text" class="form-control modern-input" id="premium_duration_text" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label">
+              <span class=" price-badge">
+                <i class="fas fa-dollar-sign"></i> Price <span class="text-danger">*</span>
+              </span>
+            </label>
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Rp</span>
+              </div>
+              <input type="number" class="form-control modern-input" name="price" id="premium_price" required placeholder="Enter price" min="0">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">
+              <span class=" payment-badge">
+                <i class="fas fa-credit-card"></i> Payment Method
+              </span>
+            </label>
+            <select class="form-control modern-select" name="payment_method" required>
+              <option value="">Select Payment Method</option>
+              <option value="cash">Cash</option>
+              <option value="transfer">Bank Transfer</option>
+              <option value="credit_card">Credit Card</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">
+              <span class=" notes-badge">
+                <i class="fas fa-sticky-note"></i> Notes (Optional)
+              </span>
+            </label>
+            <textarea class="form-control modern-input" name="notes" rows="3" placeholder="Additional notes about this transaction"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modern-btn" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary modern-btn primary">
+            <i class="fas fa-crown"></i> Apply Premium
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block styles %}
+<style>
+/* Premium Container */
+.premium-container {
+  padding: 0;
+}
+
+/* Page Header */
+.premium-header {
+  margin-bottom: 30px;
+}
+
+.page-title {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.page-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  margin: 5px 0 0 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-outline-light {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: #ffffff;
+  padding: 10px 20px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-outline-light:hover {
+  background: rgba(255, 222, 89, 0.1);
+  border-color: rgba(255, 222, 89, 0.3);
+  color: #FFDE59;
+  text-decoration: none;
+}
+
+/* Section Cards */
+.section-card {
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.table-card {
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+/* Modern Table */
+.modern-table {
+  width: 100%;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.modern-table thead {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modern-table th {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 20px 15px;
+  border: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modern-table td {
+  padding: 20px 15px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+}
+
+.table-row:hover {
+  background: rgba(255, 222, 89, 0.05);
+}
+
+/* Table Cell Styles */
+.username-text {
+  color: #FFDE59;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.email-text {
+  color: #ffffff;
+  font-size: 0.9rem;
+}
+
+.phone-cell {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+/* Premium Status */
+.premium-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.premium-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.expiry-text {
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.countdown-text {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+}
+
+.no-expiry-text {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+}
+
+.subscription-type-text {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+}
+
+/* Subscription Badge */
+.subscription-badge {
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.subscription-badge.premium {
+  background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
+}
+
+.subscription-badge.free {
+  background: rgba(108, 117, 125, 0.2);
+  color: #6c757d;
+  border: 1px solid rgba(108, 117, 125, 0.3);
+}
+
+/* Actions Dropdown */
+.actions-dropdown {
+  position: relative;
+}
+
+.actions-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #ffffff;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.actions-btn:hover {
+  background: rgba(255, 222, 89, 0.1);
+  border-color: rgba(255, 222, 89, 0.3);
+  color: #FFDE59;
+}
+
+.dropdown-menu {
+  background: rgba(26, 26, 46, 0.95);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 10px 0;
+  min-width: 200px;
+}
+
+.dropdown-item {
+  color: #ffffff;
+  padding: 10px 15px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dropdown-item:hover {
+  background: rgba(255, 222, 89, 0.1);
+  color: #FFDE59;
+}
+
+.dropdown-item.danger:hover {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
+.dropdown-item i {
+  width: 16px;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 5px 0;
+}
+
+.premium-form {
+  margin: 0;
+  padding: 0;
+}
+
+/* Modal Styles */
+.modern-modal {
+  background: rgba(26, 26, 46, 0.95);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  color: #ffffff;
+}
+
+.modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px 25px;
+}
+
+.modal-title {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+}
+
+.modal-title i {
+  margin-right: 10px;
+  color: #FFDE59;
+}
+
+.modal-body {
+  padding: 25px;
+}
+
+.form-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+/* Label Badges */
+.label-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.label-badge i {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.customer-badge {
+  background: rgba(52, 144, 220, 0.2);
+  border-color: rgba(52, 144, 220, 0.3);
+  color: #3490dc;
+}
+
+.customer-badge i {
+  color: #3490dc;
+}
+
+.duration-badge {
+  background: rgba(255, 193, 7, 0.2);
+  border-color: rgba(255, 193, 7, 0.3);
+  color: #ffc107;
+}
+
+.duration-badge i {
+  color: #ffc107;
+}
+
+.price-badge {
+  background: rgba(40, 167, 69, 0.2);
+  border-color: rgba(40, 167, 69, 0.3);
+  color: #28a745;
+}
+
+.price-badge i {
+  color: #28a745;
+}
+
+.payment-badge {
+  background: rgba(220, 53, 69, 0.2);
+  border-color: rgba(220, 53, 69, 0.3);
+  color: #dc3545;
+}
+
+.payment-badge i {
+  color: #dc3545;
+}
+
+.notes-badge {
+  background: rgba(108, 117, 125, 0.2);
+  border-color: rgba(108, 117, 125, 0.3);
+  color: #6c757d;
+}
+
+.notes-badge i {
+  color: #6c757d;
+}
+
+.modern-input,
+.modern-select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #ffffff;
+  padding: 12px 15px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.modern-input:focus,
+.modern-select:focus {
+  border-color: rgba(255, 222, 89, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 222, 89, 0.1);
+  outline: none;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.modern-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.modern-input[readonly] {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.input-group-prepend .input-group-text {
+  background: rgba(255, 222, 89, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-right: none;
+  color: #FFDE59;
+  font-weight: 600;
+}
+
+.input-group .modern-input {
+  border-left: none;
+}
+
+.modern-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.modern-btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.modern-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.modern-btn.primary {
+  background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+  color: #333;
+  box-shadow: 0 4px 15px rgba(255, 222, 89, 0.3);
+}
+
+.modern-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 222, 89, 0.4);
+  color: #333;
+}
+
+.modal-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px 25px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Filters Card */
+.filters-card {
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 30px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.filter-select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #ffffff;
+  padding: 10px 15px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.filter-select:focus {
+  border-color: rgba(255, 222, 89, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 222, 89, 0.1);
+  outline: none;
+}
+
+.filter-select option {
+  background: #1a1a2e;
+  color: #ffffff;
+}
+
+/* Search Group */
+.search-group {
+  display: flex;
+  justify-content: center;
+}
+
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.6);
+  z-index: 2;
+}
+
+.search-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 25px;
+  color: #ffffff;
+  padding: 12px 50px 12px 45px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  border-color: rgba(255, 222, 89, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 222, 89, 0.1);
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.search-btn {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+  border: none;
+  border-radius: 20px;
+  color: #333;
+  padding: 8px 15px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.search-btn:hover {
+  transform: translateY(-50%) scale(1.05);
+}
+
+.total-info {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.total-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.total-text strong {
+  color: #FFDE59;
+}
+
+/* Pagination */
+.pagination-section {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+.modern-pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: 5px;
+}
+
+.page-item {
+  margin: 0;
+}
+
+.page-link {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #ffffff;
+  padding: 10px 15px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.page-link:hover {
+  background: rgba(255, 222, 89, 0.1);
+  border-color: rgba(255, 222, 89, 0.3);
+  color: #FFDE59;
+  text-decoration: none;
+}
+
+.page-item.active .page-link {
+  background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+  border-color: rgba(255, 222, 89, 0.5);
+  color: #333;
+  font-weight: 600;
+}
+
+.page-item.disabled .page-link {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.3);
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .premium-header {
+    margin-bottom: 20px;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .filters-card {
+    padding: 20px;
+  }
+  
+  .search-input-wrapper {
+    max-width: 100%;
+  }
+  
+  .modern-table th,
+  .modern-table td {
+    padding: 15px 10px;
+  }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const getUrlVars = () => {
+    const vars = {};
+    const hashes = window.location.search.substring(1).split("&");
+    hashes.forEach(hash => {
+      const [key, value] = hash.split("=");
+      vars[key] = decodeURIComponent(value || "");
+    });
+    return vars;
+  };
+
+  const queries = getUrlVars();
+  document.getElementById("custom_select").value = queries.per_page || "10";
+  document.getElementById("custom_search").value = queries.keyword || "";
+
+  document.getElementById("button_search").addEventListener("click", function () {
+    const keyword = document.getElementById("custom_search").value;
+    window.location.href = `/admin/panel/manual-control?keyword=${encodeURIComponent(keyword)}`;
+  });
+
+  document.getElementById("custom_select").addEventListener("change", function () {
+    let page = parseInt(queries.page) || 1;
+    const perPage = this.value;
+
+    if (perPage === "10") {
+      page = (page - 1) * 2 + 1;
+    } else {
+      page = Math.ceil(page / 2);
+    }
+
+    const keyword = queries.keyword || "";
+    window.location.href = `/admin/panel/manual-control?per_page=${perPage}&page=${page}&keyword=${encodeURIComponent(keyword)}`;
+  });
+});
+
+// Premium Modal Function
+function openPremiumModal(customerId, customerName, duration, durationText) {
+  document.getElementById('premium_customer_id').value = customerId;
+  document.getElementById('premium_customer_name').value = customerName;
+  document.getElementById('premium_duration').value = duration;
+  document.getElementById('premium_duration_text').value = durationText;
+  
+  // Clear previous values
+  document.getElementById('premium_price').value = '';
+  document.querySelector('select[name="payment_method"]').value = '';
+  document.querySelector('textarea[name="notes"]').value = '';
+  
+  $('#premiumPriceModal').modal('show');
+}
+</script>
+{% endblock scripts %}

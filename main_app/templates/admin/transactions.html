@@ -1,0 +1,823 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Transaction Data{% endblock %}
+{% block content %}
+<div class="transactions-container">
+  <div class="transactions-header">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="page-title">Transaction Data</h2>
+        <p class="page-subtitle">View all premium transaction records</p>
+      </div>
+      <div class="header-actions">
+        <div class="total-info">
+          <span class="total-text">Total Transactions: <strong>{{ total_transactions or 0 }}</strong></span>
+          <span class="total-price-text">Total Revenue: <strong>Rp {{ "{:,.0f}".format(total_price or 0) }}</strong></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Filter Buttons -->
+  <div class="quick-filters">
+    <div class="filters-card">
+      <div class="row">
+        <div class="col-12">
+          <div class="filter-buttons">
+            <div class="filter-group">
+              <label class="filter-label">Transaction Type:</label>
+              <button class="filter-btn active" data-filter="all" data-type="transaction_type">
+                <i class="fas fa-receipt"></i> All Types
+              </button>
+              <button class="filter-btn" data-filter="premium_subscription" data-type="transaction_type">
+                <i class="fas fa-crown text-warning"></i> Manual Premium
+              </button>
+              <button class="filter-btn" data-filter="premium_request_approval" data-type="transaction_type">
+                <i class="fas fa-check-circle text-success"></i> Request Approval
+              </button>
+            </div>
+            
+            <div class="filter-group">
+              <label class="filter-label">Payment Method:</label>
+              <button class="filter-btn active" data-filter="all" data-type="payment_method">
+                <i class="fas fa-credit-card"></i> All Methods
+              </button>
+              <button class="filter-btn" data-filter="cash" data-type="payment_method">
+                <i class="fas fa-money-bill text-success"></i> Cash
+              </button>
+              <button class="filter-btn" data-filter="transfer" data-type="payment_method">
+                <i class="fas fa-university text-info"></i> Bank Transfer
+              </button>
+              <button class="filter-btn" data-filter="credit_card" data-type="payment_method">
+                <i class="fas fa-credit-card text-warning"></i> Credit Card
+              </button>
+              <button class="filter-btn" data-filter="other" data-type="payment_method">
+                <i class="fas fa-ellipsis-h text-secondary"></i> Other
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Card -->
+  <div class="summary-section">
+    <div class="summary-card">
+      <div class="summary-content">
+        <div class="summary-item">
+          <div class="summary-icon">
+            <i class="fas fa-receipt"></i>
+          </div>
+          <div class="summary-info">
+            <span class="summary-label">Total Transactions</span>
+            <span class="summary-value">{{ total_transactions or 0 }}</span>
+          </div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-icon">
+            <i class="fas fa-dollar-sign"></i>
+          </div>
+          <div class="summary-info">
+            <span class="summary-label">Total Revenue</span>
+            <span class="summary-value">Rp {{ "{:,.0f}".format(total_price or 0) }}</span>
+          </div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-icon">
+            <i class="fas fa-calculator"></i>
+          </div>
+          <div class="summary-info">
+            <span class="summary-label">Average Price</span>
+            <span class="summary-value">
+              {% if total_transactions and total_transactions > 0 %}
+                Rp {{ "{:,.0f}".format((total_price or 0) / total_transactions) }}
+              {% else %}
+                Rp 0
+              {% endif %}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="transactions-section">
+    <div class="section-card">
+      <div class="section-header">
+        <h5 class="section-title">
+          <i class="fas fa-list-alt"></i>
+          Transaction Records
+        </h5>
+        <div class="section-info">
+          <span class="total-text">Showing: <strong>{{ transactions|length }}</strong> transactions</span>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="table-responsive">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Transaction ID</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Type</th>
+                <th>Plan</th>
+                <th>Duration</th>
+                <th>Price</th>
+                <th>Payment Method</th>
+                <th>Admin</th>
+                <th>Status</th>
+                <th>Expiry Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for txn in transactions %}
+              <tr class="table-row">
+                <td class="transaction-id-cell">
+                  <span class="transaction-id-text">{{ txn.transaction_id }}</span>
+                </td>
+                <td class="date-cell">{{ txn.created_at }}</td>
+                <td class="customer-cell">
+                  <div class="customer-info">
+                    <span class="username-text">{{ txn.username }}</span>
+                    <small class="email-text">{{ txn.email }}</small>
+                  </div>
+                </td>
+                <td class="type-cell">
+                  {% if txn.transaction_type == 'premium_subscription' %}
+                    <span class="type-badge manual">Manual Premium</span>
+                  {% elif txn.transaction_type == 'premium_request_approval' %}
+                    <span class="type-badge approval">Request Approval</span>
+                  {% else %}
+                    <span class="type-badge unknown">{{ txn.transaction_type }}</span>
+                  {% endif %}
+                </td>
+                <td class="plan-cell">
+                  <span class="plan-badge">{{ txn.premium_type }}</span>
+                </td>
+                <td class="duration-cell">
+                  <span class="duration-text">{{ txn.duration_months }} month(s)</span>
+                </td>
+                <td class="price-cell">
+                  <span class="price-text">Rp {{ "{:,.0f}".format(txn.price) }}</span>
+                </td>
+                <td class="payment-cell">
+                  {% if txn.payment_method == 'cash' %}
+                    <span class="payment-badge cash">Cash</span>
+                  {% elif txn.payment_method == 'transfer' %}
+                    <span class="payment-badge transfer">Bank Transfer</span>
+                  {% elif txn.payment_method == 'credit_card' %}
+                    <span class="payment-badge credit">Credit Card</span>
+                  {% else %}
+                    <span class="payment-badge other">{{ txn.payment_method|title }}</span>
+                  {% endif %}
+                </td>
+                <td class="admin-cell">
+                  <span class="admin-text">{{ txn.admin_username }}</span>
+                </td>
+                <td class="status-cell">
+                  {% if txn.status == 'completed' %}
+                    <span class="status-badge completed">Completed</span>
+                  {% else %}
+                    <span class="status-badge unknown">{{ txn.status }}</span>
+                  {% endif %}
+                </td>
+                <td class="expiry-cell">
+                  <span class="expiry-text">{{ txn.expiry_date }}</span>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if total_page > 1 %}
+  <div class="pagination-section">
+    <nav aria-label="Page navigation">
+      <ul class="modern-pagination">
+        {% set prev_page = page - 1 %}
+        {% set next_page = page + 1 %}
+        {% set transaction_type_filter = request.args.get('transaction_type', '') %}
+        {% set payment_method_filter = request.args.get('payment_method', '') %}
+        
+        <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+          <a class="page-link" href="?page={{ prev_page }}&per_page={{ per_page }}{% if transaction_type_filter %}&transaction_type={{ transaction_type_filter }}{% endif %}{% if payment_method_filter %}&payment_method={{ payment_method_filter }}{% endif %}">
+            <i class="fas fa-chevron-left"></i>
+          </a>
+        </li>
+        {% if page > 3 %}
+          <li class="page-item"><a class="page-link" href="?page=1&per_page={{ per_page }}{% if transaction_type_filter %}&transaction_type={{ transaction_type_filter }}{% endif %}{% if payment_method_filter %}&payment_method={{ payment_method_filter }}{% endif %}">1</a></li>
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+        {% for p in range(page-1, page+2) %}
+          {% if 1 <= p <= total_page %}
+            <li class="page-item {% if p == page %}active{% endif %}"><a class="page-link" href="?page={{ p }}&per_page={{ per_page }}{% if transaction_type_filter %}&transaction_type={{ transaction_type_filter }}{% endif %}{% if payment_method_filter %}&payment_method={{ payment_method_filter }}{% endif %}">{{ p }}</a></li>
+          {% endif %}
+        {% endfor %}
+        {% if page < total_page - 2 %}
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+          <li class="page-item"><a class="page-link" href="?page={{ total_page }}&per_page={{ per_page }}{% if transaction_type_filter %}&transaction_type={{ transaction_type_filter }}{% endif %}{% if payment_method_filter %}&payment_method={{ payment_method_filter }}{% endif %}">{{ total_page }}</a></li>
+        {% endif %}
+        <li class="page-item {% if page >= total_page %}disabled{% endif %}">
+          <a class="page-link" href="?page={{ next_page }}&per_page={{ per_page }}{% if transaction_type_filter %}&transaction_type={{ transaction_type_filter }}{% endif %}{% if payment_method_filter %}&payment_method={{ payment_method_filter }}{% endif %}">
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+  {% endif %}
+</div>
+{% endblock content %}
+
+{% block styles %}
+<style>
+/* Transactions Container */
+.transactions-container {
+  padding: 0;
+}
+
+/* Page Header */
+.transactions-header {
+  margin-bottom: 30px;
+}
+
+.page-title {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.page-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  margin: 5px 0 0 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.total-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  height: 100%;
+  gap: 5px;
+}
+
+.total-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.total-text strong {
+  color: #FFDE59;
+}
+
+.total-price-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.total-price-text strong {
+  color: #28a745;
+  font-weight: 700;
+}
+
+/* Summary Section */
+.summary-section {
+  margin-bottom: 30px;
+}
+
+.summary-card {
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 25px;
+}
+
+.summary-content {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 30px;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+  justify-content: center;
+}
+
+.summary-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 15px rgba(255, 222, 89, 0.3);
+}
+
+.summary-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.summary-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-value {
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.summary-item:nth-child(2) .summary-icon {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.summary-item:nth-child(3) .summary-icon {
+  background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+  box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+}
+
+/* Quick Filter Buttons */
+.quick-filters {
+  margin-bottom: 20px;
+}
+
+.filters-card {
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 30px;
+}
+
+.filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+}
+
+.filter-buttons .filter-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-buttons .filter-label {
+  margin-bottom: 0;
+  margin-right: 8px;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.filter-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.filter-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.filter-btn.active {
+  background: rgba(74, 144, 226, 0.3);
+  border-color: rgba(74, 144, 226, 0.5);
+  color: white;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2);
+}
+
+.filter-btn i {
+  font-size: 0.9rem;
+}
+
+/* Section Cards */
+.section-card {
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.section-header {
+  padding: 20px 25px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-title {
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.section-title i {
+  margin-right: 10px;
+  color: #FFDE59;
+}
+
+.section-info {
+  display: flex;
+  align-items: center;
+}
+
+.section-body {
+  padding: 0;
+}
+
+/* Modern Table */
+.modern-table {
+  width: 100%;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.modern-table thead {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modern-table th {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 20px 15px;
+  border: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modern-table td {
+  padding: 20px 15px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+}
+
+.table-row:hover {
+  background: rgba(255, 222, 89, 0.05);
+}
+
+/* Table Cell Styles */
+.transaction-id-text {
+  color: #FFDE59;
+  font-weight: 600;
+  font-size: 0.85rem;
+  font-family: monospace;
+}
+
+.date-cell {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.customer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.username-text {
+  color: #FFDE59;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.email-text {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+}
+
+/* Type Badges */
+.type-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.type-badge.manual {
+  background: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.type-badge.approval {
+  background: rgba(40, 167, 69, 0.2);
+  color: #28a745;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.type-badge.unknown {
+  background: rgba(108, 117, 125, 0.2);
+  color: #6c757d;
+  border: 1px solid rgba(108, 117, 125, 0.3);
+}
+
+/* Plan Badge */
+.plan-badge {
+  background: rgba(255, 222, 89, 0.2);
+  color: #FFDE59;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.duration-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.price-text {
+  color: #28a745;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Payment Badges */
+.payment-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.payment-badge.cash {
+  background: rgba(40, 167, 69, 0.2);
+  color: #28a745;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.payment-badge.transfer {
+  background: rgba(23, 162, 184, 0.2);
+  color: #17a2b8;
+  border: 1px solid rgba(23, 162, 184, 0.3);
+}
+
+.payment-badge.credit {
+  background: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.payment-badge.other {
+  background: rgba(108, 117, 125, 0.2);
+  color: #6c757d;
+  border: 1px solid rgba(108, 117, 125, 0.3);
+}
+
+.admin-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+/* Status Badges */
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.completed {
+  background: rgba(40, 167, 69, 0.2);
+  color: #28a745;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.status-badge.unknown {
+  background: rgba(108, 117, 125, 0.2);
+  color: #6c757d;
+  border: 1px solid rgba(108, 117, 125, 0.3);
+}
+
+.expiry-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+/* Pagination */
+.pagination-section {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+.modern-pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: 5px;
+}
+
+.page-item {
+  margin: 0;
+}
+
+.page-link {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #ffffff;
+  padding: 10px 15px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.page-link:hover {
+  background: rgba(255, 222, 89, 0.1);
+  border-color: rgba(255, 222, 89, 0.3);
+  color: #FFDE59;
+  text-decoration: none;
+}
+
+.page-item.active .page-link {
+  background: linear-gradient(135deg, #FFDE59 0%, #FFB347 100%);
+  border-color: rgba(255, 222, 89, 0.5);
+  color: #333;
+  font-weight: 600;
+}
+
+.page-item.disabled .page-link {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.3);
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .transactions-header {
+    margin-bottom: 20px;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+  
+  .modern-table th,
+  .modern-table td {
+    padding: 15px 10px;
+  }
+
+  /* Quick Filter Buttons Mobile */
+  .filter-buttons {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  .filter-buttons .filter-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .filter-buttons .filter-label {
+    margin-right: 0;
+    margin-bottom: 5px;
+    text-align: center;
+  }
+
+  .filter-btn {
+    justify-content: center;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+
+  /* Summary Section Mobile */
+  .summary-content {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .summary-item {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .summary-value {
+    font-size: 1.2rem;
+  }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // Quick Filter Buttons Functionality
+  let currentFilters = {
+    transaction_type: 'all',
+    payment_method: 'all'
+  };
+
+  // Initialize filter buttons based on URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  const transactionType = urlParams.get('transaction_type') || 'all';
+  const paymentMethod = urlParams.get('payment_method') || 'all';
+
+  // Set active states
+  document.querySelectorAll('[data-type="transaction_type"]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === transactionType);
+  });
+  document.querySelectorAll('[data-type="payment_method"]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === paymentMethod);
+  });
+
+  // Handle filter button clicks
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const filterType = this.dataset.type;
+      const filterValue = this.dataset.filter;
+
+      // Update active state for this filter type
+      document.querySelectorAll(`[data-type="${filterType}"]`).forEach(b => {
+        b.classList.remove('active');
+      });
+      this.classList.add('active');
+
+      // Update current filters
+      currentFilters[filterType] = filterValue;
+
+      // Build new URL with filters
+      const params = new URLSearchParams(window.location.search);
+      params.set(filterType, filterValue);
+      
+      // Remove filter if it's 'all'
+      if (filterValue === 'all') {
+        params.delete(filterType);
+      }
+
+      // Redirect to filtered page
+      window.location.href = `/admin/panel/transactions?${params.toString()}`;
+    });
+  });
+});
+</script>
+{% endblock scripts %}

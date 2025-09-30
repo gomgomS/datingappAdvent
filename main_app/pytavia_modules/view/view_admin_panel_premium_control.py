@@ -39,6 +39,120 @@ class view_admin_panel_premium_control:
         self.webapp = app
     # end def
 
+    def html_premium_requests(self, params):
+        # Requests tab pagination
+        requests_page = int(params.get('req_page', 1))
+        requests_per_page = int(params.get('req_per_page', 10))
+        plan = params.get('plan')
+        status = params.get('status')
+        
+        # Get premium requests with filters
+        requests_query = {}
+        
+        # Handle plan filter
+        if plan and plan != 'all':
+            requests_query['plan'] = plan
+            
+        # Handle status filter
+        if status and status != 'all':
+            requests_query['status'] = status
+        
+        exec_command_requests = self.mgdDB.db_premium_requests.find(requests_query)
+        requests_numb_recs = exec_command_requests.count()
+        requests_records = exec_command_requests.skip((requests_page - 1) * requests_per_page).limit(requests_per_page)
+        
+        requests = []
+        for req in requests_records:
+            i = {
+                'request_id': req.get('request_id', ''),
+                'user_id': req.get('user_id', ''),
+                'username': req.get('username', ''),
+                'name': req.get('name', ''),
+                'email': req.get('email', ''),
+                'phone': req.get('phone', ''),
+                'plan': req.get('plan', ''),
+                'status': req.get('status', ''),
+                'created_at': req.get('created_at', ''),
+                'approved_at': req.get('approved_at', ''),
+                'rejected_at': req.get('rejected_at', ''),
+            }
+            requests.append(i)
+
+        requests_total_page = (requests_numb_recs // requests_per_page) + (1 if requests_numb_recs % requests_per_page != 0 else 0)
+
+        return render_template(
+            "admin/premium_requests.html",
+            requests=requests,
+            requests_page=requests_page,
+            requests_per_page=requests_per_page,
+            requests_total_page=requests_total_page,
+            total_requests=requests_numb_recs,
+            plan=plan,
+            status=status
+        )
+
+    def html_manual_control(self, params):
+        # Manual tab (Users) pagination/search
+        page = int(params.get('page', 1))
+        per_page = int(params.get('per_page', 10))
+        keyword = params.get('keyword')
+        query = {}
+
+        if keyword:
+            rgx = re.compile(f'.*{keyword}.*', re.IGNORECASE)
+            query['$or'] = [
+                {'username': rgx},
+                {'name': rgx},
+                {'email': rgx}
+            ]
+        
+        exec_command = self.mgdDB.db_users.find(query)
+        numb_recs = exec_command.count()
+        user_records = exec_command.skip((page - 1) * per_page).limit(per_page)
+        
+        result = []
+        for user in user_records:
+            expiry_str = user.get("premium_expiry", "")
+            expiry_date = None
+            countdown_days = ""
+            formatted_expiry = ""
+
+            if expiry_str:
+                try:
+                    expiry_date = datetime.strptime(expiry_str, "%Y-%m-%d %H:%M:%S")
+                    now = datetime.now()
+                    days_left = (expiry_date - now).days
+                    countdown_days = f"{days_left} day(s)" if days_left >= 0 else "expired"
+                    formatted_expiry = expiry_date.strftime("%d %B %Y")  # 29 June 2025
+                except:
+                    countdown_days = "invalid date"
+                    formatted_expiry = expiry_str
+
+            i = {
+                'user_id': user.get('user_id'),
+                'username': user.get('username', ''),
+                'email': user.get('email', ''),                
+                'is_premium': user.get('is_premium', ''),
+                'name': user.get('name', ''),
+                'phone': user.get('phone', ''),
+                'premium_expiry': formatted_expiry,
+                'premium_countdown': countdown_days,
+                'subscription_type': user.get('subscription_type', ''),
+            }
+            result.append(i)
+
+        total_page = (numb_recs // per_page) + (1 if numb_recs % per_page != 0 else 0)
+
+        return render_template(
+            "admin/manual_control.html",
+            data=result,
+            page=page,
+            per_page=per_page,
+            total_page=total_page,
+            total_users=numb_recs,
+            keyword=keyword
+        )
+
     def html(self, params):
         # Manual tab (Users) pagination/search
         page = int(params.get('page', 1))
